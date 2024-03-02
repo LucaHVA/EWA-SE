@@ -27,7 +27,7 @@
           <!-- TODO: login and sign-up (not logged in) AND logout and profile (logged in)-->
           <ul class="user-logging">
             <li class="nav-item">
-              <router-link to="/log-in" class="nav-link" active-class="active">Log in</router-link>
+              <router-link to="/login" class="nav-link" active-class="active">Log in</router-link>
             </li>
             <li class="nav-item">
               <router-link to="/register" class="nav-link" active-class="active">Register</router-link>
@@ -52,6 +52,8 @@ nav {
   z-index: 2;
   font-family: "Raleway", sans-serif;
   font-weight: 600;
+  font-size: 20px;
+
 }
 
 nav ul {
@@ -60,19 +62,14 @@ nav ul {
 }
 
 /* Logo */
-#left-logo img {
-  width: 100px;
-}
-
 #left-logo {
-  margin: 15px;
+  margin: 20px;
 }
 
 /* Navigation */
 .navbar-list {
   display: flex;
   justify-content: center;
-  padding: 0;
 }
 
 .nav-link {
@@ -93,7 +90,7 @@ nav ul {
 /*}*/
 
 .nav-item {
-  margin: 0 5px;
+  margin: 0 10px;
 }
 
 /* User logging */
