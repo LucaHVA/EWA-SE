@@ -37,8 +37,13 @@ export default {
 .title {
   text-align: center;
   margin-top: 50px;
+  margin-bottom: 10px;
   font-size: 30px;
   font-family: "Inria Sans", sans-serif;
+}
+
+.title h1 {
+  margin: 0;
 }
 
 /* Container */
@@ -57,7 +62,7 @@ form {
 
 /* Form button */
 form button {
-  margin-top: 30px;
+  margin-top: 20px;
   align-self: center;
 }
 
@@ -70,7 +75,7 @@ form label {
 
 /* Input field */
 form input {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 form input::placeholder {
