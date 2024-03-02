@@ -3,4 +3,11 @@ body{
     padding: 0;
     background-color: #FCD7C3;
     font-family: 'Gochi Hand', cursive;
+    width: auto;
+    height: auto;
+    background-image: url('home page image.svg');
+    background-size: cover; /* Adjust as needed */
+    background-repeat: no-repeat; /* Adjust as needed */
 }
+
+
