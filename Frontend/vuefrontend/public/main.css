@@ -1,13 +1,27 @@
-body{
+/* General */
+body {
     margin: 0;
     padding: 0;
     background-color: #FCD7C3;
-    font-family: 'Gochi Hand', cursive;
+    font-family: 'Baloo 2', cursive;
     width: auto;
     height: auto;
-    background-image: url('home page image.svg');
-    background-size: cover; /* Adjust as needed */
-    background-repeat: no-repeat; /* Adjust as needed */
+}
+
+/* Button */
+.pos-button {
+    background-color: #60BFB2;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 600;
 }
 
 

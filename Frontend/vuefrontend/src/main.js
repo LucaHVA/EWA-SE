@@ -1,7 +1,7 @@
-import { createApp } from 'vue'
+import {createApp} from 'vue'
 import {router} from "@/router";
-import App from './AppComponent33.vue'
+import AppComponent from './AppComponent.vue'
 
 
-createApp(App).use(router).mount('#app')
+createApp(AppComponent).use(router).mount('#app')
 
