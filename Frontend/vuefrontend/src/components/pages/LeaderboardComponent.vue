@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <h2>All cabins overview:</h2>
     <table class="cabins-table">
       <thead>
@@ -26,6 +26,12 @@
     </table>
     <button @click="onNewCabin">New Cabin</button>
   </div>
+
+  <div id="background-blob">
+    <div class="blob-top-left"></div>
+    <div class="blob-bottom-left"></div>
+    <div class="blob-bottom-Right"></div>
+  </div>
 </template>
 
 <script>
@@ -34,7 +40,7 @@ import {createSampleCabin} from "@/models/cabin";
 
 
 export default {
-  name: "Overview-31",
+  name: "LeaderboardComponent",
 
   data() {
     return {

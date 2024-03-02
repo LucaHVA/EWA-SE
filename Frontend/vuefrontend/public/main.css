@@ -43,6 +43,12 @@ form input::placeholder{
     color: rgba(0, 0, 0, 30%);
 }
 
+/* Background layer position */
+.container {
+    position: relative;
+    z-index: 2;
+}
+
 /* Background decoration */
 .blob-top-left {
     position: fixed;

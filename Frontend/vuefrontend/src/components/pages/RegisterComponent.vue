@@ -1,22 +1,20 @@
 <template>
   <div class="container">
     <div class="title">
-      <h1>Log in</h1>
+      <h1>Create Account</h1>
     </div>
     <div class="form-container">
       <form>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="E.g. example@mail.com" required>
+
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="Username" required>
+        <input type="text" id="username" name="username" placeholder="E.g. amongusinnator4000" required>
 
         <label for="password">Password</label>
         <input type="password" id="password" name="password" placeholder="Password" required>
 
-        <div class="other-logging-options">
-          <p>Forgot password</p>
-          <p>Create account</p>
-        </div>
-
-        <button type="submit" class="pos-button">Log in</button>
+        <button type="submit" class="pos-button">Create account</button>
       </form>
     </div>
   </div>
@@ -30,7 +28,7 @@
 
 <script>
 export default {
-  name: "LoginComponent"
+  name: "RegisterComponent"
 }
 </script>
 
@@ -57,6 +55,12 @@ form {
   flex-direction: column;
 }
 
+/* Form button */
+form button {
+  margin-top: 30px;
+  align-self: center;
+}
+
 /* Label */
 form label {
   margin-bottom: 5px;
@@ -71,22 +75,5 @@ form input {
 
 form input::placeholder {
   font-size: 15px;
-}
-
-/* Other options */
-.other-logging-options {
-  display: flex;
-  justify-content: center;
-}
-
-.other-logging-options p {
-  padding: 0 7%;
-  margin: 0;
-}
-
-/* Form button */
-form button {
-  margin-top: 30px;
-  align-self: center;
 }
 </style>

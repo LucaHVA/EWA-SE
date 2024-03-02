@@ -26,8 +26,6 @@ export default {
 /* General */
 .container {
   display: flex;
-  position: relative;
-  z-index: 2;
   justify-content: center;
   align-items: center;
   height: 90vh;

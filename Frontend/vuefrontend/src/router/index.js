@@ -1,7 +1,8 @@
 import {createRouter, createWebHashHistory} from "vue-router";
 import welcomeComponent from "@/components/WelcomeComponent.vue";
-import leaderboardComponent from "@/components/pages/Leaderboard.vue";
+import leaderboardComponent from "@/components/pages/LeaderboardComponent.vue";
 import loginComponent from "@/components/pages/LoginComponent.vue";
+import registerComponent from "@/components/pages/RegisterComponent.vue";
 import unknownRoute from "@/components/UnknownRoute.vue";
 
 
@@ -27,6 +28,12 @@ const routes = [
         path: '/login',
         name: 'login',
         component: loginComponent
+    },
+
+    {
+        path: '/register',
+        name: 'register',
+        component: registerComponent
     }
 ];
 
