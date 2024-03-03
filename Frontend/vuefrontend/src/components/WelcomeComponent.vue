@@ -6,6 +6,8 @@
       <p class="extra-info">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt
         ut labore et dolore magna.</p>
       <button class="pos-button">Play Singleplayer</button>
+      <button class="pos-button"><router-link class="multiplayer" to="/lobbySelect">Play Multiplayer</router-link></button>
+
     </div>
   </div>
 
@@ -20,6 +22,7 @@
 export default {
   name: "WelcomeComponent"
 }
+
 </script>
 
 <style scoped>
@@ -51,6 +54,11 @@ export default {
 .extra-info {
   font-family: 'Baloo 2', cursive;
   font-size: 20px;
+}
+
+.multiplayer{
+  text-decoration: none;
+  color: white;
 }
 
 </style>

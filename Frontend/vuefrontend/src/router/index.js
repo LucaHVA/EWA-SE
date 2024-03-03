@@ -4,6 +4,7 @@ import leaderboardComponent from "@/components/pages/LeaderboardComponent.vue";
 import loginComponent from "@/components/pages/LoginComponent.vue";
 import registerComponent from "@/components/pages/RegisterComponent.vue";
 import unknownRoute from "@/components/UnknownRoute.vue";
+import lobbySelectComponent from "@/components/pages/LobbySelectComponent.vue";
 
 
 const routes = [
@@ -34,6 +35,12 @@ const routes = [
         path: '/register',
         name: 'register',
         component: registerComponent
+    },
+
+    {
+       path: '/lobbySelect',
+        name: 'lobbySelect',
+        component: lobbySelectComponent
     }
 ];
 
