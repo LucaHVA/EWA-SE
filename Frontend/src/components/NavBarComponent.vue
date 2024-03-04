@@ -2,7 +2,7 @@
   <nav class="header">
     <div id="left-logo">
       <router-link to="/home">
-        <img alt="logo" src="../assets/codeboard_logo_1.svg">
+        <img alt="logo" src="../assets/images/codeboard_logo_1.svg">
       </router-link>
     </div>
 

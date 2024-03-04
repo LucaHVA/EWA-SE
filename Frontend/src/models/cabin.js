@@ -17,9 +17,9 @@ class Cabin {
     }
 
     static image = {
-        IMAGE1: require('@/assets/beachfoto1.jpg'),
-        IMAGE2: require('@/assets/beachfoto3.jpg'),
-        IMAGE3: require('@/assets/beachfoto5.jpg'),
+        IMAGE1: require('@/assets/images/duimpie_codeboard.png'),
+        IMAGE2: require('@/assets/images/duimpie_codeboard.png'),
+        IMAGE3: require('@/assets/images/duimpie_codeboard.png'),
     };
 
     // Constructor for the cabins

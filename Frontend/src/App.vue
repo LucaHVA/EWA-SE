@@ -1,5 +1,5 @@
 <template>
-  <img alt="Logo" src="./assets/logo.png">
+  <img alt="Logo" src="assets/images/logo.png">
   <nav-bar-component></nav-bar-component>
   <welcome-component></welcome-component>
 </template>

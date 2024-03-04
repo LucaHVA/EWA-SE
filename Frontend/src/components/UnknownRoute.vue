@@ -14,7 +14,7 @@ export default {
 <style scoped>
 .errorMessage{
   color: red;
-  background-image: url(@/assets/daDawg.png);
+  background-image: url(@/assets/images/daDawg.png);
   background-repeat:no-repeat;
   height: 1200px;
   width:800px;
