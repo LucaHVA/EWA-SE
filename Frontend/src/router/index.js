@@ -5,6 +5,7 @@ import loginComponent from "@/components/pages/LoginComponent.vue";
 import registerComponent from "@/components/pages/RegisterComponent.vue";
 import unknownRoute from "@/components/UnknownRoute.vue";
 import lobbySelectComponent from "@/components/pages/LobbySelectComponent.vue";
+import gameSettingsComponent from "@/components/pages/GameSettingsComponent.vue";
 
 
 const routes = [
@@ -38,9 +39,15 @@ const routes = [
     },
 
     {
-       path: '/lobbySelect',
+        path: '/lobbySelect',
         name: 'lobbySelect',
         component: lobbySelectComponent
+    },
+
+    {
+        path: '/gameSettings',
+        name: 'gameSettings',
+        component: gameSettingsComponent
     }
 ];
 

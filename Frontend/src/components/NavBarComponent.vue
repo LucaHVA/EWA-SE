@@ -2,7 +2,7 @@
   <nav class="header">
     <div id="left-logo">
       <router-link to="/home">
-        <img alt="logo" src="../assets/images/codeboard_logo_1.svg">
+        <img alt="logo" class="navbar_logo" src="../assets/images/codeboard_black_logo.png">
       </router-link>
     </div>
 
@@ -96,5 +96,9 @@ nav ul {
 /* User logging */
 .user-logging {
   justify-content: flex-end;
+}
+
+.navbar_logo {
+  width: 15%;
 }
 </style>
