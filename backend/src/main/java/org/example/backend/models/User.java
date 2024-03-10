@@ -1,4 +1,4 @@
-package models;
+package org.example.backend.models;
 
 public class User {
 
@@ -35,4 +35,5 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }
