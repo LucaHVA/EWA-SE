@@ -6,15 +6,19 @@
     <div class="form-container">
       <form>
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="E.g. example@mail.com" required>
+        <input type="email" id="email" name="email" v-model="email" placeholder="E.g. example@mail.com" required>
 
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="E.g. amongusinnator4000" required>
+        <input type="text" id="username" name="username" v-model="username" placeholder="E.g. amongusinnator4000" required>
 
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Password" required>
+        <input type="password" id="password" name="password" v-model="password" placeholder="Password" required>
+        <div class="alertMessage" role="alert" v-if="alert">
+          your password should be between 8-16 characters
+        </div>
+        <div v-else></div>
 
-        <button type="submit" class="pos-button">Create account</button>
+        <button type="submit" class="pos-button" @click='checkInfo'>Create account</button>
       </form>
     </div>
   </div>
@@ -28,7 +32,24 @@
 
 <script>
 export default {
-  name: "RegisterComponent"
+  name: "RegisterComponent",
+
+  data(){
+    return{
+      username:"",
+      password:"",
+      email:"",
+      alert:false
+    }
+  },
+  methods:{
+    checkInfo(){
+      if (!(this.password.length<8 || this.alert.length> 16)){
+      return console.log("email= " ,this.email, " username= " ,this.username, " password= " ,this.password)
+        }
+      this.alert=this.password.length<8 || this.alert.length>16;
+    }
+  }
 }
 </script>
 
@@ -52,6 +73,9 @@ export default {
   max-width: 400px;
   margin: 0 auto;
   box-sizing: border-box;
+}
+.alertMessage{
+  color: maroon;
 }
 
 /* Form */
