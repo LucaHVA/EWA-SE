@@ -7,6 +7,7 @@ import unknownRoute from "@/components/UnknownRoute.vue";
 import lobbySelectComponent from "@/components/pages/LobbySelectComponent.vue";
 import gameSettingsComponent from "@/components/pages/GameSettingsComponent.vue";
 import profileComponent from "@/components/pages/ProfileComponent.vue";
+import gameComponent from "@/components/pages/Game.vue";
 
 
 const routes = [
@@ -55,6 +56,11 @@ const routes = [
         path: '/profilePage',
         name: 'profilePage',
         component: profileComponent
+    },
+    {
+        path: '/Game',
+        name: 'Game',
+        component: gameComponent
     }
 ];
 

@@ -5,7 +5,7 @@
       <div class="sub-title">Play for free</div>
       <p class="extra-info">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt
         ut labore et dolore magna.</p>
-      <button class="pos-button">Play Singleplayer</button>
+      <button class="pos-button"><router-link class="multiplayer" to="/Game">Play Singleplayer</router-link></button>
       <button class="pos-button"><router-link class="multiplayer" to="/lobbySelect">Play Multiplayer</router-link></button>
 
     </div>
