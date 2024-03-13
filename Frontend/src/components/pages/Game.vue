@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div v-if="resourcesInitialized" class="container">
     <div class="mainContent">
       <div class="box">
         <!-- one -->
@@ -26,29 +26,72 @@
               <div class='harbor-piece br'></div>
             </div>
           </li>
-          <li v-for="(hex, index) in row1" :key="'h' + (index + 1)" :class="'hex ' + hex.resource">
-            <div class="number">{{ hex.number }}</div>
-            <div class="settlement target tl" @click="build(index * 4 + 3)" :id="'s' + (index * 4 + 3)"></div>
-            <div class="settlement target t" @click="build(index * 4)" :id="'s' + (index * 4)"></div>
-            <div class="road target tl" @click="buildRoad(0, index * 4 + 3)"></div>
-            <div class="road target l" @click="buildRoad(7, index * 4 + 3)"></div>
-            <div class="road target tr" @click="buildRoad(0, index * 4 + 4)"></div>
+          <li :class="'hex ' + row1[0].resource" id="h1">
+            <div class="settlement target tl" @click="build(3)" id="s3"></div>
+            <div class="settlement target t" @click="build(0)" id="s0"></div>
+            <div class="road target tl r3 r0" @click="buildRoad(0,3)"></div>
+            <div class="road target l r3 r7" @click="buildRoad(7,3)"></div>
+            <div class="road target tr r0 r4" @click="buildRoad(0,4)"></div>
+            <div class="number">{{ row1[0].number }}</div>
+          </li>
+          <li :class="'hex ' + row1[1].resource" id="h2">
+            <div class="settlement target tl" @click="build(4)" id="s4"></div>
+            <div class="settlement target t" @click="build(1)" id="s1"></div>
+            <div class="road target tl r4 r1" @click="buildRoad(4,1)"></div>
+            <div class="road target l r4 r8" @click="buildRoad(4,8)"></div>
+            <div class="road target tr r1 r5" @click="buildRoad(1,5)"></div>
+            <div class="number">{{ row1[1].number }}</div>
+          </li>
+          <li :class="'hex ' + row1[2].resource" id="h3">
+            <div class="settlement target tl" @click="build(5)" id="s5"></div>
+            <div class="settlement target t" @click="build(2)" id="s2"></div>
+            <div class="road target tl r5 r2" @click="buildRoad(5,2)"></div>
+            <div class="road target l r9 r5" @click="buildRoad(9,5)"></div>
+            <div class="road target tr r2 r6" @click="buildRoad(2,6)"></div>
+            <div class="number">{{ row1[2].number }}</div>
           </li>
           <li class="hex water">
             <div class="settlement target tl" @click="build(6)" id="s6"></div>
             <div class="road target l r6 r10" @click="buildRoad(6,10)"></div>
           </li>
         </ol>
+
         <!-- three -->
         <ol class="even">
           <li class="hex water"></li>
-          <li v-for="(hex, index) in row2" :key="'h' + (index + 4)" :class="'hex ' + hex.resource">
-            <div class="number">{{ hex.number }}</div>
-            <div class="settlement target tl" @click="build(index * 4 + 11)" :id="'s' + (index * 4 + 11)"></div>
-            <div class="settlement target t" @click="build(index * 4 + 7)" :id="'s' + (index * 4 + 7)"></div>
-            <div class="road target tl" @click="buildRoad(11, index * 4 + 7)"></div>
-            <div class="road target l" @click="buildRoad(11, index * 4 + 16)"></div>
-            <div class="road target tr" @click="buildRoad(7, index * 4 + 12)"></div>
+          <li :class="'hex ' + row2[0].resource" id="h4">
+            <div class="settlement target tl" @click="build(11)" id="s11"></div>
+            <div class="settlement target t" @click="build(7)" id="s7"></div>
+            <div class="road target tl r11 r7" @click="buildRoad(11,7)"></div>
+            <div class="road target l r11 r16" @click="buildRoad(11,16)"></div>
+            <div class="road target tr r7 r12" @click="buildRoad(7,12)"></div>
+            <div class="number">{{ row2[0].number }}</div>
+          </li>
+          <li :class="'hex ' + row2[1].resource" id="h5">
+            <div class="road target tl r12 r8" @click="buildRoad(12,8)"></div>
+            <div class="road target l r12 r17" @click="buildRoad(12,17)"></div>
+            <div class="road target tr r8 r13" @click="buildRoad(8,13)"></div>
+            <div class="settlement target tl" @click="build(12)" id="s12"></div>
+            <div class="settlement target t" @click="build(8)" id="s8"></div>
+            <div class="number">{{ row2[1].number }}</div>
+          </li>
+          <li :class="'hex ' + row2[2].resource" id="h6">
+            <div class="settlement target tl" @click="build(13)" id="s13"></div>
+            <div class="settlement target t" @click="build(9)" id="s9"></div>
+            <div class="road target tl r13 r9" @click="buildRoad(13,9)"></div>
+            <div class="road target l r13 r18" @click="buildRoad(13,18)"></div>
+            <div class="road target tr r9 r14" @click="buildRoad(9,14)"></div>
+            <div class="number">{{ row2[2].number }}</div>
+          </li>
+          <li :class="'hex ' + row2[3].resource" id="h7">
+            <div class="settlement target tl"></div>
+            <div class="settlement target t"></div>
+            <div class="road target tl r14 r10" @click="buildRoad(14,10)"></div>
+            <div class="road target l r14 r19" @click="buildRoad(14,19)"></div>
+            <div class="road target tr r10 r15" @click="buildRoad(10,15)"></div>
+            <div class="settlement target tl" @click="build(14)" id="s14"></div>
+            <div class="settlement target t" @click="build(10)" id="s10"></div>
+            <div class="number">{{ row2[3].number }}</div>
           </li>
           <li class="hex water">
             <div class="settlement target tl" @click="build(15)" id="s15"></div>
@@ -59,6 +102,7 @@
             </div>
           </li>
         </ol>
+
         <!-- four -->
         <ol class="odd">
           <li class="hex water">
@@ -66,32 +110,89 @@
               <div class="harbor-piece r"></div>
             </div>
           </li>
-          <li v-for="(hex, index) in row3" :key="'h' + (index + 8)" :class="'hex '+ hex.resource">
-            <div class="number">{{ hex.number }}</div>
-            <div class="settlement target tl" @click="build(index * 4 + 21)" :id="'s' + (index * 4 + 21)"></div>
-            <div class="settlement target t" @click="build(index * 4 + 16)" :id="'s' + (index * 4 + 16)"></div>
-            <div class="road target tl" @click="buildRoad(21, index * 4 + 16)"></div>
-            <div class="road target l" @click="buildRoad(21, index * 4 + 27)"></div>
-            <div class="road target tr" @click="buildRoad(16, index * 4 + 22)"></div>
+          <li :class="'hex '+ row3[0].resource" id="h8">
+            <div class="settlement target tl" @click="build(21)" id="s21"></div>
+            <div class="settlement target t" @click="build(16)" id="s16"></div>
+            <div class="road target tl r21 r16" @click="buildRoad(21,16)"></div>
+            <div class="road target l r21 r27" @click="buildRoad(21,27)"></div>
+            <div class="road target tr r16 r22" @click="buildRoad(16,22)"></div>
+            <div class="number">{{ row3[0].number }}</div>
+          </li>
+          <li :class="'hex '+ row3[1].resource" id="h9">
+            <div class="settlement target tl" @click="build(22)" id="s22"></div>
+            <div class="settlement target t" @click="build(17)" id="s17"></div>
+            <div class="road target tl r22 r17" @click="buildRoad(22,17)"></div>
+            <div class="road target l r22 r28" @click="buildRoad(22,28)"></div>
+            <div class="road target tr r17 r23" @click="buildRoad(17,23)"></div>
+            <div class="number">{{ row3[1].number }}</div>
+          </li>
+          <li :class="'hex '+ row3[2].resource" id="h10">
+            <div class="settlement target tl" @click="build(23)" id="s23"></div>
+            <div class="settlement target t" @click="build(18)" id="s18"></div>
+            <div class="road target tl r23 r18" @click="buildRoad(23,18)"></div>
+            <div class="road target l r29 r23" @click="buildRoad(29,23)"></div>
+            <div class="road target tr r18 r24" @click="buildRoad(18,24)"></div>
+            <div class="number">{{ row3[2].number }}</div>
+          </li>
+          <li :class="'hex '+ row3[3].resource" id="h11">
+            <div class="settlement target tl" @click="build(24)" id="s24"></div>
+            <div class="settlement target t" @click="build(19)" id="s19"></div>
+            <div class="road target tl r24 r19" @click="buildRoad(24,19)"></div>
+            <div class="road target l r24 r30" @click="buildRoad(24,30)"></div>
+            <div class="road target tr r19 r25" @click="buildRoad(19,25)"></div>
+            <div class="number">{{ row3[3].number }}</div>
+          </li>
+          <li :class="'hex '+ row3[4].resource" id="h12">
+            <div class="settlement target tl" @click="build(25)" id="s25"></div>
+            <div class="settlement target t" @click="build(20)" id="s20"></div>
+            <div class="road target tl r25 r20" @click="buildRoad(25,20)"></div>
+            <div class="road target l r25 r31" @click="buildRoad(25,31)"></div>
+            <div class="road target tr r20 r26" @click="buildRoad(20,26)"></div>
+            <div class="number">{{ row3[4].number }}</div>
           </li>
           <li class="hex water">
             <div class="settlement target tl" @click="build(26)" id="s26"></div>
             <div class="road target l r26 r32" @click="buildRoad(26,32)"></div>
           </li>
         </ol>
+
         <!-- five -->
         <ol class="even">
           <li class="hex water">
             <div class="settlement target t" @click="build(27)" id="s27"></div>
             <div class="road target tr r27 r33" @click="buildRoad(27,33)"></div>
           </li>
-          <li v-for="(hex, index) in row4" :key="'h' + (index + 13)" :class="'hex '+ hex.resource">
-            <div class="number">{{ hex.number }}</div>
-            <div class="settlement target tl" @click="build(index * 4 + 33)" :id="'s' + (index * 4 + 33)"></div>
-            <div class="settlement target t" @click="build(index * 4 + 28)" :id="'s' + (index * 4 + 28)"></div>
-            <div class="road target tl" @click="buildRoad(33, index * 4 + 28)"></div>
-            <div class="road target l" @click="buildRoad(33, index * 4 + 38)"></div>
-            <div class="road target tr" @click="buildRoad(28, index * 4 + 34)"></div>
+          <li :class="'hex '+ row4[0].resource" id="h13">
+            <div class="settlement target tl" @click="build(33)" id="s33"></div>
+            <div class="settlement target t" @click="build(28)" id="s28"></div>
+            <div class="road target l r33 r38" @click="buildRoad(33,38)"></div>
+            <div class="road target tr r34 r28" @click="buildRoad(34,28)"></div>
+            <div class="road target tl r28 r33" @click="buildRoad(28,33)"></div>
+            <div class="number">{{ row4[0].number }}</div>
+          </li>
+          <li :class="'hex '+ row4[1].resource" id="h14">
+            <div class="settlement target tl" @click="build(34)" id="s34"></div>
+            <div class="settlement target t" @click="build(29)" id="s29"></div>
+            <div class="road target tl r34 r29" @click="buildRoad(34,29)"></div>
+            <div class="road target l r34 r39" @click="buildRoad(34,39)"></div>
+            <div class="road target tr r29 r35" @click="buildRoad(29,35)"></div>
+            <div class="number">{{ row4[1].number }}</div>
+          </li>
+          <li :class="'hex '+ row4[2].resource" id="h15">
+            <div class="settlement target tl" @click="build(35)" id="s35"></div>
+            <div class="settlement target t" @click="build(30)" id="s30"></div>
+            <div class="road target tl r35 r30" @click="buildRoad(35,30)"></div>
+            <div class="road target l r35 r40" @click="buildRoad(35,40)"></div>
+            <div class="road target tr r30 r36" @click="buildRoad(30,36)"></div>
+            <div class="number">{{ row4[2].number }}</div>
+          </li>
+          <li :class="'hex '+ row4[3].resource" id="h16">
+            <div class="road target tl r36 r31" @click="buildRoad(36,31)"></div>
+            <div class="road target l r36 r41" @click="buildRoad(36,41)"></div>
+            <div class="road target tr r31 r37" @click="buildRoad(31,37)"></div>
+            <div class="settlement target tl" @click="build(36)" id="s36"></div>
+            <div class="settlement target t" @click="build(31)" id="s31"></div>
+            <div class="number">{{ row4[3].number }}</div>
           </li>
           <li class="hex water">
             <div class="settlement target tl" @click="build(37)" id="s37"></div>
@@ -103,6 +204,7 @@
             </div>
           </li>
         </ol>
+
         <!-- six -->
         <ol class="odd">
           <li class="hex spacer"></li>
@@ -113,19 +215,35 @@
               <div class="harbor-piece tr"></div>
             </div>
           </li>
-          <li v-for="(hex, index) in row5" :key="'h' + (index + 17)" :class="'hex '+ hex.resource">
-            <div class="number">{{ hex.number }}</div>
-            <div class="settlement target tl" @click="build(index * 4 + 43)" :id="'s' + (index * 4 + 43)"></div>
-            <div class="settlement target t" @click="build(index * 4 + 39)" :id="'s' + (index * 4 + 39)"></div>
-            <div class="road target tl" @click="buildRoad(43, index * 4 + 39)"></div>
-            <div class="road target l" @click="buildRoad(43, index * 4 + 47)"></div>
-            <div class="road target tr" @click="buildRoad(39, index * 4 + 44)"></div>
+          <li :class="'hex '+ row5[0].resource" id="h17">
+            <div class="settlement target tl" @click="build(43)" id="s43"></div>
+            <div class="settlement target t" @click="build(39)" id="s39"></div>
+            <div class="road target tl r43 r39" @click="buildRoad(43,39)"></div>
+            <div class="road target l r43 r47" @click="buildRoad(43,47)"></div>
+            <div class="road target tr r39 r44" @click="buildRoad(39,44)"></div>
+            <div class="number">{{ row5[0].number }}</div>
+          </li>
+          <li :class="'hex '+ row5[1].resource" id="h18">
+            <div class="settlement target tl" @click="build(44)" id="s44"></div>
+            <div class="settlement target t" @click="build(40)" id="s40"></div>
+            <div class="road target tl r44 r40" @click="buildRoad(44,40)"></div>
+            <div class="road target l r44 r48" @click="buildRoad(44,48)"></div>
+            <div class="road target tr r40 r45" @click="buildRoad(40,45)"></div>
+            <div class="number">{{ row5[1].number }}</div>
+          </li>
+          <li :class="'hex '+ row5[2].resource" id="h19">
+            <div class="settlement target tl" @click="build(45)" id="s45"></div>
+            <div class="settlement target t" @click="build(41)" id="s41"></div>
+            <div class="road target tl r45 r41" @click="buildRoad(45,41)"></div>
+            <div class="road target l r45 r49" @click="buildRoad(45,49)"></div>
+            <div class="road target tr r41 r46" @click="buildRoad(41,46)"></div>
+            <div class="number">{{ row5[2].number }}</div>
           </li>
           <li class="hex water">
-            <div class="settlement target tl" @click="build(37)" id="s37"></div>
-            <div class="road target tl r37 r32" @click="buildRoad(37,32)"></div>
-            <div class="road target l r37 r42" @click="buildRoad(37,42)"></div>
-            <div class="settlement target t"></div>
+            <div class="settlement target tl" @click="build(46)" id="s46"></div>
+            <div class="settlement target t" @click="build(42)" id="s42"></div>
+            <div class="road target tl r46 r42" @click="buildRoad(46,42)"></div>
+            <div class="road target l r46 r50" @click="buildRoad(46,50)"></div>
           </li>
         </ol>
 
@@ -175,6 +293,9 @@ export default {
       row3: [],
       row4: [],
       row5: [],
+      resourcesInitialized: false,
+      settlements: [],
+      roads: [],
       resourceCounts: {
         desert: 1,
         ore: 3,
@@ -186,7 +307,9 @@ export default {
     };
   },
   mounted() {
-    this.initializeBoard();
+    setTimeout(() => {
+      this.initializeBoard();
+    }, 1000);
   },
   methods: {
     initializeBoard() {
@@ -220,6 +343,8 @@ export default {
         console.log("Resource:", resource, "Number:", number);
         this.row5.push({ resource, number });
       }
+      // Set the flag to indicate resources are initialized
+      this.resourcesInitialized = true;
     },
     getRandomResource() {
       const resources = ['desert', 'ore', 'brick', 'wheat', 'wood', 'sheep'];
@@ -227,17 +352,34 @@ export default {
 
       const randomIndex = Math.floor(Math.random() * availableResources.length);
       const selectedResource = availableResources[randomIndex];
-      this.resourceCounts[selectedResource]--; // Decrease count for selected resource
+      this.resourceCounts[selectedResource]--;
       return selectedResource;
     },
 
     assignRandomNumber() {
       let randomNumber;
       do {
-        randomNumber = Math.floor(Math.random() * 11) + 2; // Random number between 2 and 12
-      } while (randomNumber === 7); // Ensure the number is not 7
+        randomNumber = Math.floor(Math.random() * 11) + 2;
+      } while (randomNumber === 7);
       return randomNumber;
     },
+
+    build(index) {
+      // Check if the settlement can be built at the selected index
+      this.settlements.push(index);
+
+      // Add a CSS class to the settlement position
+      const settlementElement = document.getElementById('s' + index);
+      if (settlementElement) {
+        settlementElement.classList.add('has-settlement');
+      }
+    },
+
+
+
+
+
+
   }
 };
 </script>
@@ -662,6 +804,18 @@ ol.odd {
   width: 20px;
   position: absolute;
   z-index: 800;
+}
+
+.hex .settlement.has-settlement::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background-color: brown; /* Adjust color as needed */
+  border-radius: 50%;
 }
 
 
