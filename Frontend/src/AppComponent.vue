@@ -5,12 +5,18 @@
 
 <script>
 import navBarComponent from "@/components/NavBarComponent";
-
+import {UsersAdaptor} from "@/services/UsersAdaptor";
+import CONFIG from "@/app-config";
 export default {
   name: "AppComponent",
   components: {
     navBarComponent
   },
+  provide(){
+    return{
+      usersService: new UsersAdaptor(CONFIG.BACKEND_URL+ '/users')
+    }
+  }
 }
 </script>
 

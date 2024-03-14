@@ -18,7 +18,7 @@
         </div>
         <div v-else></div>
 
-        <button type="submit" class="pos-button" @click='checkInfo'>Create account</button>
+        <button type="submit" class="pos-button" @click.prevent='checkInfo'>Create account</button>
       </form>
     </div>
   </div>
@@ -34,6 +34,11 @@
 export default {
   name: "RegisterComponent",
 
+  inject:['usersService'],
+
+  created() {
+  },
+
   data(){
     return{
       username:"",
@@ -43,11 +48,32 @@ export default {
     }
   },
   methods:{
-    checkInfo(){
-      if (!(this.password.length<8 || this.alert.length> 16)){
-      return console.log("email= " ,this.email, " username= " ,this.username, " password= " ,this.password)
-        }
-      this.alert=this.password.length<8 || this.alert.length>16;
+    async checkInfo(event){
+      event.preventDefault();
+      if (this.password.length < 8 || this.password.length > 16) {
+        this.alert = true;
+        return;
+      }
+
+
+      console.log("email:", this.email, "username:", this.username, "password:", this.password);
+
+      const id = Math.floor(Math.random() * 1000);
+
+
+      const user = {
+        id:id,
+        email: this.email,
+        username: this.username,
+        password: this.password
+      };
+      // Attempt to save user
+      const savedUser = await this.usersService.save(user);
+      if (savedUser) {
+        console.log('User saved successfully:', savedUser);
+      } else {
+        console.error('Failed to save user.');
+      }
     }
   }
 }
