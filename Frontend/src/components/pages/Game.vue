@@ -280,6 +280,23 @@
         </ol>
       </div>
     </div>
+
+    <div class="game-buttons-container">
+      <div class="dice-container">
+        <button class="pos-button" id="roll-dice-button" @click="rollDice">Roll the dices!
+          <img alt="roll dice" src="../../assets/images/game/dices/clear_rolling-dices.png">
+        </button>
+        <div class="dice-outcome-container">
+          <img :src="leftDiceImg" alt="left dice outcome">
+          <img :src="rightDiceImg" alt="right dice outcome">
+          <h2>Total outcome: {{dicesOutcome}}</h2>
+        </div>
+      </div>
+      <div>
+<!--        <button class="pos-button" id="next-turn-button" @click="continueNextPlayerTurn">Next turn</button>-->
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -303,7 +320,18 @@ export default {
         wheat: 4,
         wood: 4,
         sheep: 4
-      }
+      },
+      dicesOutcome: "NaN",
+      leftDiceImg: require("../../assets/images/game/dices/clear_perspective-dice-six-faces-random.png"),
+      rightDiceImg: require("../../assets/images/game/dices/clear_perspective-dice-six-faces-random.png"),
+      clearWhiteDiceImg: {
+        1: require("../../assets/images/game/dices/clear_dice-six-faces-one.png"),
+        2: require("../../assets/images/game/dices/clear_dice-six-faces-two.png"),
+        3: require("../../assets/images/game/dices/clear_dice-six-faces-three.png"),
+        4: require("../../assets/images/game/dices/clear_dice-six-faces-four.png"),
+        5: require("../../assets/images/game/dices/clear_dice-six-faces-five.png"),
+        6: require("../../assets/images/game/dices/clear_dice-six-faces-six.png"),
+      },
     };
   },
   mounted() {
@@ -375,22 +403,47 @@ export default {
       }
     },
 
+    rollDice(){
+      // Generate random number between 1 and 6
+      function roll() {
+        return 1 + Math.floor(6 * Math.random());
+      }
+
+      // Assign dice outcome
+      let rightDiceOutcome = roll();
+      let leftDiceOutcome = roll();
+      this.dicesOutcome = rightDiceOutcome + leftDiceOutcome;
+
+      //TODO Activate robber if outcome is 7
+
+      // Update dice outcome images
+      this.leftDiceImg = this.clearWhiteDiceImg[leftDiceOutcome];
+      this.rightDiceImg = this.clearWhiteDiceImg[rightDiceOutcome];
+    },
+    continueNextPlayerTurn(){
+      // Check if player rolled dice
 
 
+      // Continue to next player's turn
 
-
-
+    },
   }
 };
 </script>
 
 <style scoped>
+/* General */
+.container {
+  display: flex;
+  justify-content: center;
+}
+
 /* ----------------------------------------- */
 
 .box {
   margin: 0 auto;
-  margin-left: 31%;
-  width: 1200px;
+  /*margin-left: 31%;*/
+  width: 1000px;
   /* background-color: #2fa4ed; */
   /* border: 1px solid black; */
   line-height: 1.3;
@@ -869,6 +922,41 @@ ol.odd {
 /* end cities */
 /* ----------------------------------------- */
 
+/* Dice container */
+.dice-container {
+  width: max-content;
+  alignment: center;
+  align-self: center;
+}
+
+/* Dice button */
+#roll-dice-button {
+  display: grid;
+  justify-items: center;
+  padding: 15px;
+}
+
+#roll-dice-button img {
+  width: 120px;
+}
+
+/* Dice outcome */
+.dice-outcome-container {
+  text-align: center;
+  width: fit-content;
+}
+
+.dice-outcome-container img {
+  width: 120px;
+  background-color: #000000;
+  border-radius: 10px;
+  margin: 5px;
+}
+
+.dice-outcome-container h2{
+  font-weight: 400;
+  margin: 0;
+}
 
 </style>
 
