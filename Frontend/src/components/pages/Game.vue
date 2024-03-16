@@ -1,6 +1,7 @@
 <template>
   <div v-if="resourcesInitialized" class="container">
     <div class="mainContent">
+      <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
       <div class="box">
         <!-- one -->
         <ol class="even">
@@ -278,6 +279,7 @@
             </div>
           </li>
         </ol>
+        <button @click="nextTurn">Next Turn</button>
       </div>
     </div>
   </div>
@@ -288,6 +290,8 @@ export default {
   name: "gameComponent",
   data() {
     return {
+      currentPlayerIndex: 0,
+      playerColors: ["red", "blue", "green", "orange"],
       row1: [],
       row2: [],
       row3: [],
@@ -310,6 +314,14 @@ export default {
     setTimeout(() => {
       this.initializeBoard();
     }, 1000);
+  },
+  computed: {
+    currentPlayer() {
+      return this.playerColors[this.currentPlayerIndex];
+    },
+    currentPlayerColor() {
+      return this.currentPlayer;
+    }
   },
   methods: {
     initializeBoard() {
@@ -365,19 +377,31 @@ export default {
     },
 
     build(index) {
-      // Check if the settlement can be built at the selected index
-      this.settlements.push(index);
+      // Store the owner of the settlement
+      this.settlements[index] = this.currentPlayerIndex;
 
       // Add a CSS class to the settlement position
       const settlementElement = document.getElementById('s' + index);
       if (settlementElement) {
-        settlementElement.classList.add('has-settlement');
+        settlementElement.classList.add(`has-settlement-${this.currentPlayerIndex}`);
+      }
+    },
+    buildRoad(fromIndex, toIndex) {
+      // Add the road to the list of roads
+      this.roads.push({ from: fromIndex, to: toIndex, owner: this.currentPlayerIndex });
+
+      // Add a CSS class to the road position
+      const roadElement = document.querySelector(`.road.r${fromIndex}.r${toIndex}`);
+      if (roadElement) {
+        roadElement.classList.add(`build-${this.currentPlayerIndex}`);
       }
     },
 
 
-
-
+    nextTurn() {
+      // Increment the current player index
+      this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.playerColors.length;
+    }
 
 
   }
@@ -386,6 +410,25 @@ export default {
 
 <style scoped>
 /* ----------------------------------------- */
+
+.current-player {
+  margin-bottom: 10px;
+}
+
+.has-settlement-0 {
+  background-color: red;
+}
+.has-settlement-1 {
+  background-color: blue;
+}
+.has-settlement-2 {
+  background-color: green;
+}
+.has-settlement-3 {
+  background-color: orange;
+}
+
+
 
 .box {
   margin: 0 auto;
@@ -514,11 +557,19 @@ ol.odd {
   z-index: 150;
 }
 
-.road.target {
-  background-color: transparent;
-  position: absolute;
-  /* border: 2px dashed black; */
+.build-0 {
+  background-color: red;
 }
+.build-1 {
+  background-color: blue;
+}
+.build-2 {
+  background-color: green;
+}
+.build-3 {
+  background-color: orange;
+}
+
 
 .road.target:hover {
   background-color: #ffffff6b;
@@ -816,6 +867,15 @@ ol.odd {
   height: 10px;
   background-color: brown; /* Adjust color as needed */
   border-radius: 50%;
+}
+.settlement-svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px; /* Adjust width as needed */
+  height: 40px; /* Adjust height as needed */
+  /* Add any additional styling properties here */
 }
 
 
