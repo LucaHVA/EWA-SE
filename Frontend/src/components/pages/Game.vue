@@ -1,7 +1,13 @@
 <template>
   <div v-if="resourcesInitialized" class="container">
+    <div id="game-error-message" class="hidden">
+      <div class="error-message-box">
+        <h2 class="error-message">An error occurred</h2>
+        <button id="confirm-error-message" class="pos-button">Continue</button>
+      </div>
+    </div>
+    <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
     <div class="mainContent">
-      <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
       <div class="box">
         <!-- one -->
         <ol class="even">
@@ -279,23 +285,29 @@
             </div>
           </li>
         </ol>
-        <button @click="nextTurn">Next Turn</button>
+      </div>
+      <div class="game-buttons-container">
+        <div class="dice-container">
+          <button class="pos-button" id="roll-dice-button" @click="rollDice">Roll the dices!
+            <img alt="roll dice" src="../../assets/images/game/dices/clear_rolling-dices.png">
+          </button>
+          <div class="dice-outcome-container">
+            <img :src="leftDiceImg" alt="left dice outcome">
+            <img :src="rightDiceImg" alt="right dice outcome">
+            <h2>Total outcome: {{dicesOutcome}}</h2>
+          </div>
+        </div>
+        <div>
+          <button class="pos-button" id="next-turn-button" @click="nextTurn" >Next turn</button>
+        </div>
       </div>
     </div>
 
-    <div class="game-buttons-container">
-      <div class="dice-container">
-        <button class="pos-button" id="roll-dice-button" @click="rollDice">Roll the dices!
-          <img alt="roll dice" src="../../assets/images/game/dices/clear_rolling-dices.png">
-        </button>
-        <div class="dice-outcome-container">
-          <img :src="leftDiceImg" alt="left dice outcome">
-          <img :src="rightDiceImg" alt="right dice outcome">
-          <h2>Total outcome: {{dicesOutcome}}</h2>
+    <div class="player-inventory-container">
+      <div class="player-inventory-resources">
+        <div v-for="resource in currentPlayerResourcesInventory" :key="resource">
+          <div class="inventory-resource-card"><img :src=this.resourceCardImg[resource] alt="resource card"></div>
         </div>
-      </div>
-      <div>
-<!--        <button class="pos-button" id="next-turn-button" @click="continueNextPlayerTurn">Next turn</button>-->
       </div>
     </div>
 
@@ -303,12 +315,17 @@
 </template>
 
 <script>
+import Player from "@/models/player";
+
 export default {
   name: "gameComponent",
   data() {
     return {
       currentPlayerIndex: 0,
       playerColors: ["red", "blue", "green", "orange"],
+      players: [],
+      currentPlayerResources: [],
+      hasRolledDice: false,
       row1: [],
       row2: [],
       row3: [],
@@ -336,11 +353,19 @@ export default {
         5: require("../../assets/images/game/dices/clear_dice-six-faces-five.png"),
         6: require("../../assets/images/game/dices/clear_dice-six-faces-six.png"),
       },
+      resourceCardImg: {
+        brick: require("../../assets/images/game/resources/brick_card_v1.png"),
+        grain: require("../../assets/images/game/resources/grain_card_v1.png"),
+        ore: require("../../assets/images/game/resources/ore_card_v1.png"),
+        wood: require("../../assets/images/game/resources/sheep_card_v1.png"),
+        sheep: require("../../assets/images/game/resources/wood_card_v1.png")
+      }
     };
   },
   mounted() {
     setTimeout(() => {
       this.initializeBoard();
+      this.initializePlayers();
     }, 1000);
   },
   computed: {
@@ -349,6 +374,9 @@ export default {
     },
     currentPlayerColor() {
       return this.currentPlayer;
+    },
+    currentPlayerResourcesInventory(){
+      return this.players[this.currentPlayerIndex].resources;
     }
   },
   methods: {
@@ -424,9 +452,43 @@ export default {
         roadElement.classList.add(`build-${this.currentPlayerIndex}`);
       }
     },
+    initializePlayers() {
+      //todo
+      // Dummy player data
+      const player1 = new Player("red", "NaN", ["brick", "grain"], []);
+      const player2 = new Player("green", "NaN", ["ore"], []);
+      const player3 = new Player("blue", "NaN", [], []);
+      const player4 = new Player("orange", "NaN", ["wood"], []);
+      this.players.push(player1);
+      this.players.push(player2);
+      this.players.push(player3);
+      this.players.push(player4);
+
+      // Add to dummy player
+      this.collectResources("green", ["sheep", "wood"]);
+
+    },
+    collectResources(playerId, resources) {
+      for (const player of this.players){
+        if (player.playerId === playerId){
+          for (const resource of resources){
+            player.resources.push(resource);
+          }
+        }
+      }
+    },
     nextTurn() {
+      // Check if current player has rolled the dice
+      if (!this.hasRolledDice){
+        this.displayError("You have not rolled the dice yet.");
+        return;
+      }
+
       // Increment the current player index
       this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.playerColors.length;
+
+      // Reset next button
+      this.hasRolledDice = false;
     },
     rollDice(){
       // Generate random number between 1 and 6
@@ -439,19 +501,29 @@ export default {
       let leftDiceOutcome = roll();
       this.dicesOutcome = rightDiceOutcome + leftDiceOutcome;
 
-      //TODO Activate robber if outcome is 7
-
       // Update dice outcome images
       this.leftDiceImg = this.clearWhiteDiceImg[leftDiceOutcome];
       this.rightDiceImg = this.clearWhiteDiceImg[rightDiceOutcome];
+
+      //TODO Activate robber if outcome is 7
+
+      //TODO Collect resources
+
+      // User can end their turn after rolling the dice
+      this.hasRolledDice = true;
+
     },
-    continueNextPlayerTurn(){
-      // Check if player rolled dice
+    displayError(message){
+      // Display error message
+      document.getElementById('game-error-message').classList.remove('hidden');
+      let errorMessage = document.querySelector('.error-message');
+      errorMessage.textContent = message;
 
-
-      // Continue to next player's turn
-
-    },
+      // Close error message
+      document.getElementById('confirm-error-message').addEventListener('click', function() {
+        document.getElementById('game-error-message').classList.add('hidden');
+      });
+    }
   }
 };
 </script>
@@ -459,14 +531,54 @@ export default {
 <style scoped>
 /* General */
 .container {
+  justify-content: center;
+}
+
+.mainContent {
+  display: inline-flex;
+}
+
+/* Error message */
+.hidden {
+  display: none !important;
+}
+
+#game-error-message {
+  z-index: 2;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
+  align-items: center;
+}
+
+.error-message-box {
+  background-color: #ebfcf7;
+  border: solid 5px #60BFB2;
+  padding: 16px;
+  border-radius: 15px;
+  width: 30vw;
+  display: grid;
+}
+
+.error-message {
+  margin: 20px 20px 50px 20px;
+  font-weight: normal;
+}
+
+#confirm-error-message {
+  justify-self: right;
 }
 
 /* ----------------------------------------- */
 
 .current-player {
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .has-settlement-0 {
@@ -487,7 +599,7 @@ export default {
 .box {
   margin: 0 auto;
   /*margin-left: 31%;*/
-  width: 1000px;
+  width: 1100px;
   /* background-color: #2fa4ed; */
   /* border: 1px solid black; */
   line-height: 1.3;
@@ -983,6 +1095,11 @@ ol.odd {
 /* end cities */
 /* ----------------------------------------- */
 
+/* Game buttons */
+.game-buttons-container {
+  margin-left: 60px;
+}
+
 /* Dice container */
 .dice-container {
   width: max-content;
@@ -1017,6 +1134,23 @@ ol.odd {
 .dice-outcome-container h2{
   font-weight: 400;
   margin: 0;
+}
+
+/* Player resources */
+.player-inventory-container {
+  background-color: #5c86ae;
+  border: solid #2c3e50 ;
+  padding: 10px;
+  min-height: 160px;
+}
+
+.player-inventory-container img {
+  height: 150px;
+  margin: 0 5px;
+}
+
+.player-inventory-resources {
+  display: inline-flex;
 }
 
 </style>
