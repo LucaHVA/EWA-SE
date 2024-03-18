@@ -1,8 +1,11 @@
 package org.example.backend.controllers;
 
+import jakarta.transaction.Transactional;
+import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.User;
-import org.example.backend.repositories.UsersRepository;
+import org.example.backend.repositories.EntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -12,57 +15,51 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * @author Luca Rijkbost
+ * @author Luca Rijkbost & Armando Labega
  */
+
 @RestController
+@Transactional
 @RequestMapping("/users")
-@CrossOrigin(origins = "http://localhost:8080")
 public class UsersController {
 
-private final UsersRepository usersRepository;
+    @Qualifier("USERS.JPA")
+    @Autowired
+    private EntityRepository<User> usersRepository;
 
-@Autowired
-    public UsersController(UsersRepository usersRepository) {
-        this.usersRepository = usersRepository;
-    }
-
-    @GetMapping(path = "test", produces = "application/json")
+    @GetMapping("/test")
     public List<User> getMockUsers(){
         return List.of(
-                new User(10,"Armando","Cringe@ball.nl", "fout"),
-                new User(11,"Ballmando","yep@huh.be", "goed")
-
+                new User(10L,"Armando","Cringe@ball.nl", "fout"),
+                new User(11L,"Ballmando","yep@huh.be", "goed")
         );
     }
 
+    @GetMapping("/all")
+    public List<User> getAllScooters() {
+        // Call the findAll method from the repository and return the list of all scooters
+        return usersRepository.findAll();
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<User> getCabinById(@PathVariable long id) {
+    public ResponseEntity<User> getUserById(@PathVariable long id) {
         User user = usersRepository.findById(id);
-        if (user != null) {
-            return ResponseEntity.ok(user);
-        } else {
-            return ResponseEntity.notFound().build();
+        if (user == null) {
+            throw new ResourceNotFoundException("User with ID " + id + " not found.");
         }
+        return ResponseEntity.ok(user);
     }
 
-    @PostMapping(consumes = "application/json", produces = "application/json")
-    public ResponseEntity<User> createCabin(@RequestBody User user) {
-        try {
-            // Save the cabin to generate a unique ID
-            User savedUser = usersRepository.save(user);
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        usersRepository.save(user);
 
-            URI location = ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .path("/{id}")
-                    .buildAndExpand(savedUser.getId())
-                    .toUri();
+        // Build URI for new scooter and return it with a 201 Created status code
+        URI componentBuilder = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(user.getId())
+                .toUri();
 
-            return ResponseEntity.created(location).body(savedUser);
-        } catch (Exception e) {
-            // Handle exceptions (e.g., constraint violations) appropriately
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.created(componentBuilder).body(user);
     }
-
-
 }

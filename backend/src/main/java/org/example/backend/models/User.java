@@ -1,25 +1,36 @@
 package org.example.backend.models;
 
-public class User {
+import jakarta.persistence.*;
 
-    int id;
+@Entity
+@Table(name = "\"user\"")
+public class User implements Identifiable{
 
-    String username;
-    String email;
-    String password;
+    @Id
+    @SequenceGenerator(initialValue = 30000, name = "UserGenerator")
+    @GeneratedValue(generator = "UserGenerator")
+    private Long id;
+    private String username;
+    private String email;
+    private String password;
 
-    public User(int id,String username, String email, String password) {
+    public User() {
+    }
+
+    public User(Long id,String username, String email, String password) {
         this.id= id;
         this.username = username;
         this.email = email;
         this.password = password;
     }
 
-    public long getId() {
+    @Override
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    @Override
+    public void setId(Long id) {
         this.id = id;
     }
 

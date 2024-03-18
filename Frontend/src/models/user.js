@@ -1,9 +1,8 @@
-class User{
+export class User{
     id;
     username;
     email;
     password;
-
 
     constructor(id, username, email, password) {
         this.id = id;
@@ -12,14 +11,8 @@ class User{
         this.password = password;
     }
 
-    static copyConstructor(user){
-        if (user==null) return null;
-
-        let copy=new User(
-            user.id,
-            user.username,
-        user.email,
-        user.password,
-        )
+    static copyConstructor(user) {
+        if (user === null || user === undefined) return null;
+        return Object.assign(new User(0), user);
     }
 }

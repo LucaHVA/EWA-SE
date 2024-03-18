@@ -1,5 +1,3 @@
-
-
 export class UsersAdaptor{
     resourcesUrl;
 
@@ -7,21 +5,19 @@ export class UsersAdaptor{
         this.resourcesUrl=resourcesUrl;
     }
 
-    async fetchJson(url, options = null){
-        try {
-            console.log('Fetching data from:', url);
-            let response = await fetch(url, options);
-
-            if (response.ok) {
-                return await response.json();
-            } else {
-                console.log('Error during fetch:', response, !response.bodyUsed ? await response.text() : "");
-                return null;
-            }
-        } catch (error) {
-            console.error('Error during fetch:', error);
+    async fetchJson(url, options = null) {
+        let res = await fetch(url, options);
+        if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+            return res.json();
+        } else {
+            console.log(res, !res.bodyUsed ? await res.text() : "")
             return null;
         }
+    }
+
+    async asyncFindById(id) {
+        const url = `${this.resourcesUrl}/${id}`;
+        return await this.fetchJson(url);
     }
 
     async save(user, queryParams) {

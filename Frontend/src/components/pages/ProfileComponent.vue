@@ -26,7 +26,7 @@
 
     <div class="button-container">
       <button type="submit" class="cancel-button">Cancel</button>
-      <button type="submit" class="pos-button">Save</button>
+      <button type="submit" @click="findUser" class="pos-button">Save</button>
     </div>
   </div>
 
@@ -41,6 +41,7 @@
 import defaultImage from '@/assets/images/defaultpfp.png'
 export default {
   name: "ProfileComponent",
+  inject:['usersService'],
   data() {
     return {
       imageUrl: defaultImage
@@ -53,6 +54,9 @@ export default {
     },
     triggerFileInput() {
       this.$refs.fileInput.click();
+    },
+    findUser() {
+      console.log(this.usersService.asyncFindById(30000))
     }
   }
 }
