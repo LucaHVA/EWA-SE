@@ -288,7 +288,7 @@
       </div>
       <div class="game-buttons-container">
         <div class="dice-container">
-          <button class="pos-button" id="roll-dice-button" @click="rollDice">Roll the dices!
+          <button class="pos-button" id="roll-dice-button" @click="rollDice" :disabled="hasRolledDice">Roll the dices!
             <img alt="roll dice" src="../../assets/images/game/dices/clear_rolling-dices.png">
           </button>
           <div class="dice-outcome-container">
@@ -299,6 +299,7 @@
         </div>
         <div>
           <button class="pos-button" id="next-turn-button" @click="nextTurn" >Next turn</button>
+          <div>Time remaining: {{this.timeRemaining}}</div>
         </div>
       </div>
     </div>
@@ -326,6 +327,7 @@ export default {
       players: [],
       currentPlayerResources: [],
       hasRolledDice: false,
+      timeRemaining: 0,
       row1: [],
       row2: [],
       row3: [],
@@ -355,7 +357,7 @@ export default {
       },
       resourceCardImg: {
         brick: require("../../assets/images/game/resources/brick_card_v1.png"),
-        grain: require("../../assets/images/game/resources/grain_card_v1.png"),
+        wheat: require("../../assets/images/game/resources/wheat_card_v1.png"),
         ore: require("../../assets/images/game/resources/ore_card_v1.png"),
         wood: require("../../assets/images/game/resources/sheep_card_v1.png"),
         sheep: require("../../assets/images/game/resources/wood_card_v1.png")
@@ -455,7 +457,7 @@ export default {
     initializePlayers() {
       //todo
       // Dummy player data
-      const player1 = new Player("red", "NaN", ["brick", "grain"], []);
+      const player1 = new Player("red", "NaN", ["brick", "wheat", "wood"], []);
       const player2 = new Player("green", "NaN", ["ore"], []);
       const player3 = new Player("blue", "NaN", [], []);
       const player4 = new Player("orange", "NaN", ["wood"], []);
@@ -467,6 +469,23 @@ export default {
       // Add to dummy player
       this.collectResources("green", ["sheep", "wood"]);
 
+      this.startCountdown();
+    },
+    startCountdown() {
+      this.timeRemaining = 60; // Reset the timer
+      this.timerId = setInterval(() => {
+        if (this.timeRemaining > 0) {
+          this.timeRemaining--;
+        } else {
+          this.timeUp();
+        }
+      }, 1000);
+    },
+    timeUp() {
+      clearInterval(this.timerId);
+      this.rollDice();
+      this.nextTurn();
+      this.startCountdown(); // Start the countdown for the next player
     },
     collectResources(playerId, resources) {
       for (const player of this.players){
@@ -508,6 +527,8 @@ export default {
       //TODO Activate robber if outcome is 7
 
       //TODO Collect resources
+      // console.log(this.row1);
+
 
       // User can end their turn after rolling the dice
       this.hasRolledDice = true;

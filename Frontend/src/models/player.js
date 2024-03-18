@@ -8,7 +8,7 @@ class Player {
     static resourcesList = {
         ORE: 'ore',
         BRICK: 'brick',
-        GRAIN: 'grain',
+        WHEAT: 'wheat',
         WOOD: 'wood',
         SHEEP: 'sheep'
     }
@@ -29,8 +29,8 @@ class Player {
     }
 
     createPlayer(playerId = 0, user= "NaN") {
-        let resources = [];
-        let developmentCards = [];
+        let resources = {};
+        let developmentCards = {};
         return new Player(playerId, user, resources, developmentCards);
     }
 }
