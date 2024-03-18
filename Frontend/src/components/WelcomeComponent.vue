@@ -5,9 +5,7 @@
       <div class="sub-title">Play for free</div>
       <p class="extra-info">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt
         ut labore et dolore magna.</p>
-      <button class="pos-button"><router-link class="multiplayer" to="/Game">Play Singleplayer</router-link></button>
-      <button class="pos-button"><router-link class="multiplayer" to="/lobbySelect">Play Multiplayer</router-link></button>
-
+        <router-link to="/gameSettings"><button class="play-button transition">Play SinglePlayer</button></router-link>
     </div>
   </div>
 
@@ -56,9 +54,32 @@ export default {
   font-size: 20px;
 }
 
-.multiplayer{
-  text-decoration: none;
-  color: white;
+.transition {
+  transition: all 0.4s ease;
 }
 
+.transition:hover {
+  transition: all 0.4s ease;
+  top: 10%;
+  transform: translateY(-10%);
+  border: none;
+}
+
+.play-button {
+  color: white;
+  background-color: #60BFB2;
+  font-size: 30px;
+  font-weight: bold;
+  border: none;
+  width: 350px;
+  height: 70px;
+  border-radius: 10px;
+  margin: auto;
+  text-decoration: none;
+}
+
+.play-button:hover {
+  color: #60BFB2;
+  background-color: white;
+}
 </style>
