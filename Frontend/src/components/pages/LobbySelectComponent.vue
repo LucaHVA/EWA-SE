@@ -1,15 +1,7 @@
 
 <template>
-<div class="container">
   <div class="title">
     {{title}}
-  </div>
-</div>
-
-  <div id="background-blob">
-    <div class="blob-top-left"></div>
-    <div class="blob-bottom-left"></div>
-    <div class="blob-bottom-Right"></div>
   </div>
 </template>
 

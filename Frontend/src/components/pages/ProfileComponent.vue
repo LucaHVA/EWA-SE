@@ -29,12 +29,6 @@
       <button type="submit" @click="findUser" class="pos-button">Save</button>
     </div>
   </div>
-
-  <div id="background-blob">
-    <div class="blob-top-left"></div>
-    <div class="blob-bottom-left"></div>
-    <div class="blob-bottom-Right"></div>
-  </div>
 </template>
 
 <script>
