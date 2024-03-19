@@ -39,9 +39,18 @@ data(){
   methods:{
     async login(){
       try {
-        const response=await this.usersService.login(this.username,this.password);
-        console.log('logged in successfully', response);
-      }catch (error){
+        const response = await this.usersService.login(this.username, this.password);
+        if (response !== null) {
+          // Login successful
+          console.log('Logged in successfully:', response);
+          this.$router.push({name: 'home'})
+        } else {
+          // Login failed
+          console.error('Login failed: Invalid username or password.');
+          this.alert = true;
+        }
+      }
+      catch (error){
         console.log('login failed', error);
         this.alert=true;
       }
@@ -71,6 +80,11 @@ data(){
 form {
   display: flex;
   flex-direction: column;
+}
+
+.alertMessage{
+  color: maroon;
+  text-align: center;
 }
 
 /* Label */

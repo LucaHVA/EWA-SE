@@ -97,6 +97,7 @@ export default {
 }
 .alertMessage{
   color: maroon;
+  text-align: center;
 }
 
 /* Form */
