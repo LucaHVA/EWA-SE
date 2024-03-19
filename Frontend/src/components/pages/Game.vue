@@ -1,4 +1,9 @@
 <template>
+  <div class="previous-page-container">
+    <button class="previous-page-button" @click="confirmNavigation">
+        <img src="../../assets/images/back_button.png" alt="back">
+    </button>
+  </div>
   <div v-if="resourcesInitialized" class="container">
     <div id="game-error-message" class="hidden">
       <div class="error-message-box">
@@ -323,6 +328,7 @@ export default {
   name: "gameComponent",
   data() {
     return {
+      previousPage: "/gameSettings",
       currentPlayerIndex: 0,
       playerColors: ["red", "blue", "green", "orange"],
       players: [],
@@ -384,6 +390,11 @@ export default {
     }
   },
   methods: {
+    confirmNavigation() {
+      if (confirm('Are you sure you want to go to the previous page?')){
+        this.$router.push(this.previousPage);
+      }
+    },
     initializeBoard() {
       for (let i = 0; i < 3; i++) {
         const resource = this.getRandomResource();
@@ -713,6 +724,21 @@ export default {
 
 .mainContent {
   display: inline-flex;
+}
+
+/* Previous page button */
+.previous-page-container {
+  margin-left: 30px;
+  display: flex;
+}
+
+.previous-page-button {
+  border: none;
+  background: none;
+}
+
+.previous-page-container img {
+  width: 40px;
 }
 
 /* Error message */

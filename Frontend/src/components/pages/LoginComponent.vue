@@ -1,37 +1,61 @@
 <template>
-  <div class="container">
     <div class="title">
       <h1>Log in</h1>
     </div>
     <div class="form-container">
       <form>
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="Username" required>
+        <input v-model="username" type="text" id="username" name="username" placeholder="Username" required>
 
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Password" required>
+        <input v-model="password" type="password" id="password" name="password" placeholder="Password" required>
 
         <div class="other-logging-options">
           <p>Forgot password</p>
-          <p>Create account</p>
+          <p>
+            <router-link to="register">Create account</router-link></p>
         </div>
-
-        <button type="submit" class="pos-button">Log in</button>
+        <div class="alertMessage" role="alert" v-if="alert">
+          Username and/or password is invalid
+        </div>
+        <div v-else>
+        </div>
+        <button type="submit" class="pos-button" @click.prevent="login">Log in</button>
       </form>
     </div>
-  </div>
-
-  <div id="background-blob">
-    <div class="blob-top-left"></div>
-    <div class="blob-bottom-left"></div>
-    <div class="blob-bottom-Right"></div>
-  </div>
 </template>
 
 <script>
 export default {
-  name: "LoginComponent"
-
+  name: "LoginComponent",
+  inject:['usersService'],
+data(){
+    return{
+      username:'',
+      password:'',
+      alert:false
+    }
+},
+  methods:{
+    async login(){
+      try {
+        const response = await this.usersService.login(this.username, this.password);
+        if (response !== null) {
+          // Login successful
+          console.log('Logged in successfully:', response);
+          this.$router.push({name: 'home'})
+        } else {
+          // Login failed
+          console.error('Login failed: Invalid username or password.');
+          this.alert = true;
+        }
+      }
+      catch (error){
+        console.log('login failed', error);
+        this.alert=true;
+      }
+    }
+  }
 }
 </script>
 
@@ -58,6 +82,11 @@ form {
   flex-direction: column;
 }
 
+.alertMessage{
+  color: maroon;
+  text-align: center;
+}
+
 /* Label */
 form label {
   margin-bottom: 5px;
@@ -78,6 +107,7 @@ form input::placeholder {
 .other-logging-options {
   display: flex;
   justify-content: center;
+  text-decoration: none;
 }
 
 .other-logging-options p {

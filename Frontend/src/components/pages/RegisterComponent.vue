@@ -16,17 +16,11 @@
         <div class="alertMessage" role="alert" v-if="alert">
           your password should be between 8-16 characters
         </div>
-        <div v-else></div>
-
+        <div v-else>
+        </div>
         <button type="submit" class="pos-button" @click.prevent='checkInfo'>Create account</button>
       </form>
     </div>
-  </div>
-
-  <div id="background-blob">
-    <div class="blob-top-left"></div>
-    <div class="blob-bottom-left"></div>
-    <div class="blob-bottom-Right"></div>
   </div>
 </template>
 
@@ -71,6 +65,7 @@ export default {
       const savedUser = await this.usersService.save(user);
       if (savedUser) {
         console.log('User saved successfully:', savedUser);
+        this.$router.push({name: 'profilePage'})
       } else {
         console.error('Failed to save user.');
       }
@@ -102,6 +97,7 @@ export default {
 }
 .alertMessage{
   color: maroon;
+  text-align: center;
 }
 
 /* Form */

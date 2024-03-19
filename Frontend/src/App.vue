@@ -1,28 +1,44 @@
 <template>
-  <img alt="Logo" src="assets/images/logo.png">
-  <nav-bar-component></nav-bar-component>
-  <welcome-component></welcome-component>
+  <div class="front-blob-container">
+    <header-component></header-component>
+    <nav-bar-component v-if="!ignoredNavBarPaths.includes(this.$route.path)"></nav-bar-component>
+    <router-view></router-view>
+  </div>
+
+<!-- Background items -->
+  <div id="background-blob" v-if="!ignoredBackgroundPaths.includes(this.$route.path)">
+    <div class="blob-top-left"></div>
+    <div class="blob-bottom-left"></div>
+    <div class="blob-bottom-Right"></div>
+  </div>
 </template>
 
 <script>
-import navBarComponent from "@/components/NavBarComponent";
-import welcomeComponent from "@/components/WelcomeComponent";
+import NavBarComponent from "@/components/NavBarComponent";
+import {UsersAdaptor} from "@/services/UsersAdaptor";
+import CONFIG from "@/app-config";
+import HeaderComponent from "@/components/HeaderComponent";
 
 export default {
-  name: 'App',
+  name: "AppComponent",
   components: {
-    navBarComponent,
-    welcomeComponent
+    HeaderComponent,
+    NavBarComponent
+  },
+  data() {
+    return {
+      ignoredBackgroundPaths: ['/game', '/Game'],
+      ignoredNavBarPaths: ['/game', '/Game'],
+    }
+  },
+  provide(){
+    return{
+      usersService: new UsersAdaptor(CONFIG.BACKEND_URL+ '/users')
+    }
   }
 }
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<style scoped>
+
 </style>

@@ -36,8 +36,8 @@ public class UsersController {
     }
 
     @GetMapping("/all")
-    public List<User> getAllScooters() {
-        // Call the findAll method from the repository and return the list of all scooters
+    public List<User> getAllUsers() {
+        // Call the findAll method from the repository and return the list of all users
         return usersRepository.findAll();
     }
 
@@ -50,6 +50,8 @@ public class UsersController {
         return ResponseEntity.ok(user);
     }
 
+
+
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
         usersRepository.save(user);
@@ -61,5 +63,18 @@ public class UsersController {
                 .toUri();
 
         return ResponseEntity.created(componentBuilder).body(user);
+    }
+
+    @PostMapping(path="/login", produces = "application/json")
+    public ResponseEntity<User> loginUser(@RequestBody User loginUser) {
+        // Retrieve the user from the repository by username
+        User user = usersRepository.findByUsername(loginUser.getUsername());
+
+        // Check if the user exists and if the password matches
+        if (user != null && user.getPassword().equals(loginUser.getPassword())) {
+            return ResponseEntity.ok(user); // Return the user with a 200 OK status code if login is successful
+        } else {
+            throw new ResourceNotFoundException("Invalid username or password."); // Throw exception if login fails
+        }
     }
 }

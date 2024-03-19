@@ -44,12 +44,6 @@
     <div class="right-column-gamesettings-page">
     </div>
   </div>
-
-  <div id="background-blob">
-    <div class="blob-top-left"></div>
-    <div class="blob-bottom-left"></div>
-    <div class="blob-bottom-Right"></div>
-  </div>
 </template>
 
 <script>

@@ -1,11 +1,5 @@
 <template>
-  <nav class="header">
-    <div id="left-logo">
-      <router-link to="/home">
-        <img alt="logo" class="navbar_logo" src="../assets/images/codeboard_black_logo.png">
-      </router-link>
-    </div>
-
+  <nav class="navigation">
     <div class="navbar">
       <ul class="navbar-list">
         <li>
@@ -13,9 +7,9 @@
             <li class="nav-item">
               <router-link to="/home" class="nav-link" active-class="active">Home</router-link>
             </li>
-            <li class="nav-item">
-              <router-link to="/leaderboard" class="nav-link" active-class="active">Leaderboard</router-link>
-            </li>
+            <!--            <li class="nav-item">-->
+            <!--              <router-link to="/leaderboard" class="nav-link" active-class="active">Leaderboard</router-link>-->
+            <!--            </li>-->
             <!-- TODO: tutorial page -->
             <!-- <li class="nav-item">-->
             <!--    <router-link to="/tutorial" class="nav-link" active-class="active">Tutorial</router-link>-->
@@ -66,6 +60,10 @@ nav ul {
   margin: 20px;
 }
 
+.navbar_logo {
+  width: 15%;
+}
+
 /* Navigation */
 .navbar-list {
   display: flex;
@@ -98,7 +96,4 @@ nav ul {
   justify-content: flex-end;
 }
 
-.navbar_logo {
-  width: 15%;
-}
 </style>

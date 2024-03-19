@@ -3,16 +3,11 @@
     <div class="centered-content">
       <div class="title">Play Catan Online</div>
       <div class="sub-title">Play for free</div>
-      <p class="extra-info">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed do eiusmod tempor incididunt
-        ut labore et dolore magna.</p>
-        <router-link to="/gameSettings"><button class="play-button transition">Play SinglePlayer</button></router-link>
+      <p class="extra-info">Enjoy an online game of the classic board game Settlers of Catan!</p>
+      <router-link to="/gameSettings">
+        <button class="play-button transition">Play SinglePlayer</button>
+      </router-link>
     </div>
-  </div>
-
-  <div id="background-blob">
-    <div class="blob-top-left"></div>
-    <div class="blob-bottom-left"></div>
-    <div class="blob-bottom-Right"></div>
   </div>
 </template>
 

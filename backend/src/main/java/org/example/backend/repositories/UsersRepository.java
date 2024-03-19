@@ -1,9 +1,6 @@
 package org.example.backend.repositories;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import org.example.backend.models.User;
 import org.springframework.stereotype.Repository;
@@ -54,5 +51,17 @@ public class UsersRepository extends AbstractEntityRepositoryJpa<User> {
             query.setParameter(i + 1, params[i]);
         }
         return query.getResultList();
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        TypedQuery<User> query = entityManager.createQuery(
+                "SELECT u FROM User u WHERE u.username = :username", User.class);
+        query.setParameter("username", username);
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 }

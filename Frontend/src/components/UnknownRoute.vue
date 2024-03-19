@@ -1,8 +1,8 @@
 <template>
-  <div class="errorMessage">
-    <h1>No route has been found</h1>
-    <p>There is no component available to load</p>
-  </div>
+    <div class="errorMessage">
+      <h1>No route has been found</h1>
+      <p>There is no component available to load</p>
+    </div>
 </template>
 
 <script>

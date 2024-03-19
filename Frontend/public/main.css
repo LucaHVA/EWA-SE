@@ -52,7 +52,7 @@ form input::placeholder{
 }
 
 /* Background layer position */
-.container {
+.front-blob-container {
     position: relative;
     z-index: 2;
 }
@@ -62,7 +62,7 @@ form input::placeholder{
     position: fixed;
     top: -10vw;
     left: -10vw;
-    width: 35vw;
+    width: 40vw;
     height: 35vw;
     background-image: url("data:image/svg+xml;utf8,%3Csvg viewBox=%220 0 1000 1000%22 xmlns=%22http:%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3CclipPath id=%22a%22%3E%3Cpath fill=%22currentColor%22 d=%22M786.5 599.5q-87.5 99.5-187 134T342 792q-158 24-179-134t4-312q25-154 179-226.5t304.5 3.5q150.5 76 187 226.5t-51 250Z%22%2F%3E%3C%2FclipPath%3E%3C%2Fdefs%3E%3Cg clip-path=%22url(%23a)%22%3E%3Cpath fill=%22%23FFB54A%22 d=%22M786.5 599.5q-87.5 99.5-187 134T342 792q-158 24-179-134t4-312q25-154 179-226.5t304.5 3.5q150.5 76 187 226.5t-51 250Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
     background-repeat: no-repeat;
