@@ -435,6 +435,25 @@ export default {
     },
 
     build(index) {
+      // Check if the current player has the required resources (1 wood, 1 brick, 1 sheep, and 1 wheat)
+      const currentPlayer = this.players[this.currentPlayerIndex];
+      const hasWood = currentPlayer.resources.includes('wood');
+      const hasBrick = currentPlayer.resources.includes('brick');
+      const hasSheep = currentPlayer.resources.includes('sheep');
+      const hasWheat = currentPlayer.resources.includes('wheat');
+
+      if (!hasWood || !hasBrick || !hasSheep || !hasWheat) {
+        // Display an error message if the player doesn't have the required resources
+        this.displayError("You don't have enough resources to build a settlement.");
+        return;
+      }
+
+      // Deduct the resources from the player's inventory
+      currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
+      currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
+      currentPlayer.resources.splice(currentPlayer.resources.indexOf('sheep'), 1);
+      currentPlayer.resources.splice(currentPlayer.resources.indexOf('wheat'), 1);
+
       // Store the owner of the settlement
       this.settlements[index] = this.currentPlayerIndex;
 
@@ -445,6 +464,30 @@ export default {
       }
     },
     buildRoad(fromIndex, toIndex) {
+      // Check if the current player has the required resources (1 wood and 1 stone)
+      const currentPlayer = this.players[this.currentPlayerIndex];
+      const hasWood = currentPlayer.resources.includes('wood');
+      const hasStone = currentPlayer.resources.includes('brick');
+
+      if (!hasWood || !hasStone) {
+        // Display an error message if the player doesn't have the required resources
+        this.displayError("You don't have enough resources to build a road.");
+        return;
+      }
+
+      // Deduct the resources from the player's inventory
+      currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
+      currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
+
+      // Check if the road is adjacent to a settlement
+      const adjacentToSettlement = this.isAdjacentToSettlement(fromIndex, toIndex);
+
+      if (!adjacentToSettlement) {
+        // Display an error message if the road is not adjacent to a settlement
+        this.displayError("Road must be adjacent to your own settlement.");
+        return;
+      }
+
       // Add the road to the list of roads
       this.roads.push({ from: fromIndex, to: toIndex, owner: this.currentPlayerIndex });
 
@@ -454,6 +497,21 @@ export default {
         roadElement.classList.add(`build-${this.currentPlayerIndex}`);
       }
     },
+
+    isAdjacentToSettlement(fromIndex, toIndex) {
+      // Check if there is a settlement built on either of the specified indices
+      const settlement1 = document.getElementById(`s${fromIndex}`);
+      const settlement2 = document.getElementById(`s${toIndex}`);
+
+      // Check if either settlement has the class indicating it has a settlement built on it
+      const hasSettlement1 = settlement1 ? settlement1.classList.contains('has-settlement-0') : false;
+      const hasSettlement2 = settlement2 ? settlement2.classList.contains('has-settlement-0') : false;
+
+      // Return true if either settlement has a settlement built on it
+      return hasSettlement1 || hasSettlement2;
+    },
+
+
     initializePlayers() {
       //todo
       // Dummy player data
@@ -461,6 +519,10 @@ export default {
       const player2 = new Player("green", "NaN", ["ore"], []);
       const player3 = new Player("blue", "NaN", [], []);
       const player4 = new Player("orange", "NaN", ["wood"], []);
+
+      // Add 1 extra wood and 1 extra brick to player 1
+      player1.resources.push("wood", "brick","sheep","wheat");
+
       this.players.push(player1);
       this.players.push(player2);
       this.players.push(player3);
