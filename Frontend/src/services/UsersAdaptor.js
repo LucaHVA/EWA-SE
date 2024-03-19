@@ -1,3 +1,5 @@
+
+
 export class UsersAdaptor{
     resourcesUrl;
 
@@ -46,4 +48,30 @@ export class UsersAdaptor{
             return null;
         }
     }
+
+ async login(username, password){
+        try {
+            console.log('Sending login request...')
+           const url=`${this.resourcesUrl}/login`;
+            const options={
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body: JSON.stringify({username,password})
+
+            };
+            const response=await this.fetchJson(url,options);
+            if (response){
+                console.log('login successful:',response);
+                return response
+            }else {
+                console.error('Login failed: Invalid username or password.');
+                return null;
+            }
+        }catch (error){
+            console.error('Error during login:', error);
+            return null;
+        }
+ }
 }
