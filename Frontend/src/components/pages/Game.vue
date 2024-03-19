@@ -299,7 +299,8 @@
         </div>
         <div>
           <button class="pos-button" id="next-turn-button" @click="nextTurn" >Next turn</button>
-          <div>Time remaining: {{this.timeRemaining}}</div>
+          <div>Time remaining: {{ this.timeRemaining }}</div>
+          <div v-if="!hasRolledDice">Turn: {{ turn }}</div>
         </div>
       </div>
     </div>
@@ -328,6 +329,7 @@ export default {
       currentPlayerResources: [],
       hasRolledDice: false,
       timeRemaining: 0,
+      turn: 1,
       row1: [],
       row2: [],
       row3: [],
@@ -435,66 +437,111 @@ export default {
     },
 
     build(index) {
-      // Check if the current player has the required resources (1 wood, 1 brick, 1 sheep, and 1 wheat)
-      const currentPlayer = this.players[this.currentPlayerIndex];
-      const hasWood = currentPlayer.resources.includes('wood');
-      const hasBrick = currentPlayer.resources.includes('brick');
-      const hasSheep = currentPlayer.resources.includes('sheep');
-      const hasWheat = currentPlayer.resources.includes('wheat');
+      // Check if it's the first turn
+      const isFirstTurn = this.turn === 1;
 
-      if (!hasWood || !hasBrick || !hasSheep || !hasWheat) {
-        // Display an error message if the player doesn't have the required resources
-        this.displayError("You don't have enough resources to build a settlement.");
+      // Check if the player has already built on their first turn
+      const hasBuiltFirstTurn = this.players[this.currentPlayerIndex].hasBuiltFirstTurn || false;
+
+      // Check if the player has already built a settlement or road on their first turn
+      if (isFirstTurn && hasBuiltFirstTurn) {
+        this.displayError("You have already built on your first turn.");
         return;
       }
 
-      // Deduct the resources from the player's inventory
-      currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
-      currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
-      currentPlayer.resources.splice(currentPlayer.resources.indexOf('sheep'), 1);
-      currentPlayer.resources.splice(currentPlayer.resources.indexOf('wheat'), 1);
+      // Check if the player has already built a settlement or road on their first turn
+      if (isFirstTurn && !hasBuiltFirstTurn) {
+        // Set the flag to indicate that the player has built on their first turn
+        this.players[this.currentPlayerIndex].hasBuiltFirstTurn = true;
+      }
 
-      // Store the owner of the settlement
-      this.settlements[index] = this.currentPlayerIndex;
+      // Check if the current player has the required resources (1 wood, 1 brick, 1 sheep, and 1 wheat) on non-first turn
+      if (!isFirstTurn || (isFirstTurn && !hasBuiltFirstTurn)) {
+        const currentPlayer = this.players[this.currentPlayerIndex];
+        const hasWood = currentPlayer.resources.includes('wood');
+        const hasBrick = currentPlayer.resources.includes('brick');
+        const hasSheep = currentPlayer.resources.includes('sheep');
+        const hasWheat = currentPlayer.resources.includes('wheat');
 
-      // Add a CSS class to the settlement position
-      const settlementElement = document.getElementById('s' + index);
-      if (settlementElement) {
-        settlementElement.classList.add(`has-settlement-${this.currentPlayerIndex}`);
+        if (!isFirstTurn && (!hasWood || !hasBrick || !hasSheep || !hasWheat)) {
+          // Display an error message if the player doesn't have the required resources on non-first turn
+          this.displayError("You don't have enough resources to build a settlement.");
+          return;
+        }
+
+        // Deduct the resources from the player's inventory on non-first turn
+        if (!isFirstTurn) {
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('sheep'), 1);
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wheat'), 1);
+        }
+
+        // Store the owner of the settlement
+        this.settlements[index] = this.currentPlayerIndex;
+
+        // Add a CSS class to the settlement position
+        const settlementElement = document.getElementById('s' + index);
+        if (settlementElement) {
+          settlementElement.classList.add(`has-settlement-${this.currentPlayerIndex}`);
+        }
       }
     },
+
     buildRoad(fromIndex, toIndex) {
-      // Check if the current player has the required resources (1 wood and 1 stone)
-      const currentPlayer = this.players[this.currentPlayerIndex];
-      const hasWood = currentPlayer.resources.includes('wood');
-      const hasStone = currentPlayer.resources.includes('brick');
+      // Check if it's the first turn
+      const isFirstTurn = this.turn === 1;
 
-      if (!hasWood || !hasStone) {
-        // Display an error message if the player doesn't have the required resources
-        this.displayError("You don't have enough resources to build a road.");
+      // Check if the player has already built on their first turn
+      const hasBuiltFirstTurn2 = this.players[this.currentPlayerIndex].hasBuiltFirstTurn2 || false;
+
+      // Check if the player has already built a settlement or road on their first turn
+      if (isFirstTurn && hasBuiltFirstTurn2) {
+        this.displayError("You have already built on your first turn.");
         return;
       }
 
-      // Deduct the resources from the player's inventory
-      currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
-      currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
-
-      // Check if the road is adjacent to a settlement
-      const adjacentToSettlement = this.isAdjacentToSettlement(fromIndex, toIndex);
-
-      if (!adjacentToSettlement) {
-        // Display an error message if the road is not adjacent to a settlement
-        this.displayError("Road must be adjacent to your own settlement.");
-        return;
+      // Check if the player has already built a settlement or road on their first turn
+      if (isFirstTurn && !hasBuiltFirstTurn2) {
+        // Set the flag to indicate that the player has built on their first turn
+        this.players[this.currentPlayerIndex].hasBuiltFirstTurn2 = true;
       }
 
-      // Add the road to the list of roads
-      this.roads.push({ from: fromIndex, to: toIndex, owner: this.currentPlayerIndex });
+      // Check if the current player has the required resources (1 wood and 1 stone) on non-first turn
+      if (!isFirstTurn || (isFirstTurn && !hasBuiltFirstTurn2)) {
+        const currentPlayer = this.players[this.currentPlayerIndex];
+        const hasWood = currentPlayer.resources.includes('wood');
+        const hasStone = currentPlayer.resources.includes('brick');
 
-      // Add a CSS class to the road position
-      const roadElement = document.querySelector(`.road.r${fromIndex}.r${toIndex}`);
-      if (roadElement) {
-        roadElement.classList.add(`build-${this.currentPlayerIndex}`);
+        if (!isFirstTurn && (!hasWood || !hasStone)) {
+          // Display an error message if the player doesn't have the required resources on non-first turn
+          this.displayError("You don't have enough resources to build a road.");
+          return;
+        }
+
+        // Deduct the resources from the player's inventory on non-first turn
+        if (!isFirstTurn) {
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
+        }
+
+        // Check if the road is adjacent to a settlement
+        const adjacentToSettlement = this.isAdjacentToSettlement(fromIndex, toIndex);
+
+        if (!adjacentToSettlement && !isFirstTurn) {
+          // Display an error message if the road is not adjacent to a settlement on non-first turn
+          this.displayError("Road must be adjacent to your own settlement.");
+          return;
+        }
+
+        // Add the road to the list of roads
+        this.roads.push({ from: fromIndex, to: toIndex, owner: this.currentPlayerIndex });
+
+        // Add a CSS class to the road position
+        const roadElement = document.querySelector(`.road.r${fromIndex}.r${toIndex}`);
+        if (roadElement) {
+          roadElement.classList.add(`build-${this.currentPlayerIndex}`);
+        }
       }
     },
 
@@ -515,13 +562,11 @@ export default {
     initializePlayers() {
       //todo
       // Dummy player data
-      const player1 = new Player("red", "NaN", ["brick", "wheat", "wood"], []);
-      const player2 = new Player("green", "NaN", ["ore"], []);
+      const player1 = new Player("red", "NaN", [], []);
+      const player2 = new Player("green", "NaN", [], []);
       const player3 = new Player("blue", "NaN", [], []);
-      const player4 = new Player("orange", "NaN", ["wood"], []);
+      const player4 = new Player("orange", "NaN", [], []);
 
-      // Add 1 extra wood and 1 extra brick to player 1
-      player1.resources.push("wood", "brick","sheep","wheat");
 
       this.players.push(player1);
       this.players.push(player2);
@@ -560,18 +605,23 @@ export default {
     },
     nextTurn() {
       // Check if current player has rolled the dice
-      if (!this.hasRolledDice){
+      if (!this.hasRolledDice) {
         this.displayError("You have not rolled the dice yet.");
         return;
       }
 
       // Increment the current player index
-      this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.playerColors.length;
+      this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+
+      // If it's the first player's turn again, increment the turn counter
+      if (this.currentPlayerIndex === 0) {
+        this.turn++;
+      }
 
       // Reset next button
       this.hasRolledDice = false;
     },
-    rollDice(){
+    rollDice() {
       // Generate random number between 1 and 6
       function roll() {
         return 1 + Math.floor(6 * Math.random());
@@ -586,15 +636,59 @@ export default {
       this.leftDiceImg = this.clearWhiteDiceImg[leftDiceOutcome];
       this.rightDiceImg = this.clearWhiteDiceImg[rightDiceOutcome];
 
+      // Log the hex ID with the rolled number
+      let rolledNumber = rightDiceOutcome + leftDiceOutcome;
+      let hexIdList = [];
+      let hexes = document.querySelectorAll('.hex');
+      hexes.forEach(hex => {
+        let numberElement = hex.querySelector('.number');
+        if (numberElement) {
+          let number = parseInt(numberElement.textContent);
+          if (number === rolledNumber) {
+            hexIdList.push(hex.id);
+          }
+        }
+      });
+      console.log(`Rolled: ${rolledNumber}, Hex IDs: ${hexIdList.join(', ')}`);
+
+      // Assign resources to players based on the rolled number
+      this.assignResourcesToPlayers(rolledNumber);
+
       //TODO Activate robber if outcome is 7
 
       //TODO Collect resources
-      // console.log(this.row1);
-
 
       // User can end their turn after rolling the dice
       this.hasRolledDice = true;
+    },
 
+
+
+    assignResourcesToPlayers(rolledNumber) {
+      // Iterate over each hex on the board
+      let hexes = document.querySelectorAll('.hex');
+      hexes.forEach(hex => {
+        // Get the number element within the hex
+        let numberElement = hex.querySelector('.number');
+        if (numberElement) {
+          // Get the number value from the number element
+          let number = parseInt(numberElement.textContent);
+          // Check if the number matches the rolled number
+          if (number === rolledNumber) {
+            // Check if there's a settlement next to this hex
+            let settlements = hex.querySelectorAll('.settlement');
+            settlements.forEach(settlement => {
+              // Check if the settlement has the class indicating it belongs to the current player
+              let playerClass = `has-settlement-${this.currentPlayerIndex}`;
+              if (settlement.classList.contains(playerClass)) {
+                // If the settlement belongs to the current player, assign resources to the player
+                let resourceType = hex.classList[1]; // Assuming resource type is stored as a class in the hex element
+                this.collectResources(this.currentPlayer, [resourceType]);
+              }
+            });
+          }
+        }
+      });
     },
     displayError(message){
       // Display error message
