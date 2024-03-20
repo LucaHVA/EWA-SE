@@ -11,7 +11,6 @@
         <button id="confirm-error-message" class="pos-button">Continue</button>
       </div>
     </div>
-    <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
     <div class="mainContent">
       <div class="box">
         <!-- one -->
@@ -306,6 +305,7 @@
           <button class="pos-button" id="next-turn-button" @click="nextTurn" >Next turn</button>
           <div>Time remaining: {{ this.timeRemaining }}</div>
           <div v-if="!hasRolledDice">Turn: {{ turn }}</div>
+          <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
         </div>
       </div>
     </div>
