@@ -25,17 +25,17 @@
       <div>
         <h3>Number of Players</h3>
         <span>{{ numberOfPlayers }}</span>
-        <input type="range" min="2" max="4" v-model="numberOfPlayers" class="transition center-column-slider">
+        <input type="range" min="2" max="4" v-model.number="numberOfPlayers" class="transition center-column-slider">
       </div>
       <div>
         <h3>Turn Duration (In seconds)</h3>
         <span>{{ turnDuration }}</span>
-        <input type="range" min="30" max="90" v-model="turnDuration" class="transition center-column-slider">
+        <input type="range" min="30" max="90" v-model.number="turnDuration" class="transition center-column-slider">
       </div>
       <div>
         <h3>Points to win</h3>
         <span>{{ pointsToWin }}</span>
-        <input type="range" min="8" max="10" v-model="pointsToWin" class="transition center-column-slider">
+        <input type="range" min="8" max="10" v-model.number="pointsToWin" class="transition center-column-slider">
       </div>
       <div class="start-game-div">
         <button class="start-game-button transition" @click="showModal = true">Start Game</button>
@@ -46,7 +46,9 @@
                                 @close="showModal = false"
                                 :numberOfPlayers="numberOfPlayers"
                                 :turnDuration="turnDuration"
-                                :pointsToWin="pointsToWin">
+                                :pointsToWin="pointsToWin"
+                                :botCount="botCount"
+                                :totalPlayers="totalPlayers">
     </popUpGameSettingsComponent>
   </div>
 </template>
@@ -98,6 +100,12 @@ export default {
         } else {
           this.botCount--;
         }
+        // Update the indexes of the bots when deleted
+        this.players.forEach((player, i) => {
+          if (!player.host && player.index !== undefined) {
+            player.index = i + 1;
+          }
+        });
       }
     }
   }

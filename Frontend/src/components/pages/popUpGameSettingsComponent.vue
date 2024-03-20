@@ -13,11 +13,16 @@
               <li>Turn Duration: {{ turnDuration }} seconds</li>
               <li>Points to Win: {{ pointsToWin }}</li>
             </ul>
+            <p v-if="missingBotsCount > 0" class="error-message">
+              Current number of players chosen: {{ numberOfPlayers }}, but there
+              {{ missingBotsCount === 1 ? 'is' : 'are' }}
+              still {{ missingBotsCount }} {{ missingBotsCount === 1 ? 'bot' : 'bots' }} needed to fill the lobby.
+            </p>
           </div>
           <div class="modal-footer">
             <slot name="footer">
               <button class="close-button-pop-up transition" @click="$emit('close')">Close</button>
-              <router-link to="/Game">
+              <router-link v-if="totalPlayers === numberOfPlayers" to="/Game">
                 <button class="start-game-button-pop-up transition">Start Game</button>
               </router-link>
             </slot>
@@ -36,8 +41,16 @@ export default {
     numberOfPlayers: Number,
     turnDuration: Number,
     pointsToWin: Number,
-  }
-}
+    botCount: Number,
+    totalPlayers: Number,
+  },
+  computed: {
+    missingBotsCount() {
+      // Calculate the number of bots needed to fill the lobby
+      return Math.max(this.numberOfPlayers - this.totalPlayers, 0);
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -72,8 +85,8 @@ export default {
 }
 
 .modal-container {
-  width: 400px;
-  height: 300px;
+  width: 450px;
+  height: 350px;
   margin: 0 auto;
   padding: 20px 30px;
   background-color: #fff;
@@ -108,6 +121,12 @@ export default {
   justify-content: center;
   align-items: center;
   gap: 1rem;
+}
+
+.error-message {
+  font-size: 16px;
+  color: red;
+  font-weight: bolder;
 }
 
 /*
