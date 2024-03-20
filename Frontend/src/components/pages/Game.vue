@@ -341,6 +341,27 @@ export default {
       row3: [],
       row4: [],
       row5: [],
+      adjacents: [
+        [0,3,4,7,8,12],
+        [1,4,5,8,9,13],
+        [2,5,6,9,10,14],
+        [7,11,12,16,17,22],
+        [8,12,13,17,18,23],
+        [9,13,14,18,19,24],
+        [10,14,15,19,20,25],
+        [16,21,22,27,28,33],
+        [17,22,23,28,29,34],
+        [18,23,24,29,30,35],
+        [19,24,25,30,31,36],
+        [20,25,26,31,32,37],
+        [28,33,34,38,39,43],
+        [29,34,35,39,40,44],
+        [30,35,36,40,41,45],
+        [31,36,37,41,42,46],
+        [39,43,44,47,48,51],
+        [40,44,45,48,49,52],
+        [41,45,46,49,50,53]
+      ],
       resourcesInitialized: false,
       settlements: [],
       roads: [],
@@ -367,8 +388,8 @@ export default {
         brick: require("../../assets/images/game/resources/brick_card_v1.png"),
         wheat: require("../../assets/images/game/resources/wheat_card_v1.png"),
         ore: require("../../assets/images/game/resources/ore_card_v1.png"),
-        wood: require("../../assets/images/game/resources/sheep_card_v1.png"),
-        sheep: require("../../assets/images/game/resources/wood_card_v1.png")
+        wood: require("../../assets/images/game/resources/wood_card_v1.png"),
+        sheep: require("../../assets/images/game/resources/sheep_card_v1.png")
       }
     };
   },
@@ -399,31 +420,26 @@ export default {
       for (let i = 0; i < 3; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        console.log("Resource:", resource, "Number:", number);
         this.row1.push({ resource, number });
       }
       for (let i = 0; i < 4; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        console.log("Resource:", resource, "Number:", number);
         this.row2.push({ resource, number });
       }
       for (let i = 0; i < 5; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        console.log("Resource:", resource, "Number:", number);
         this.row3.push({ resource, number });
       }
       for (let i = 0; i < 4; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        console.log("Resource:", resource, "Number:", number);
         this.row4.push({ resource, number });
       }
       for (let i = 0; i < 3; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        console.log("Resource:", resource, "Number:", number);
         this.row5.push({ resource, number });
       }
       // Set the flag to indicate resources are initialized
@@ -584,13 +600,16 @@ export default {
       this.players.push(player3);
       this.players.push(player4);
 
-      // Add to dummy player
-      this.collectResources("green", ["sheep", "wood"]);
-
       this.startCountdown();
     },
     startCountdown() {
-      this.timeRemaining = 60; // Reset the timer
+      // Clear any existing timer
+      clearInterval(this.timerId);
+
+      // Reset the timer
+      this.timeRemaining = 60;
+
+      // Start a new timer
       this.timerId = setInterval(() => {
         if (this.timeRemaining > 0) {
           this.timeRemaining--;
@@ -605,15 +624,7 @@ export default {
       this.nextTurn();
       this.startCountdown(); // Start the countdown for the next player
     },
-    collectResources(playerId, resources) {
-      for (const player of this.players){
-        if (player.playerId === playerId){
-          for (const resource of resources){
-            player.resources.push(resource);
-          }
-        }
-      }
-    },
+
     nextTurn() {
       // Check if current player has rolled the dice
       if (!this.hasRolledDice) {
@@ -631,6 +642,8 @@ export default {
 
       // Reset next button
       this.hasRolledDice = false;
+
+      this.startCountdown();
     },
     rollDice() {
       // Generate random number between 1 and 6
@@ -686,21 +699,63 @@ export default {
           let number = parseInt(numberElement.textContent);
           // Check if the number matches the rolled number
           if (number === rolledNumber) {
-            // Check if there's a settlement next to this hex
-            let settlements = hex.querySelectorAll('.settlement');
-            settlements.forEach(settlement => {
-              // Check if the settlement has the class indicating it belongs to the current player
-              let playerClass = `has-settlement-${this.currentPlayerIndex}`;
-              if (settlement.classList.contains(playerClass)) {
-                // If the settlement belongs to the current player, assign resources to the player
-                let resourceType = hex.classList[1]; // Assuming resource type is stored as a class in the hex element
-                this.collectResources(this.currentPlayer, [resourceType]);
+            // Find the index of the hex (from 1 to 19)
+            let hexIndex = parseInt(hex.id.substr(1));
+
+            // Get the adjacent settlement indexes for the given hex index
+            let adjacentIndexes = this.adjacents[hexIndex - 1]; // Adjust for zero-based index
+
+            // Ensure adjacentIndexes is an array and is not empty
+            if (Array.isArray(adjacentIndexes) && adjacentIndexes.length > 0) {
+              // Iterate over each adjacent index and check if there's a settlement
+              for (const adjacentIndex of adjacentIndexes) {
+                // Get the settlement ID for this adjacent index
+                let settlementId = `s${adjacentIndex}`; // Keep it as one-based index
+
+                // Get the settlement element by ID
+                let settlementElement = document.getElementById(settlementId);
+
+                // Check if there's a settlement and if it belongs to any player
+                if (settlementElement) {
+                  // Iterate over each player
+                  for (let i = 0; i < this.players.length; i++) {
+                    // Check if the settlement belongs to the current player
+                    let playerClass = `has-settlement-${i}`;
+                    if (settlementElement.classList.contains(playerClass)) {
+                      // Log the hex, adjacent settlement, and if settlement is built
+                      console.log(`Hex: ${hex.id}, Adjacent Settlement: ${settlementId}, Settlement Built: ${settlementElement.classList.contains('settlement')}`);
+
+                      // Assign resources to the player's inventory
+                      let resourceType = hex.classList[1]; // Assuming the resource type is the second class
+                      if (resourceType) {
+                        // Update the player's inventory with the assigned resource
+                        this.giveResourcesToPlayer(i, [resourceType]);
+                        // Log the assignment of resources
+                        console.log(`Player ${i} received ${resourceType} from hex ${hex.id} with number ${number}`);
+                      }
+                    }
+                  }
+                }
               }
-            });
+            }
           }
         }
       });
     },
+
+    giveResourcesToPlayer(playerIndex, resources) {
+      // Find the player by their index
+      const player = this.players[playerIndex];
+
+      // Check if the player is found
+      if (player) {
+        // Add the resources to the player's inventory
+        player.resources.push(...resources);
+      } else {
+        console.error(`Player at index ${playerIndex} not found.`);
+      }
+    },
+
     displayError(message){
       // Display error message
       document.getElementById('game-error-message').classList.remove('hidden');
@@ -724,6 +779,7 @@ export default {
 
 .mainContent {
   display: inline-flex;
+  width: 90vw;
 }
 
 /* Previous page button */
@@ -803,7 +859,6 @@ export default {
   margin: 0 auto;
   /*margin-left: 31%;*/
   width: 1100px;
-  /* background-color: #2fa4ed; */
   /* border: 1px solid black; */
   line-height: 1.3;
   margin-top: -.5%;
@@ -1300,7 +1355,7 @@ ol.odd {
 
 /* Game buttons */
 .game-buttons-container {
-  margin-left: 60px;
+
 }
 
 /* Dice container */
