@@ -28,9 +28,9 @@
         <input type="range" min="2" max="4" v-model="numberOfPlayers" class="transition center-column-slider">
       </div>
       <div>
-        <h3>Turn Duration (In minutes)</h3>
+        <h3>Turn Duration (In seconds)</h3>
         <span>{{ turnDuration }}</span>
-        <input type="range" min="1" max="3" v-model="turnDuration" class="transition center-column-slider">
+        <input type="range" min="30" max="90" v-model="turnDuration" class="transition center-column-slider">
       </div>
       <div>
         <h3>Points to win</h3>
@@ -38,26 +38,37 @@
         <input type="range" min="8" max="10" v-model="pointsToWin" class="transition center-column-slider">
       </div>
       <div class="start-game-div">
-       <router-link to="/Game"><button class="start-game-button transition">Start Game</button></router-link>
+        <button class="start-game-button transition" @click="showModal = true">Start Game</button>
       </div>
     </div>
-    <div class="right-column-gamesettings-page">
-    </div>
+    <div class="right-column-gamesettings-page"></div>
+    <popUpGameSettingsComponent :show="showModal"
+                                @close="showModal = false"
+                                :numberOfPlayers="numberOfPlayers"
+                                :turnDuration="turnDuration"
+                                :pointsToWin="pointsToWin">
+    </popUpGameSettingsComponent>
   </div>
 </template>
 
 <script>
+import popUpGameSettingsComponent from "@/components/pages/popUpGameSettingsComponent.vue";
+
 export default {
   name: "GameSettingsComponent",
+  components: {
+    popUpGameSettingsComponent,
+  },
   data() {
     return {
       players: [
         {name: "Susano", host: true},
       ],
       numberOfPlayers: 4,
-      turnDuration: 1,
-      pointsToWin: 10,
-      botCount: 0
+      turnDuration: 60,
+      pointsToWin: 8,
+      botCount: 0,
+      showModal: false,
     };
   },
   computed: {
