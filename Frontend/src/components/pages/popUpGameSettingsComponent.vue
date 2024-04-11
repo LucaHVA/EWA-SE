@@ -22,9 +22,7 @@
           <div class="modal-footer">
             <slot name="footer">
               <button class="close-button-pop-up transition" @click="$emit('close')">Close</button>
-              <router-link v-if="totalPlayers === numberOfPlayers" to="/Game">
-                <button class="start-game-button-pop-up transition">Start Game</button>
-              </router-link>
+              <button class="start-game-button-pop-up transition" @click="initializeGame">Start Game</button>
             </slot>
           </div>
         </div>
@@ -34,6 +32,8 @@
 </template>
 
 <script>
+import GameService from '@/services/GameService';
+
 export default {
   name: "popUpGameSettingsComponent",
   props: {
@@ -43,6 +43,23 @@ export default {
     pointsToWin: Number,
     botCount: Number,
     totalPlayers: Number,
+  },
+  methods: {
+    initializeGame() {
+      //todo check if all game conditions are valid
+      if (this.totalPlayers !== this.numberOfPlayers){
+        return;
+      }
+
+      // Create a game
+      this.game = GameService.generateGame(this.numberOfPlayers, this.turnDuration, this.pointsToWin);
+
+      // Save the game instance to a service
+      GameService.saveGame(this.game.id, this.game);
+
+      // Go to game page
+      this.$router.replace({ name: 'game', params: { id: this.game.id } });
+    },
   },
   computed: {
     missingBotsCount() {

@@ -58,9 +58,10 @@ const routes = [
         component: profileComponent
     },
     {
-        path: '/Game',
-        name: 'Game',
-        component: gameComponent
+        path: '/game/:id',
+        name: 'game',
+        component: gameComponent,
+        // props: true
     }
 ];
 

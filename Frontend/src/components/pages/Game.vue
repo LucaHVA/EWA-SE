@@ -304,8 +304,18 @@
         <div>
           <button class="pos-button" id="next-turn-button" @click="nextTurn" >Next turn</button>
           <div>Time remaining: {{ this.timeRemaining }}</div>
+          <div>Points to win: {{this.game.pointsToWin}}</div>
           <div v-if="!hasRolledDice">Turn: {{ turn }}</div>
           <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
+        </div>
+        <div class="player-cards-container">
+          <div v-for="player in players" :key="player" class="player-card">
+            <div>Player: {{player.playerId}}</div>
+            <div>Points: {{player.pointAmount}}</div>
+            <div>Longest road: {{player.longestRoad}}</div>
+            <div>Settlement amount: {{player.settlementAmount}}</div>
+            <div>Knight cards used: {{player.knightsUsed}}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -323,11 +333,14 @@
 
 <script>
 import Player from "@/models/player";
+import GameService from "@/services/GameService";
 
 export default {
   name: "gameComponent",
   data() {
     return {
+      game: null,
+      gameId: this.$route.params.id,
       previousPage: "/gameSettings",
       currentPlayerIndex: 0,
       playerColors: ["red", "blue", "green", "orange"],
@@ -393,6 +406,9 @@ export default {
       }
     };
   },
+created() {
+    this.game = GameService.getGame(this.gameId);
+},
   mounted() {
     setTimeout(() => {
       this.initializeBoard();
@@ -607,7 +623,7 @@ export default {
       clearInterval(this.timerId);
 
       // Reset the timer
-      this.timeRemaining = 60;
+      this.timeRemaining = this.game.turnDuration;
 
       // Start a new timer
       this.timerId = setInterval(() => {
@@ -679,8 +695,6 @@ export default {
       this.assignResourcesToPlayers(rolledNumber);
 
       //TODO Activate robber if outcome is 7
-
-      //TODO Collect resources
 
       // User can end their turn after rolling the dice
       this.hasRolledDice = true;
@@ -1409,6 +1423,21 @@ ol.odd {
 
 .player-inventory-resources {
   display: inline-flex;
+}
+
+/* Player cards */
+.player-cards-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.player-card {
+  background-color: #5c86ae;
+  border: solid #2c3e50;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 5px;
+  color: white;
 }
 
 </style>
