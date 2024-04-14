@@ -43,7 +43,7 @@
             <div class="road target tl r3 r0" @click="buildRoad(0,3)"></div>
             <div class="road target l r3 r7" @click="buildRoad(7,3)"></div>
             <div class="road target tr r0 r4" @click="buildRoad(0,4)"></div>
-            <div class="number">{{ row1[0].number }}</div>
+            <div class="number" @click="placeRobber(0)">{{ row1[0].number }}</div>
           </li>
           <li :class="'hex ' + row1[1].resource" id="h2">
             <div class="settlement target tl" @click="build(4)" id="s4"></div>
@@ -51,7 +51,7 @@
             <div class="road target tl r4 r1" @click="buildRoad(4,1)"></div>
             <div class="road target l r4 r8" @click="buildRoad(4,8)"></div>
             <div class="road target tr r1 r5" @click="buildRoad(1,5)"></div>
-            <div class="number">{{ row1[1].number }}</div>
+            <div class="number" @click="placeRobber(1)">{{ row1[1].number }}</div>
           </li>
           <li :class="'hex ' + row1[2].resource" id="h3">
             <div class="settlement target tl" @click="build(5)" id="s5"></div>
@@ -59,7 +59,7 @@
             <div class="road target tl r5 r2" @click="buildRoad(5,2)"></div>
             <div class="road target l r9 r5" @click="buildRoad(9,5)"></div>
             <div class="road target tr r2 r6" @click="buildRoad(2,6)"></div>
-            <div class="number">{{ row1[2].number }}</div>
+            <div class="number" @click="placeRobber(2)">{{ row1[2].number }}</div>
           </li>
           <li class="hex water">
             <div class="settlement target tl" @click="build(6)" id="s6"></div>
@@ -76,7 +76,7 @@
             <div class="road target tl r11 r7" @click="buildRoad(11,7)"></div>
             <div class="road target l r11 r16" @click="buildRoad(11,16)"></div>
             <div class="road target tr r7 r12" @click="buildRoad(7,12)"></div>
-            <div class="number">{{ row2[0].number }}</div>
+            <div class="number" @click="placeRobber(3)">{{ row2[0].number }}</div>
           </li>
           <li :class="'hex ' + row2[1].resource" id="h5">
             <div class="road target tl r12 r8" @click="buildRoad(12,8)"></div>
@@ -84,7 +84,7 @@
             <div class="road target tr r8 r13" @click="buildRoad(8,13)"></div>
             <div class="settlement target tl" @click="build(12)" id="s12"></div>
             <div class="settlement target t" @click="build(8)" id="s8"></div>
-            <div class="number">{{ row2[1].number }}</div>
+            <div class="number" @click="placeRobber(4)">{{ row2[1].number }}</div>
           </li>
           <li :class="'hex ' + row2[2].resource" id="h6">
             <div class="settlement target tl" @click="build(13)" id="s13"></div>
@@ -92,7 +92,7 @@
             <div class="road target tl r13 r9" @click="buildRoad(13,9)"></div>
             <div class="road target l r13 r18" @click="buildRoad(13,18)"></div>
             <div class="road target tr r9 r14" @click="buildRoad(9,14)"></div>
-            <div class="number">{{ row2[2].number }}</div>
+            <div class="number" @click="placeRobber(5)">{{ row2[2].number }}</div>
           </li>
           <li :class="'hex ' + row2[3].resource" id="h7">
             <div class="settlement target tl"></div>
@@ -102,7 +102,7 @@
             <div class="road target tr r10 r15" @click="buildRoad(10,15)"></div>
             <div class="settlement target tl" @click="build(14)" id="s14"></div>
             <div class="settlement target t" @click="build(10)" id="s10"></div>
-            <div class="number">{{ row2[3].number }}</div>
+            <div class="number" @click="placeRobber(6)">{{ row2[3].number }}</div>
           </li>
           <li class="hex water">
             <div class="settlement target tl" @click="build(15)" id="s15"></div>
@@ -127,7 +127,7 @@
             <div class="road target tl r21 r16" @click="buildRoad(21,16)"></div>
             <div class="road target l r21 r27" @click="buildRoad(21,27)"></div>
             <div class="road target tr r16 r22" @click="buildRoad(16,22)"></div>
-            <div class="number">{{ row3[0].number }}</div>
+            <div class="number" @click="placeRobber(7)">{{ row3[0].number }}</div>
           </li>
           <li :class="'hex '+ row3[1].resource" id="h9">
             <div class="settlement target tl" @click="build(22)" id="s22"></div>
@@ -135,7 +135,7 @@
             <div class="road target tl r22 r17" @click="buildRoad(22,17)"></div>
             <div class="road target l r22 r28" @click="buildRoad(22,28)"></div>
             <div class="road target tr r17 r23" @click="buildRoad(17,23)"></div>
-            <div class="number">{{ row3[1].number }}</div>
+            <div class="number" @click="placeRobber(8)">{{ row3[1].number }}</div>
           </li>
           <li :class="'hex '+ row3[2].resource" id="h10">
             <div class="settlement target tl" @click="build(23)" id="s23"></div>
@@ -143,7 +143,7 @@
             <div class="road target tl r23 r18" @click="buildRoad(23,18)"></div>
             <div class="road target l r29 r23" @click="buildRoad(29,23)"></div>
             <div class="road target tr r18 r24" @click="buildRoad(18,24)"></div>
-            <div class="number">{{ row3[2].number }}</div>
+            <div class="number" @click="placeRobber(9)">{{ row3[2].number }}</div>
           </li>
           <li :class="'hex '+ row3[3].resource" id="h11">
             <div class="settlement target tl" @click="build(24)" id="s24"></div>
@@ -151,7 +151,7 @@
             <div class="road target tl r24 r19" @click="buildRoad(24,19)"></div>
             <div class="road target l r24 r30" @click="buildRoad(24,30)"></div>
             <div class="road target tr r19 r25" @click="buildRoad(19,25)"></div>
-            <div class="number">{{ row3[3].number }}</div>
+            <div class="number" @click="placeRobber(10)">{{ row3[3].number }}</div>
           </li>
           <li :class="'hex '+ row3[4].resource" id="h12">
             <div class="settlement target tl" @click="build(25)" id="s25"></div>
@@ -159,7 +159,7 @@
             <div class="road target tl r25 r20" @click="buildRoad(25,20)"></div>
             <div class="road target l r25 r31" @click="buildRoad(25,31)"></div>
             <div class="road target tr r20 r26" @click="buildRoad(20,26)"></div>
-            <div class="number">{{ row3[4].number }}</div>
+            <div class="number" @click="placeRobber(11)">{{ row3[4].number }}</div>
           </li>
           <li class="hex water">
             <div class="settlement target tl" @click="build(26)" id="s26"></div>
@@ -179,7 +179,7 @@
             <div class="road target l r33 r38" @click="buildRoad(33,38)"></div>
             <div class="road target tr r34 r28" @click="buildRoad(34,28)"></div>
             <div class="road target tl r28 r33" @click="buildRoad(28,33)"></div>
-            <div class="number">{{ row4[0].number }}</div>
+            <div class="number" @click="placeRobber(12)">{{ row4[0].number }}</div>
           </li>
           <li :class="'hex '+ row4[1].resource" id="h14">
             <div class="settlement target tl" @click="build(34)" id="s34"></div>
@@ -187,7 +187,7 @@
             <div class="road target tl r34 r29" @click="buildRoad(34,29)"></div>
             <div class="road target l r34 r39" @click="buildRoad(34,39)"></div>
             <div class="road target tr r29 r35" @click="buildRoad(29,35)"></div>
-            <div class="number">{{ row4[1].number }}</div>
+            <div class="number" @click="placeRobber(13)">{{ row4[1].number }}</div>
           </li>
           <li :class="'hex '+ row4[2].resource" id="h15">
             <div class="settlement target tl" @click="build(35)" id="s35"></div>
@@ -195,7 +195,7 @@
             <div class="road target tl r35 r30" @click="buildRoad(35,30)"></div>
             <div class="road target l r35 r40" @click="buildRoad(35,40)"></div>
             <div class="road target tr r30 r36" @click="buildRoad(30,36)"></div>
-            <div class="number">{{ row4[2].number }}</div>
+            <div class="number" @click="placeRobber(14)">{{ row4[2].number }}</div>
           </li>
           <li :class="'hex '+ row4[3].resource" id="h16">
             <div class="road target tl r36 r31" @click="buildRoad(36,31)"></div>
@@ -203,7 +203,7 @@
             <div class="road target tr r31 r37" @click="buildRoad(31,37)"></div>
             <div class="settlement target tl" @click="build(36)" id="s36"></div>
             <div class="settlement target t" @click="build(31)" id="s31"></div>
-            <div class="number">{{ row4[3].number }}</div>
+            <div class="number" @click="placeRobber(15)">{{ row4[3].number }}</div>
           </li>
           <li class="hex water">
             <div class="settlement target tl" @click="build(37)" id="s37"></div>
@@ -232,7 +232,7 @@
             <div class="road target tl r43 r39" @click="buildRoad(43,39)"></div>
             <div class="road target l r43 r47" @click="buildRoad(43,47)"></div>
             <div class="road target tr r39 r44" @click="buildRoad(39,44)"></div>
-            <div class="number">{{ row5[0].number }}</div>
+            <div class="number" @click="placeRobber(16)">{{ row5[0].number }}</div>
           </li>
           <li :class="'hex '+ row5[1].resource" id="h18">
             <div class="settlement target tl" @click="build(44)" id="s44"></div>
@@ -240,7 +240,7 @@
             <div class="road target tl r44 r40" @click="buildRoad(44,40)"></div>
             <div class="road target l r44 r48" @click="buildRoad(44,48)"></div>
             <div class="road target tr r40 r45" @click="buildRoad(40,45)"></div>
-            <div class="number">{{ row5[1].number }}</div>
+            <div class="number" @click="placeRobber(17)">{{ row5[1].number }}</div>
           </li>
           <li :class="'hex '+ row5[2].resource" id="h19">
             <div class="settlement target tl" @click="build(45)" id="s45"></div>
@@ -248,7 +248,7 @@
             <div class="road target tl r45 r41" @click="buildRoad(45,41)"></div>
             <div class="road target l r45 r49" @click="buildRoad(45,49)"></div>
             <div class="road target tr r41 r46" @click="buildRoad(41,46)"></div>
-            <div class="number">{{ row5[2].number }}</div>
+            <div class="number" @click="placeRobber(18)">{{ row5[2].number }}</div>
           </li>
           <li class="hex water">
             <div class="settlement target tl" @click="build(46)" id="s46"></div>
@@ -325,6 +325,10 @@
         <div v-for="resource in currentPlayerResourcesInventory" :key="resource">
           <div class="inventory-resource-card"><img :src=this.resourceCardImg[resource] alt="resource card"></div>
         </div>
+        <div class="game-buttons-container">
+          <button @click="acquireDevelopmentCard">Acquire Development Card</button>
+          <button @click="playDevelopmentCard('knight')">Play Knight Card</button>
+        </div>
       </div>
     </div>
 
@@ -346,6 +350,7 @@ export default {
       playerColors: ["red", "blue", "green", "orange"],
       players: [],
       currentPlayerResources: [],
+      robberHexIndex: null,
       hasRolledDice: false,
       timeRemaining: 0,
       turn: 1,
@@ -403,7 +408,10 @@ export default {
         ore: require("../../assets/images/game/resources/ore_card_v1.png"),
         wood: require("../../assets/images/game/resources/wood_card_v1.png"),
         sheep: require("../../assets/images/game/resources/sheep_card_v1.png")
-      }
+      },
+      developmentCards: ['knight'],
+      hasPlayedDevelopmentCard: false,
+
     };
   },
 created() {
@@ -588,6 +596,194 @@ created() {
       }
     },
 
+
+
+
+    acquireDevelopmentCard() {
+      const currentPlayer = this.players[this.currentPlayerIndex];
+
+      // Check if the player has resources to acquire a development card (e.g., using wheat, ore, sheep)
+      if (currentPlayer.resources.includes('wheat') && currentPlayer.resources.includes('ore') && currentPlayer.resources.includes('sheep')) {
+        // Deduct the resources from the player's inventory
+        currentPlayer.resources.splice(currentPlayer.resources.indexOf('wheat'), 1);
+        currentPlayer.resources.splice(currentPlayer.resources.indexOf('ore'), 1);
+        currentPlayer.resources.splice(currentPlayer.resources.indexOf('sheep'), 1);
+
+        // Add a random development card (e.g., "knight") to the player's development card list
+        const randomCard = this.developmentCards[Math.floor(Math.random() * this.developmentCards.length)];
+        currentPlayer.developmentCards.push(randomCard);
+      } else {
+        this.displayError("You don't have enough resources to acquire a development card.");
+      }
+    },
+
+    playDevelopmentCard(cardType) {
+      if (!this.hasPlayedDevelopmentCard) {
+        const currentPlayer = this.players[this.currentPlayerIndex];
+
+        // Check if the player has the specified development card type
+        if (currentPlayer.developmentCards.includes(cardType)) {
+          // Remove the card from the player's development card list
+          const cardIndex = currentPlayer.developmentCards.indexOf(cardType);
+          currentPlayer.developmentCards.splice(cardIndex, 1);
+
+          // Perform the action based on the development card type (e.g., "knight")
+          if (cardType === 'knight') {
+            // Set a flag to indicate that a knight card has been played
+            this.hasPlayedDevelopmentCard = true;
+          }
+
+          // Call the specific action method for the development card
+          this.performDevelopmentCardAction(cardType);
+        } else {
+          this.displayError("You don't have the specified development card to play.");
+        }
+      } else {
+        this.displayError("You have already played a development card in this turn.");
+      }
+    },
+
+    performDevelopmentCardAction(cardType) {
+      if (cardType === 'knight') {
+        this.placeRobberMode = true;
+      }
+    },
+
+    placeRobber(hexIndex) {
+      if (this.placeRobberMode) {
+        const adjustedHexIndex = hexIndex + 1;
+        if (!isNaN(adjustedHexIndex)) {
+          if (adjustedHexIndex !== this.robberHexIndex) {
+            if (this.robberHexIndex !== null) {
+              this.deactivateRobber(this.robberHexIndex);
+            }
+            this.activateRobber(adjustedHexIndex);
+
+            const hexId = `h${adjustedHexIndex}`;
+            const numberElement = document.getElementById(hexId)?.querySelector('.number');
+            if (numberElement) {
+              numberElement.classList.add('red-number');
+            }
+
+            // Call the method to steal a resource from adjacent settlements
+            this.stealResourceFromAdjacentSettlement();
+          } else {
+            console.error(`Same hexIndex as current robber position: ${adjustedHexIndex}`);
+          }
+        } else {
+          console.error(`Invalid hexIndex: ${adjustedHexIndex}`);
+        }
+
+        this.placeRobberMode = false;
+      } else {
+        this.displayError("You can only place the robber after playing the knight card.");
+      }
+    },
+
+    stealResourceFromAdjacentSettlement() {
+      // Check if there is a robber placed on any tile
+      if (this.robberHexIndex !== null) {
+        // Get the adjacent settlement indexes for the robber's tile
+        const adjacentIndexes = this.adjacents[this.robberHexIndex - 1];
+
+        // Check if there are adjacent settlement indexes
+        if (Array.isArray(adjacentIndexes) && adjacentIndexes.length > 0) {
+          // Find all player settlements adjacent to the robber's tile
+          const playerSettlements = this.findPlayerSettlements(adjacentIndexes);
+
+          // Check if there are valid player settlements adjacent to the robber hex
+          if (playerSettlements.length > 0) {
+            // Randomly choose a player settlement to steal from
+            const randomPlayerId = playerSettlements[Math.floor(Math.random() * playerSettlements.length)];
+
+            // Get the corresponding player object
+            const player = this.players[randomPlayerId];
+
+            // Check if the player has resources to steal
+            if (Array.isArray(player.resources) && player.resources.length > 0) {
+              // Randomly choose a resource to steal
+              const randomResourceIndex = Math.floor(Math.random() * player.resources.length);
+
+
+              // Remove the stolen resource from the player's inventory
+              const stolenResource = player.resources.splice(randomResourceIndex, 1)[0];
+
+              // Add the stolen resource to the player who placed the robber
+              const robberPlayer = this.players.find(player => player.id === this.currentPlayerId);
+              if (robberPlayer) {
+                robberPlayer.resources.push(stolenResource);
+
+                // Log the theft
+                console.log(`Stole ${stolenResource} from ${player.name}'s settlement.`);
+              } else {
+                console.log(`Error: Current player not found.`);
+              }
+            } else {
+              console.log(`Player ${player.name} (ID: ${randomPlayerId}) has no resources to steal.`);
+            }
+          } else {
+            console.log('No valid player settlements adjacent to the robber.');
+          }
+        } else {
+          console.log('No adjacent settlement indexes found for the robber hex.');
+        }
+      } else {
+        console.log('Robber has not been placed on any tile.');
+      }
+    },
+
+    findPlayerSettlements(adjacentIndexes) {
+      const playerSettlements = [];
+
+      // Iterate over each adjacent settlement index
+      for (const index of adjacentIndexes) {
+        const settlementId = `s${index}`;
+
+        // Get the settlement element by ID
+        const settlementElement = document.getElementById(settlementId);
+
+        // Check if there's a settlement at the given index and if it belongs to any player
+        if (settlementElement) {
+          // Iterate over each player to check ownership of the settlement
+          for (let i = 0; i < this.players.length; i++) {
+            const playerClass = `has-settlement-${i}`;
+
+            // Check if the settlement belongs to the current player
+            if (settlementElement.classList.contains(playerClass)) {
+              // Extract player ID from the settlement class
+              const playerId = i;
+
+              // Ensure playerId is a valid number and corresponds to a player in the players array
+              if (!isNaN(playerId) && playerId >= 0 && playerId < this.players.length) {
+                playerSettlements.push(playerId);
+              }
+            }
+          }
+        }
+      }
+
+      return playerSettlements;
+    },
+
+
+
+    activateRobber(hexIndex) {
+      // Set the robber's hex index
+      this.robberHexIndex = hexIndex;
+    },
+
+    deactivateRobber(hexIndex) {
+      // Reset the UI of the previous robber's position
+      const previousHexId = `h${hexIndex}`;
+      const previousNumberElement = document.getElementById(previousHexId)?.querySelector('.number');
+      if (previousNumberElement) {
+        previousNumberElement.classList.remove('red-number');
+      }
+    },
+
+
+
+
     isAdjacentToSettlement(fromIndex, toIndex) {
       // Check if there is a settlement built on either of the specified indices
       const settlement1 = document.getElementById(`s${fromIndex}`);
@@ -603,19 +799,22 @@ created() {
 
 
     initializePlayers() {
-      //todo
       // Dummy player data
       const player1 = new Player("red", "NaN", [], []);
       const player2 = new Player("green", "NaN", [], []);
       const player3 = new Player("blue", "NaN", [], []);
       const player4 = new Player("orange", "NaN", [], []);
 
+      // Assign initial resources to the red player
+      player1.resources = ['ore', 'wheat', 'sheep'];
 
+      // Add players to the players array
       this.players.push(player1);
       this.players.push(player2);
       this.players.push(player3);
       this.players.push(player4);
 
+      // Start the countdown timer
       this.startCountdown();
     },
     startCountdown() {
@@ -716,6 +915,12 @@ created() {
             // Find the index of the hex (from 1 to 19)
             let hexIndex = parseInt(hex.id.substr(1));
 
+            // Check if the hex has the robber
+            if (hexIndex === this.robberHexIndex) {
+              console.log(`Robber is on hex ${hex.id}. No resources assigned.`);
+              return; // Skip assigning resources if there's a robber on this hex
+            }
+
             // Get the adjacent settlement indexes for the given hex index
             let adjacentIndexes = this.adjacents[hexIndex - 1]; // Adjust for zero-based index
 
@@ -736,9 +941,6 @@ created() {
                     // Check if the settlement belongs to the current player
                     let playerClass = `has-settlement-${i}`;
                     if (settlementElement.classList.contains(playerClass)) {
-                      // Log the hex, adjacent settlement, and if settlement is built
-                      console.log(`Hex: ${hex.id}, Adjacent Settlement: ${settlementId}, Settlement Built: ${settlementElement.classList.contains('settlement')}`);
-
                       // Assign resources to the player's inventory
                       let resourceType = hex.classList[1]; // Assuming the resource type is the second class
                       if (resourceType) {
@@ -756,6 +958,7 @@ created() {
         }
       });
     },
+
 
     giveResourcesToPlayer(playerIndex, resources) {
       // Find the player by their index
@@ -786,6 +989,22 @@ created() {
 </script>
 
 <style scoped>
+
+
+
+
+.robber-placed {
+  background-color: #c0392b;
+  border: 2px solid #fff;
+}
+
+.red-number{
+  color: #c0392b;
+}
+
+.robber-number {
+  color: #c0392b;
+}
 /* General */
 .container {
   justify-content: center;
