@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.User;
 import org.example.backend.repositories.EntityRepository;
+import org.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class UsersController {
 
     @Qualifier("USERS.JPA")
     @Autowired
-    private EntityRepository<User> usersRepository;
+    private UserRepository usersRepository;
 
     @GetMapping("/test")
     public List<User> getMockUsers(){

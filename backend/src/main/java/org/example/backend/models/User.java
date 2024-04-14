@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "\"user\"")
-public class User implements Identifiable{
+public class User implements Identifiable<Long>{
 
     @Id
     @SequenceGenerator(initialValue = 30000, name = "UserGenerator")

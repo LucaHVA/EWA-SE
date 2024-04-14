@@ -1,7 +1,7 @@
 package org.example.backend.models;
 
-public interface Identifiable {
-    Long getId();
+public interface Identifiable<T> {
+    T getId();
 
-    void setId(Long id);
+    void setId(T id);
 }

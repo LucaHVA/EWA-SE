@@ -6,7 +6,7 @@ import jakarta.transaction.Transactional;
 import org.example.backend.models.Identifiable;
 
 @Transactional
-public abstract class AbstractEntityRepositoryJpa<E extends Identifiable> implements EntityRepository<E> {
+public abstract class AbstractEntityRepositoryJpa<E extends Identifiable<T>, T> implements EntityRepository<E, T> {
     @PersistenceContext
     protected EntityManager entityManager;
 

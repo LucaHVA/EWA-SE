@@ -1,19 +1,18 @@
 package org.example.backend.repositories;
 
-        import org.example.backend.models.Identifiable;
+import org.example.backend.models.Identifiable;
 
-        import java.util.List;
+import java.util.List;
 
-public interface EntityRepository<E extends Identifiable> {
+public interface EntityRepository<E extends Identifiable<T>, T> {
     List<E> findAll();
+    List<E> findByQuery(String jpqlName, Object... params);
 
-    E findById(long id);
+    E findById(T id);
 
     E save(E entity);
 
-    E deleteById(long id);
+    E deleteById(T id);
 
-    List<E> findByQuery(String jpqlName, Object... params);
-
-    E findByUsername(String username);
+    E update(E oldEntity, E newEntity);
 }

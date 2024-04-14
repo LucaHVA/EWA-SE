@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository("USERS.JPA")
 @Transactional
-public class UsersRepository extends AbstractEntityRepositoryJpa<User> {
+public class UsersRepository extends AbstractEntityRepositoryJpa<User, Long> implements UserRepository {
     @PersistenceContext
     protected EntityManager entityManager;
 
@@ -26,7 +26,7 @@ public class UsersRepository extends AbstractEntityRepositoryJpa<User> {
     }
 
     @Override
-    public User findById(long id) {
+    public User findById(Long id) {
         return entityManager.find(User.class, id);
     }
 
@@ -36,11 +36,17 @@ public class UsersRepository extends AbstractEntityRepositoryJpa<User> {
     }
 
     @Override
-    public User deleteById(long id) {
+    public User deleteById(Long id) {
         User user = this.findById(id);
         entityManager.remove(user);
 
         return user;
+    }
+
+    @Override
+    public User update(User oldEntity, User newEntity) {
+        //todo update user
+        return null;
     }
 
     @Override
