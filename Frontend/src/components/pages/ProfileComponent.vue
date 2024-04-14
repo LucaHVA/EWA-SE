@@ -14,19 +14,19 @@
     <div class="form-container">
       <form>
         <label for="email">Change Username</label>
-        <input type="email" id="email" name="email" placeholder="Username">
+        <input v-model="username" type="email" id="email" name="email" placeholder="Username">
 
         <label for="username">Change Email</label>
-        <input type="text" id="username" name="username" placeholder="Email">
+        <input v-model="email" type="text" id="username" name="username" placeholder="Email">
 
         <label for="password">Change Password</label>
-        <input type="password" id="password" name="password" placeholder="Password">
+        <input v-model="password" type="password" id="password" name="password" placeholder="Password">
       </form>
     </div>
 
     <div class="button-container">
-      <button type="submit" class="cancel-button">Cancel</button>
-      <button type="submit" @click="findUser" class="pos-button">Save</button>
+      <button type="submit" @click="cancel" class="cancel-button">Cancel</button>
+      <button type="submit" @click="save" class="pos-button">Save</button>
     </div>
   </div>
 </template>
@@ -36,22 +36,72 @@ import defaultImage from '@/assets/images/defaultpfp.png'
 export default {
   name: "ProfileComponent",
   inject:['usersService'],
+
   data() {
     return {
-      imageUrl: defaultImage
+      imageUrl: defaultImage,
+      username: '',
+      email: '',
+      password: '',
     };
   },
+
+  created() {
+    this.fetchUserInfo();
+  },
+
   methods: {
+    cancel() {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      console.log(userInfo.id)
+      this.username = userInfo.username;
+      this.email = userInfo.email;
+      this.password = userInfo.password;
+      this.imageUrl = userInfo.profilePicture;
+    },
+    fetchUserInfo() {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      if (userInfo) {
+        this.username = userInfo.username;
+        this.email = userInfo.email;
+        this.password = userInfo.password;
+        if (userInfo.profilePicture != null){
+          this.imageUrl = userInfo.profilePicture;
+        }
+      } else {
+        // Redirect to login page if userInfo is not found
+        this.$router.push({name: 'login'});
+      }
+    },
     onFileChange(e) {
       const file = e.target.files[0];
-      this.imageUrl = URL.createObjectURL(file);
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        this.imageUrl = reader.result;
+      };
+      reader.onerror = function (error) {
+        console.log('Error: ', error);
+      };
     },
     triggerFileInput() {
       this.$refs.fileInput.click();
     },
-    findUser() {
-      console.log(this.usersService.asyncFindById(30000))
-    }
+    async save() {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const userId = userInfo.id;
+      const userUpdate = {
+        id: userId,
+        username: this.username,
+        email: this.email,
+        password: this.password,
+        profilePicture: this.imageUrl
+      };
+      await this.usersService.save(userUpdate);
+      await this.usersService.asyncFindAll();
+      localStorage.setItem('userInfo', JSON.stringify(userUpdate));
+      alert('Profile saved successfully!');
+    },
   }
 }
 </script>
@@ -136,5 +186,9 @@ form input::placeholder {
 .pos-button {
   box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
   margin: 4px 2rem!important;
+}
+
+input {
+  font-size: 1.2rem;
 }
 </style>

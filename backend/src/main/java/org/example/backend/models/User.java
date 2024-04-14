@@ -13,6 +13,9 @@ public class User implements Identifiable<Long>{
     private String username;
     private String email;
     private String password;
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String profilePicture;
 
     public User() {
     }
@@ -58,4 +61,11 @@ public class User implements Identifiable<Long>{
         this.password = password;
     }
 
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
 }

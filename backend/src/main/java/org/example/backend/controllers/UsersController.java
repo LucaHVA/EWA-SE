@@ -3,7 +3,6 @@ package org.example.backend.controllers;
 import jakarta.transaction.Transactional;
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.User;
-import org.example.backend.repositories.EntityRepository;
 import org.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -77,5 +76,13 @@ public class UsersController {
         } else {
             throw new ResourceNotFoundException("Invalid username or password."); // Throw exception if login fails
         }
+    }
+
+    @PutMapping("/{id}")
+    public User updateUser(@PathVariable long id, @RequestBody User user) {
+        if (id != user.getId()) {
+            throw new ResourceNotFoundException("Scooter-id = " + user.getId() + " does not match path parameter = " + id);
+        }
+        return usersRepository.save(user);
     }
 }

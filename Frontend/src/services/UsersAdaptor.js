@@ -1,3 +1,4 @@
+import {User} from "@/models/user";
 
 
 export class UsersAdaptor{
@@ -17,6 +18,17 @@ export class UsersAdaptor{
         }
     }
 
+    async asyncFindAll() {
+        try {
+            const scooters = await this.fetchJson(this.resourcesUrl + "/all", {
+                method: 'GET'
+            })
+            return scooters?.map(User.copyConstructor);
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
     async asyncFindById(id) {
         const url = `${this.resourcesUrl}/${id}`;
         return await this.fetchJson(url);
@@ -24,25 +36,40 @@ export class UsersAdaptor{
 
     async save(user, queryParams) {
         try {
-            const url = `${this.resourcesUrl}${queryParams ? `?${queryParams}` : ''}`;
-            const options = {
-                method: 'POST',
+
+            if (user.id === 0) {
+                const url = `${this.resourcesUrl}${queryParams ? `?${queryParams}` : ''}`;
+                const options = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(user)
+                };
+
+                console.log('Saving user:', user);
+                const response = await this.fetchJson(url, options);
+
+                if (response) {
+                    console.log('User saved successfully:', response);
+                    return response;
+                } else {
+                    console.error('Failed to save user.');
+                    return null;
+                }
+            }
+
+            const createdUser = User.copyConstructor(user);
+            let res;
+            res = this.fetchJson(this.resourcesUrl + "/" + user.id, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(user)
-            };
+                body: JSON.stringify(createdUser)
+            })
+            return User.copyConstructor(res);
 
-            console.log('Saving user:', user);
-            const response = await this.fetchJson(url, options);
-
-            if (response) {
-                console.log('User saved successfully:', response);
-                return response;
-            } else {
-                console.error('Failed to save user.');
-                return null;
-            }
         } catch (error) {
             console.error('Error during save:', error);
             return null;
