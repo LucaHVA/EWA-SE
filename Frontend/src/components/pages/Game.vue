@@ -291,6 +291,8 @@
         </ol>
       </div>
       <div class="game-buttons-container">
+
+
         <div class="dice-container">
           <button class="pos-button" id="roll-dice-button" @click="rollDice" :disabled="hasRolledDice">Roll the dices!
             <img alt="roll dice" src="../../assets/images/game/dices/clear_rolling-dices.png">
@@ -302,6 +304,12 @@
           </div>
         </div>
         <div>
+          <!-- Modal for robber placement message -->
+          <div class="modal" v-if="showRobberPlacementModal">
+            <div class="modal-content">
+              <p>Click one of the numbers to place the robber.</p>
+            </div>
+          </div>
           <button class="pos-button" id="next-turn-button" @click="nextTurn" >Next turn</button>
           <div>Time remaining: {{ this.timeRemaining }}</div>
           <div>Points to win: {{this.game.pointsToWin}}</div>
@@ -326,11 +334,13 @@
           <div class="inventory-resource-card"><img :src=this.resourceCardImg[resource] alt="resource card"></div>
         </div>
         <div class="game-buttons-container">
-          <button @click="acquireDevelopmentCard">Acquire Development Card</button>
-          <button @click="playDevelopmentCard('knight')">Play Knight Card</button>
+          <button class="pos-button" @click="acquireDevelopmentCard">Buy Development Card</button>
+          <button class="pos-button" v-if="canPlayKnightCard" @click="playDevelopmentCard('knight')">Play Knight Card</button>
         </div>
       </div>
     </div>
+
+
 
   </div>
 </template>
@@ -343,6 +353,8 @@ export default {
   name: "gameComponent",
   data() {
     return {
+      canPlayKnightCard: false,
+      showRobberPlacementModal: false,
       game: null,
       gameId: this.$route.params.id,
       previousPage: "/gameSettings",
@@ -602,9 +614,9 @@ created() {
     acquireDevelopmentCard() {
       const currentPlayer = this.players[this.currentPlayerIndex];
 
-      // Check if the player has resources to acquire a development card (e.g., using wheat, ore, sheep)
+      // Check if the player has resources to acquire a development card (wheat, ore, sheep)
       if (currentPlayer.resources.includes('wheat') && currentPlayer.resources.includes('ore') && currentPlayer.resources.includes('sheep')) {
-        // Deduct the resources from the player's inventory
+        // Deduct resources from the player's inventory
         currentPlayer.resources.splice(currentPlayer.resources.indexOf('wheat'), 1);
         currentPlayer.resources.splice(currentPlayer.resources.indexOf('ore'), 1);
         currentPlayer.resources.splice(currentPlayer.resources.indexOf('sheep'), 1);
@@ -612,42 +624,38 @@ created() {
         // Add a random development card (e.g., "knight") to the player's development card list
         const randomCard = this.developmentCards[Math.floor(Math.random() * this.developmentCards.length)];
         currentPlayer.developmentCards.push(randomCard);
+
+        // Check if the acquired card is a "knight" card
+        if (randomCard === 'knight') {
+          this.canPlayKnightCard = true; // Enable the "Play Knight Card" button
+        }
       } else {
         this.displayError("You don't have enough resources to acquire a development card.");
       }
     },
-
     playDevelopmentCard(cardType) {
-      if (!this.hasPlayedDevelopmentCard) {
-        const currentPlayer = this.players[this.currentPlayerIndex];
+      const currentPlayer = this.players[this.currentPlayerIndex];
 
-        // Check if the player has the specified development card type
-        if (currentPlayer.developmentCards.includes(cardType)) {
-          // Remove the card from the player's development card list
-          const cardIndex = currentPlayer.developmentCards.indexOf(cardType);
-          currentPlayer.developmentCards.splice(cardIndex, 1);
+      // Check if the player has the specified development card type
+      if (currentPlayer.developmentCards.includes(cardType)) {
+        // Show the robber placement modal
+        this.showRobberPlacementModal = true;
 
-          // Perform the action based on the development card type (e.g., "knight")
-          if (cardType === 'knight') {
-            // Set a flag to indicate that a knight card has been played
-            this.hasPlayedDevelopmentCard = true;
-          }
+        // Remove the card from the player's development card list
+        const cardIndex = currentPlayer.developmentCards.indexOf(cardType);
+        currentPlayer.developmentCards.splice(cardIndex, 1);
 
-          // Call the specific action method for the development card
-          this.performDevelopmentCardAction(cardType);
-        } else {
-          this.displayError("You don't have the specified development card to play.");
+        // Perform the action based on the development card type (e.g., "knight")
+        if (cardType === 'knight') {
+          this.hasPlayedDevelopmentCard = true;
+          this.canPlayKnightCard = false; // Disable the "Play Knight Card" button
+          this.placeRobberMode = true; // Set flag to activate robber placement
         }
       } else {
-        this.displayError("You have already played a development card in this turn.");
+        this.displayError("You don't have the specified development card to play.");
       }
     },
 
-    performDevelopmentCardAction(cardType) {
-      if (cardType === 'knight') {
-        this.placeRobberMode = true;
-      }
-    },
 
     placeRobber(hexIndex) {
       if (this.placeRobberMode) {
@@ -678,6 +686,7 @@ created() {
       } else {
         this.displayError("You can only place the robber after playing the knight card.");
       }
+      this.showRobberPlacementModal = false;
     },
 
     stealResourceFromAdjacentSettlement() {
@@ -991,7 +1000,30 @@ created() {
 <style scoped>
 
 
+.modal {
+  position: absolute;
+  top: -15%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
 
+.modal-content {
+  background-color: #ebfcf7;
+  border: solid 5px #60BFB2;
+  padding: 16px;
+  border-radius: 15px;
+  width: 30vw;
+  pointer-events: auto; /* Enable clicks inside modal content */
+}
+
+.game-buttons-container {
+  position: relative; /* Ensure modal is positioned relative to this container */
+}
 
 .robber-placed {
   background-color: #c0392b;
