@@ -4,25 +4,21 @@
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-header">
-            <slot name="header">Confirm Game Settings</slot>
+            <slot name="header">Confirm Joining Game</slot>
           </div>
           <div class="modal-body">
-            <p class="modal-body-header">Current Settings:</p>
+            <p class="modal-body-header">Current game:</p>
             <ul class="game-settings-modal">
-              <li>Number of Players: {{ numberOfPlayers }}</li>
-              <li>Turn Duration: {{ turnDuration }} seconds</li>
-              <li>Points to Win: {{ pointsToWin }}</li>
+              <li>Game name: {{ selectedGame.name }}</li>
+              <li>Lobby size: {{ selectedGame.players }} / {{ selectedGame.maxPlayers }}</li>
             </ul>
-            <p v-if="missingBotsCount > 0" class="error-message">
-              Current number of players chosen: {{ numberOfPlayers }}, but there
-              {{ missingBotsCount === 1 ? 'is' : 'are' }}
-              still {{ missingBotsCount }} {{ missingBotsCount === 1 ? 'bot' : 'bots' }} needed to fill the lobby.
-            </p>
           </div>
           <div class="modal-footer">
             <slot name="footer">
               <button class="close-button-pop-up transition" @click="$emit('close')">Close</button>
-              <button class="start-game-button-pop-up transition" @click="initializeGame">Start Game</button>
+              <router-link to="/gameSettings">
+                <button class="start-game-button-pop-up transition">Join Game</button>
+              </router-link>
             </slot>
           </div>
         </div>
@@ -32,40 +28,11 @@
 </template>
 
 <script>
-import GameService from '@/services/GameService';
-
 export default {
-  name: "popUpGameSettingsComponent",
+  name: "popUpLobbySelectComponent",
   props: {
     show: Boolean,
-    numberOfPlayers: Number,
-    turnDuration: Number,
-    pointsToWin: Number,
-    botCount: Number,
-    totalPlayers: Number,
-  },
-  methods: {
-    initializeGame() {
-      //todo check if all game conditions are valid
-      if (this.totalPlayers !== this.numberOfPlayers){
-        return;
-      }
-
-      // Create a game
-      this.game = GameService.generateGame(this.numberOfPlayers, this.turnDuration, this.pointsToWin);
-
-      // Save the game instance to a service
-      GameService.saveGame(this.game.id, this.game);
-
-      // Go to game page
-      this.$router.replace({ name: 'game', params: { id: this.game.id } });
-    },
-  },
-  computed: {
-    missingBotsCount() {
-      // Calculate the number of bots needed to fill the lobby
-      return Math.max(this.numberOfPlayers - this.totalPlayers, 0);
-    },
+    selectedGame: Object,
   },
 };
 </script>
@@ -106,6 +73,7 @@ export default {
   flex-direction: column;
   justify-content: space-between;
   width: 450px;
+  height: 350px;
   margin: 0 auto;
   padding: 20px 30px;
   background-color: #fff;

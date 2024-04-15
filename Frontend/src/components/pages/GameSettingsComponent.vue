@@ -295,4 +295,9 @@ export default {
   height: 30px;
 }
 
+.game-list-container {
+  max-height: 300px; /* Adjust as needed */
+  overflow-y: auto;
+}
+
 </style>

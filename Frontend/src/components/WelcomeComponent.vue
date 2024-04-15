@@ -4,9 +4,14 @@
       <div class="title">Play Catan Online</div>
       <div class="sub-title">Play for free</div>
       <p class="extra-info">Enjoy an online game of the classic board game Settlers of Catan!</p>
+      <div class="welcome-page-button-container">
       <router-link to="/gameSettings">
-        <button class="play-button transition">Play SinglePlayer</button>
+        <button class="singleplayer-button buttons-welcome-page transition">Play SinglePlayer</button>
       </router-link>
+      <router-link to="/lobbySelect">
+        <button class="multiplayer-button buttons-welcome-page transition">Play Multiplayer</button>
+      </router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -60,9 +65,15 @@ export default {
   border: none;
 }
 
-.play-button {
-  color: white;
-  background-color: #60BFB2;
+.welcome-page-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+.buttons-welcome-page {
   font-size: 30px;
   font-weight: bold;
   border: none;
@@ -73,8 +84,23 @@ export default {
   text-decoration: none;
 }
 
-.play-button:hover {
+.singleplayer-button {
+  color: white;
+  background-color: #60BFB2;
+}
+
+.singleplayer-button:hover {
   color: #60BFB2;
+  background-color: white;
+}
+
+.multiplayer-button {
+  color: white;
+  background-color: #FFB54A;
+}
+
+.multiplayer-button:hover {
+  color: #FFB54A;
   background-color: white;
 }
 </style>
