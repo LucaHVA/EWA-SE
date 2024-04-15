@@ -46,9 +46,7 @@ export default {
       username: '',
       email: '',
       password: '',
-      alert: false,
-      alertMessage: '',
-      alertType: '',
+      alert: false
     };
   },
 
