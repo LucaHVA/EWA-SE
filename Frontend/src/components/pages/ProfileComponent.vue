@@ -21,6 +21,9 @@
 
         <label for="password">Change Password</label>
         <input v-model="password" type="password" id="password" name="password" placeholder="Password">
+        <div class="alertMessage" role="alert" v-if="alert">
+          Your password should be between 8-16 characters.
+        </div>
       </form>
     </div>
 
@@ -32,7 +35,7 @@
 </template>
 
 <script>
-import defaultImage from '@/assets/images/defaultpfp.png'
+import defaultImage from '@/assets/images/defaultpfp.png';
 export default {
   name: "ProfileComponent",
   inject:['usersService'],
@@ -43,6 +46,9 @@ export default {
       username: '',
       email: '',
       password: '',
+      alert: false,
+      alertMessage: '',
+      alertType: '',
     };
   },
 
@@ -52,12 +58,7 @@ export default {
 
   methods: {
     cancel() {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      console.log(userInfo.id)
-      this.username = userInfo.username;
-      this.email = userInfo.email;
-      this.password = userInfo.password;
-      this.imageUrl = userInfo.profilePicture;
+      this.fetchUserInfo();
     },
     fetchUserInfo() {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -88,6 +89,12 @@ export default {
       this.$refs.fileInput.click();
     },
     async save() {
+      if (this.password.length < 8 || this.password.length > 16) {
+        this.alert = true;
+        return;
+      } else {
+        this.alert = false;
+      }
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const userId = userInfo.id;
       const userUpdate = {
@@ -97,10 +104,20 @@ export default {
         password: this.password,
         profilePicture: this.imageUrl
       };
-      await this.usersService.save(userUpdate);
-      await this.usersService.asyncFindAll();
-      localStorage.setItem('userInfo', JSON.stringify(userUpdate));
-      alert('Profile saved successfully!');
+
+      try {
+        const response = await this.usersService.save(userUpdate);
+        if (!response) {
+          alert('Failed to save profile.');
+          throw new Error('Failed to save profile.');
+        }
+        await this.usersService.asyncFindAll();
+        localStorage.setItem('userInfo', JSON.stringify(userUpdate));
+        alert('Profile saved successfully!');
+      } catch (e) {
+        console.error('Error during save:', e);
+        alert('Failed to save profile. Please try again.');
+      }
     },
   }
 }
@@ -190,5 +207,10 @@ form input::placeholder {
 
 input {
   font-size: 1.2rem;
+}
+
+.alertMessage{
+  color: maroon;
+  text-align: center;
 }
 </style>
