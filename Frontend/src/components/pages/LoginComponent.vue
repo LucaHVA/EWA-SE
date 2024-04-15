@@ -43,7 +43,10 @@ data(){
         if (response !== null) {
           // Login successful
           console.log('Logged in successfully:', response);
-          this.$router.push({name: 'home'})
+          localStorage.setItem('userInfo', JSON.stringify(response));
+          this.$router.push({name: 'home'}).then(() => {
+            window.location.reload();
+          });
         } else {
           // Login failed
           console.error('Login failed: Invalid username or password.');

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "\"user\"")
-public class User implements Identifiable{
+public class User implements Identifiable<Long>{
 
     @Id
     @SequenceGenerator(initialValue = 30000, name = "UserGenerator")
@@ -13,6 +13,9 @@ public class User implements Identifiable{
     private String username;
     private String email;
     private String password;
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String profilePicture;
 
     public User() {
     }
@@ -58,4 +61,11 @@ public class User implements Identifiable{
         this.password = password;
     }
 
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
 }

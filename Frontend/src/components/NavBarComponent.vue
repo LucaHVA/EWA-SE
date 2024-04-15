@@ -20,10 +20,16 @@
         <li>
           <!-- TODO: login and sign-up (not logged in) AND logout and profile (logged in)-->
           <ul class="user-logging">
-            <li class="nav-item">
+            <li class="nav-item" v-if="isLoggedIn">
+              <router-link to="/profilePage" class="nav-link" active-class="active">Profile</router-link>
+            </li>
+            <li class="nav-item" v-else>
               <router-link to="/login" class="nav-link" active-class="active">Log in</router-link>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" v-if="isLoggedIn">
+              <router-link to="/home" @click.prevent="logout" class="nav-link" active-class="active">Logout</router-link>
+            </li>
+            <li class="nav-item" v-else>
               <router-link to="/register" class="nav-link" active-class="active">Register</router-link>
             </li>
           </ul>
@@ -35,7 +41,20 @@
 
 <script>
 export default {
-  name: "NavbarComponent"
+  name: "NavbarComponent",
+  computed: {
+    isLoggedIn() {
+      // Check if user information exists in local storage
+      return localStorage.getItem('userInfo') !== null;
+    }
+  },
+  methods: {
+    logout() {
+      // Clear user info from local storage
+      localStorage.removeItem('userInfo');
+      window.location.reload();
+    }
+  }
 }
 </script>
 
