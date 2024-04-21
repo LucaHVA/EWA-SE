@@ -18,6 +18,7 @@ import NavBarComponent from "@/components/NavBarComponent";
 import {UsersAdaptor} from "@/services/UsersAdaptor";
 import CONFIG from "@/app-config";
 import HeaderComponent from "@/components/HeaderComponent";
+import {GameService} from "@/services/GameService";
 
 export default {
   name: "AppComponent",
@@ -33,7 +34,8 @@ export default {
   },
   provide(){
     return{
-      usersService: new UsersAdaptor(CONFIG.BACKEND_URL+ '/users')
+      usersService: new UsersAdaptor(CONFIG.BACKEND_URL+ '/users'),
+      gameService: new GameService(CONFIG.BACKEND_URL+'/game')
     }
   },
   methods: {

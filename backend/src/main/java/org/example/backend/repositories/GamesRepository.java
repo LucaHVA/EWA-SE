@@ -47,7 +47,7 @@ public class GamesRepository extends AbstractEntityRepositoryJpa<Game, String> i
     @Override
     public Game update(Game oldEntity, Game newEntity) {
         //todo update game
-        return null;
+        return entityManager.merge(newEntity);
     }
 
     @Override

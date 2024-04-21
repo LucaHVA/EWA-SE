@@ -25,7 +25,7 @@
       </div>
       <div class="buttons-container-lobby-select-page">
         <router-link to="/gameSettings">
-          <button class="create-game-button transition">Create Game</button>
+          <button class="create-game-button transition" @click="createGame">Create Game</button>
         </router-link>
       </div>
     </div>
@@ -42,6 +42,7 @@ import popUpLobbySelectComponent from "@/components/pages/popUpLobbySelectCompon
 export default {
   name: "LobbySelectComponent",
   components: {popUpLobbySelectComponent},
+  inject:['gameService'],
 
   data() {
     return {
@@ -80,6 +81,10 @@ export default {
     selectGame(index) {
       this.selectedGameIndex = index;
       this.showModal = true;
+    },
+   async createGame(){
+   const game=await  this.gameService.createGame()
+      console.log(game)
     }
   }
 }

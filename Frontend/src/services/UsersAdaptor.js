@@ -76,10 +76,10 @@ export class UsersAdaptor{
         }
     }
 
- async login(username, password){
+    async login(username, password){
         try {
             console.log('Sending login request...')
-           const url=`${this.resourcesUrl}/login`;
+            const url=`${this.resourcesUrl}/login`;
             const options={
                 method:'POST',
                 headers:{
@@ -100,5 +100,5 @@ export class UsersAdaptor{
             console.error('Error during login:', error);
             return null;
         }
- }
+    }
 }
