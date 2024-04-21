@@ -11,6 +11,19 @@ class Game {
         this.pointsToWin = pointsToWin;
     }
 
+    static copyConstructor(game){
+        if(game == null) return null;
+
+        const copy = new Game(
+            game.id,
+            game.numberOfPlayers,
+            game.turnDuration,
+            game.pointsToWin
+        );
+
+        return copy;
+    }
+
     static createGame(id, numberOfPlayers, turnDuration, pointsToWin) {
         return new Game(id, numberOfPlayers, turnDuration, pointsToWin);
     }

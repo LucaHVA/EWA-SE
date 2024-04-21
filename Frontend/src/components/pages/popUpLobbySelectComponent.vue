@@ -7,10 +7,14 @@
             <slot name="header">Confirm Joining Game</slot>
           </div>
           <div class="modal-body">
-            <p class="modal-body-header">Current game:</p>
             <ul class="game-settings-modal">
-              <li>Game name: {{ selectedGame.name }}</li>
-              <li>Lobby size: {{ selectedGame.players }} / {{ selectedGame.maxPlayers }}</li>
+              <li>
+                Game id: <span @click="copyText" title="click to copy id" id="lobbyGameId">{{ selectedGame.id }}</span>
+              </li>
+<!--              TODO get amount of players in the lobby-->
+              <li>Lobby size: {{ 1 }} / {{ selectedGame.numberOfPlayers }}</li>
+              <li>Turn duration: {{selectedGame.turnDuration}}</li>
+              <li>Points to win: {{selectedGame.pointsToWin}}</li>
             </ul>
           </div>
           <div class="modal-footer">
@@ -34,10 +38,29 @@ export default {
     show: Boolean,
     selectedGame: Object,
   },
+  methods: {
+    copyText(){
+      // Copy id to clipboard
+      let copyText = document.getElementById("lobbyGameId").textContent;
+      navigator.clipboard.writeText(copyText)
+    }
+  }
 };
 </script>
 
 <style scoped>
+/* Copy text */
+#lobbyGameId {
+  background-color: rgba(145, 142, 142, 0.5);
+  border-radius: 2px;
+  padding: 0 6px;
+}
+
+#lobbyGameId:hover{
+  background-color: rgba(206, 198, 198, 0.5);
+  cursor: pointer;
+}
+
 /**Transitions**/
 .transition {
   transition: all 0.4s ease;

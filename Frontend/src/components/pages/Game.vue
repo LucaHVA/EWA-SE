@@ -427,7 +427,7 @@ export default {
     };
   },
 created() {
-    this.game = GameService.getGame(this.gameId);
+    this.game = GameService.asyncGetById(this.gameId);
 },
   mounted() {
     setTimeout(() => {

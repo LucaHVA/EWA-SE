@@ -21,13 +21,13 @@ export class GameService {
 
     // Save a game instance with a unique gameId
     saveGame(gameId, game) {
-        // this.games[gameId] = game;
             this.games.set(gameId, game);
     }
 
     // Get a game instance by its gameId
-    getGame(gameId) {
-        return this.games.get(gameId);
+    async asyncGetById(gameId) {
+        const game = await this.fetchJson(`${this.resourcesUrl}/${gameId}`);
+        return game;
     }
 
     // Get all games

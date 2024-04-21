@@ -4,20 +4,21 @@
       <div>
         <h2 class="header-title">Find a game lobby</h2>
         <div class="search-bar-lobby-select-page">
-          <input type="text" v-model="searchQuery" placeholder="Search Available games...">
+          <input type="text" v-model="searchQuery" placeholder="Search available games...">
         </div>
         <h2 class="header-title">Game/Player</h2>
       </div>
       <div :class="{'scrollable': filteredGames.length > 4}">
         <table>
           <tbody>
-          <tr v-for="(game, index) in filteredGames" :key="index" class="player-pill transition"
-              @click="selectGame(index)">
+          <tr v-for="(game) in filteredGames" :key="game" class="player-pill transition"
+              @click="selectGame(game)">
             <td>
-              <div>{{ game.name }}</div>
+              <div>{{ game.id }}</div>
             </td>
             <td>
-              <div>Players {{ game.players }}/{{ game.maxPlayers }}</div>
+<!--          TODO get amount of players in the lobby-->
+              <div>Players {{ 1 }}/{{ game.numberOfPlayers }}</div>
             </td>
           </tr>
           </tbody>
@@ -47,39 +48,25 @@ export default {
   data() {
     return {
       searchQuery: '',
-      games: [
-        {name: "random Game", players: 1, maxPlayers: 4},
-        {name: "Galactic Conquest", players: 2, maxPlayers: 4},
-        {name: "Pirate's Plunder", players: 4, maxPlayers: 4},
-        {name: "Jurassic Journey", players: 1, maxPlayers: 4},
-        {name: "Fantasy Frenzy", players: 2, maxPlayers: 4},
-        {name: "Cybernetic Showdown", players: 4, maxPlayers: 4},
-        {name: "The noobs", players: 3, maxPlayers: 4},
-        {name: "random Game", players: 1, maxPlayers: 4},
-        {name: "Galactic Conquest", players: 2, maxPlayers: 4},
-        {name: "Pirate's Plunder", players: 4, maxPlayers: 4},
-        {name: "Jurassic Journey", players: 1, maxPlayers: 4},
-        {name: "Fantasy Frenzy", players: 2, maxPlayers: 4},
-        {name: "Cybernetic Showdown", players: 4, maxPlayers: 4},
-        {name: "The noobs", players: 3, maxPlayers: 4},
-      ],
-      selectedGameIndex: null,
+      games: [],
+      selectedGame: null,
       showModal: false,
     }
   },
 
+  async created() {
+    this.games = await this.gameService.asyncFindAll()
+  },
+
   computed: {
     filteredGames() {
-      return this.games.filter(game => game.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+      return this.games.filter(game => game.id.includes(this.searchQuery.toUpperCase()));
     },
-    selectedGame() {
-      return this.selectedGameIndex !== null ? this.games[this.selectedGameIndex] : null;
-    }
   },
 
   methods: {
-    selectGame(index) {
-      this.selectedGameIndex = index;
+    selectGame(game) {
+      this.selectedGame = game;
       this.showModal = true;
     },
    async createGame(){
