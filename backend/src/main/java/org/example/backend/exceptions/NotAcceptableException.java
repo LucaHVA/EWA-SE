@@ -3,10 +3,9 @@ package org.example.backend.exceptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.NOT_FOUND)
-
-public class ResourceNotFoundException extends RuntimeException{
-    public ResourceNotFoundException(String message) {
+@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+public class NotAcceptableException extends RuntimeException {
+    public NotAcceptableException(String message) {
         super(message);
     }
 }
