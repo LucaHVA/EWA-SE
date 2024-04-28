@@ -20,9 +20,9 @@ export class GameService {
     }
 
     // Save a game instance with a unique gameId
-    saveGame(gameId, game) {
-            this.games.set(gameId, game);
-    }
+    // saveGame(game) {
+    //         this.games.set(game);
+    // }
 
     // Get a game instance by its gameId
     async asyncGetById(gameId) {
@@ -42,7 +42,11 @@ export class GameService {
         }
     }
 
-    async createGame(game, queryParams) {
+    generateNewGame(numberOfPlayers, turnDuration, pointsToWin) {
+        return Game.createGame(this.generateUniqueGameId(), numberOfPlayers, turnDuration, pointsToWin);
+    }
+
+    async saveGame(game, queryParams) {
 
         if (!game) {
             game = {

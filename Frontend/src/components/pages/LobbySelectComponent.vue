@@ -26,7 +26,7 @@
       </div>
       <div class="buttons-container-lobby-select-page">
         <router-link to="/gameSettings">
-          <button class="create-game-button transition" @click="createGame">Create Game</button>
+          <button class="create-game-button transition">Create Game</button>
         </router-link>
       </div>
     </div>
@@ -69,10 +69,6 @@ export default {
       this.selectedGame = game;
       this.showModal = true;
     },
-   async createGame(){
-   const game=await  this.gameService.createGame()
-      console.log(game)
-    }
   }
 }
 </script>

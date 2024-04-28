@@ -52,10 +52,10 @@ export default {
       }
 
       // Create a game
-      this.game = GameService.generateGame(this.numberOfPlayers, this.turnDuration, this.pointsToWin);
+      this.game = GameService.generateNewGame(this.numberOfPlayers, this.turnDuration, this.pointsToWin);
 
       // Save the game instance to a service
-      GameService.saveGame(this.game.id, this.game);
+      GameService.saveGame(this.game);
 
       // Go to game page
       this.$router.replace({ name: 'game', params: { id: this.game.id } });
