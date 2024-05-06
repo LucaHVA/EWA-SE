@@ -2,7 +2,6 @@ package org.example.backend.controllers;
 
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.Game;
-import org.example.backend.models.User;
 import org.example.backend.repositories.GamesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
