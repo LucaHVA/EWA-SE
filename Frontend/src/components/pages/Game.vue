@@ -532,6 +532,21 @@ created() {
           return;
         }
 
+        // Check if there are settlements adjacent to the road
+        const adjacentSettlements = this.getAdjacentSettlements(index);
+
+        // Log the adjacent settlement IDs
+        console.log(`Adjacent Settlements for index ${index}:`, adjacentSettlements);
+
+        // Log the connected settlements
+        this.logConnectedSettlements(index);
+
+        // If there are adjacent settlements, check if any of them belong to another player
+        if (adjacentSettlements.some(settlement => settlement.owner !== currentPlayer)) {
+          this.displayError("You cannot build here. Settlements must have at least two roads in between.");
+          return;
+        }
+
         // Deduct the resources from the player's inventory on non-first turn
         if (!isFirstTurn) {
           currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
@@ -550,6 +565,45 @@ created() {
         }
       }
     },
+
+    getAdjacentSettlements(index) {
+      const adjacentIndices = [];
+      const roadElements = document.querySelectorAll(`.road[target~="s${index}"]`);
+
+      roadElements.forEach(roadElement => {
+        const classNames = roadElement.classList;
+        classNames.forEach(className => {
+          if (className.startsWith('r')) {
+            const neighborIndex = parseInt(className.substring(1)); // Extract the numeric part of the class name
+            const neighborSettlementIndex = roadElement.classList.contains('l') ? neighborIndex + 1 : neighborIndex - 1;
+            adjacentIndices.push(neighborSettlementIndex);
+          }
+        });
+      });
+
+      return adjacentIndices;
+    },
+
+    logConnectedSettlements(index) {
+      const connectedSettlements = [];
+      const roadElements = document.querySelectorAll(`.road[class*="r${index}"]`);
+
+      roadElements.forEach(roadElement => {
+        // Extract the settlement IDs from the class attribute
+        const settlements = roadElement.className.match(/r\d+/g);
+        // Remove the current settlement ID from the list
+        const connected = settlements.filter(settlement => settlement !== `r${index}`);
+        // Remove the 'r' prefix from each settlement ID
+        const connectedWithoutPrefix = connected.map(settlement => settlement.substring(1));
+        // Add the connected settlements to the list
+        connectedSettlements.push(...connectedWithoutPrefix);
+      });
+
+      console.log(`Settlements connected to settlement ${index}:`);
+      console.log(connectedSettlements.join('\n'));
+    },
+
+
 
     buildRoad(fromIndex, toIndex) {
       // Check if it's the first turn
@@ -590,24 +644,66 @@ created() {
 
         // Check if the road is adjacent to a settlement
         const adjacentToSettlement = this.isAdjacentToSettlement(fromIndex, toIndex);
+        const adjacentToOwnRoad = this.isAdjacentToOwnRoad(fromIndex, toIndex);
 
-        if (!adjacentToSettlement && !isFirstTurn) {
-          // Display an error message if the road is not adjacent to a settlement on non-first turn
-          this.displayError("Road must be adjacent to your own settlement.");
+        if (!adjacentToSettlement && !adjacentToOwnRoad && !isFirstTurn) {
+          // Display a warning message if the road is not adjacent to the player's settlement or road
+          this.displayWarning("Road must be adjacent to your own settlement or road.");
           return;
         }
 
-        // Add the road to the list of roads
-        this.roads.push({ from: fromIndex, to: toIndex, owner: this.currentPlayerIndex });
+        // Build the road only if it's adjacent to the player's settlement or road
+        if (adjacentToSettlement || adjacentToOwnRoad) {
+          // Add the road to the list of roads
+          this.roads.push({ from: fromIndex, to: toIndex, owner: this.currentPlayerIndex });
 
-        // Add a CSS class to the road position
-        const roadElement = document.querySelector(`.road.r${fromIndex}.r${toIndex}`);
-        if (roadElement) {
-          roadElement.classList.add(`build-${this.currentPlayerIndex}`);
+          // Add a CSS class to the road position
+          const roadElement = document.querySelector(`.road.r${fromIndex}.r${toIndex}`);
+          if (roadElement) {
+            roadElement.classList.add(`build-${this.currentPlayerIndex}`);
+          }
         }
       }
     },
 
+    isAdjacentToOwnRoad(fromIndex, toIndex) {
+      // Check if there is a road built adjacent to either of the specified indices by the current player
+      const roadsAdjacentToFrom = document.querySelectorAll(`.road.r${fromIndex}`);
+      const roadsAdjacentToTo = document.querySelectorAll(`.road.r${toIndex}`);
+
+      // Check if any of the adjacent roads belong to the current player
+      const adjacentRoads = Array.from(roadsAdjacentToFrom).concat(Array.from(roadsAdjacentToTo));
+
+      console.log("Adjacent roads:", adjacentRoads);
+
+      for (const road of adjacentRoads) {
+        const roadClasses = road.classList;
+        console.log("Road classes:", roadClasses);
+        for (const roadClass of roadClasses) {
+          if (roadClass.startsWith('build-') && roadClass.endsWith(this.currentPlayerIndex.toString())) {
+            console.log("Found adjacent road belonging to current player.");
+            return true;
+          }
+        }
+      }
+
+      // If no adjacent roads belong to the current player, return false
+      console.log("No adjacent road belonging to current player found.");
+      return false;
+    },
+
+    isAdjacentToSettlement(fromIndex, toIndex) {
+      // Check if there is a settlement built on either of the specified indices
+      const settlement1 = document.getElementById(`s${fromIndex}`);
+      const settlement2 = document.getElementById(`s${toIndex}`);
+
+      // Check if either settlement has the class indicating it has a settlement built on it
+      const hasSettlement1 = settlement1 ? settlement1.classList.contains('has-settlement-0') : false;
+      const hasSettlement2 = settlement2 ? settlement2.classList.contains('has-settlement-0') : false;
+
+      // Return true if either settlement has a settlement built on it
+      return hasSettlement1 || hasSettlement2;
+    },
 
 
 
@@ -793,19 +889,6 @@ created() {
 
 
 
-    isAdjacentToSettlement(fromIndex, toIndex) {
-      // Check if there is a settlement built on either of the specified indices
-      const settlement1 = document.getElementById(`s${fromIndex}`);
-      const settlement2 = document.getElementById(`s${toIndex}`);
-
-      // Check if either settlement has the class indicating it has a settlement built on it
-      const hasSettlement1 = settlement1 ? settlement1.classList.contains('has-settlement-0') : false;
-      const hasSettlement2 = settlement2 ? settlement2.classList.contains('has-settlement-0') : false;
-
-      // Return true if either settlement has a settlement built on it
-      return hasSettlement1 || hasSettlement2;
-    },
-
 
     initializePlayers() {
       // Dummy player data
@@ -823,15 +906,16 @@ created() {
       this.players.push(player3);
       this.players.push(player4);
 
-      // Start the countdown timer
+      // Start the countdown timer after initializing players
       this.startCountdown();
     },
+
     startCountdown() {
       // Clear any existing timer
       clearInterval(this.timerId);
 
       // Reset the timer
-      this.timeRemaining = this.game.turnDuration;
+      this.timeRemaining = 60; // Set the time remaining to 60 seconds
 
       // Start a new timer
       this.timerId = setInterval(() => {
@@ -842,6 +926,7 @@ created() {
         }
       }, 1000);
     },
+
     timeUp() {
       clearInterval(this.timerId);
       this.rollDice();
