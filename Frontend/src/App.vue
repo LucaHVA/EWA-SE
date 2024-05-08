@@ -16,7 +16,6 @@
 <script>
 import NavBarComponent from "@/components/NavBarComponent";
 import {UsersAdaptor} from "@/services/UsersAdaptor";
-import CONFIG from "@/app-config";
 import HeaderComponent from "@/components/HeaderComponent";
 import {GameService} from "@/services/GameService";
 
@@ -34,8 +33,8 @@ export default {
   },
   provide(){
     return{
-      usersService: new UsersAdaptor(CONFIG.BACKEND_URL+ '/users'),
-      gameService: new GameService(CONFIG.BACKEND_URL+'/game')
+      usersService: new UsersAdaptor(process.env.VUE_APP_API_URL + '/users'),
+      gameService: new GameService(process.env.VUE_APP_API_URL +'/game')
     }
   },
   methods: {
