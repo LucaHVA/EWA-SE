@@ -7,8 +7,22 @@ import java.security.Key;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+
+
+
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+
+import java.security.Key;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 public class JWToken {
 
+    private String callName;
+    private Long userId;
+    private String role;
     private static final String JWT_ISSUER_CLAIM = "iss";
     private static final String JWT_CALLNAME_CLAIM = "sub";
     private static final String JWT_USERID_CLAIM = "id";
@@ -22,7 +36,7 @@ public class JWToken {
 
 
     public String encode(String issuer, String passphrase, int expiration) {
-        Key key = getKey(passphrase);
+        Key key = getKey();
 
         return Jwts.builder()
                 .claim(JWT_CALLNAME_CLAIM, this.callName)
@@ -35,15 +49,14 @@ public class JWToken {
                 .compact();
     }
 
-    private static Key getKey(String passphrase) {
-        byte[] hmacKey = passphrase.getBytes(StandardCharsets.UTF_8);
-        return new SecretKeySpec(hmacKey, SignatureAlgorithm.HS512.getJcaName());
+    private static Key getKey() {
+      return Keys.secretKeyFor(SignatureAlgorithm.HS512);
     }
 
     public static JWToken decode(String token, String issuer, String passphrase)
             throws ExpiredJwtException, MalformedJwtException {
         // Validate the token string and extract the claims
-        Key key = getKey(passphrase);
+        Key key = getKey();
         Jws<Claims> jws = Jwts.parserBuilder().setSigningKey(key).build()
                 .parseClaimsJws(token);
         Claims claims = jws.getBody();
@@ -62,9 +75,7 @@ public class JWToken {
 
     public static final String JWT_ATTRIBUTE_NAME = "JWTokenInfo";
 
-    private String callName = null;
-    private Long userId = null;
-    private String role = null;
+
 
 
     public String getCallName() {

@@ -25,9 +25,7 @@
         </table>
       </div>
       <div class="buttons-container-lobby-select-page">
-        <router-link to="/gameSettings">
-          <button class="create-game-button transition">Create Game</button>
-        </router-link>
+          <button class="create-game-button transition" @click="createGame" >Create Game</button>
       </div>
     </div>
   </div>
@@ -40,9 +38,10 @@
 <script>
 import popUpLobbySelectComponent from "@/components/pages/popUpLobbySelectComponent.vue";
 
+
 export default {
   name: "LobbySelectComponent",
-  components: {popUpLobbySelectComponent},
+  components: { popUpLobbySelectComponent},
   inject:['gameService'],
 
   data() {
@@ -58,6 +57,9 @@ export default {
     this.games = await this.gameService.asyncFindAll()
   },
 
+
+
+
   computed: {
     filteredGames() {
       return this.games.filter(game => game.id.includes(this.searchQuery.toUpperCase()));
@@ -68,6 +70,12 @@ export default {
     selectGame(game) {
       this.selectedGame = game;
       this.showModal = true;
+    },
+    async createGame(){
+      const game=await  this.gameService.saveGame()
+      console.log(game)
+      // this.$emit('game-created',game)
+      this.$router.replace({ name: 'gameSettings', params: { id: game.id } });
     },
   }
 }

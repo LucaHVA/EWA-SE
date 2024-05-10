@@ -26,18 +26,18 @@
       </div>
       <div>
         <h3>Number of Players</h3>
-        <span>{{ numberOfPlayers }}</span>
-        <input type="range" min="2" max="4" v-model.number="numberOfPlayers" class="transition center-column-slider">
+        <span>{{ this.currentGame.numberOfPlayers }}</span>
+        <input type="range" min="2" max="4" v-model.number="currentGame.numberOfPlayers" class="transition center-column-slider">
       </div>
       <div>
         <h3>Turn Duration (In seconds)</h3>
-        <span>{{ turnDuration }}</span>
-        <input type="range" min="30" max="90" v-model.number="turnDuration" class="transition center-column-slider">
+        <span>{{ this.currentGame.turnDuration}}</span>
+        <input type="range" min="30" max="90" v-model.number="currentGame.turnDuration" class="transition center-column-slider">
       </div>
       <div>
         <h3>Points to win</h3>
-        <span>{{ pointsToWin }}</span>
-        <input type="range" min="8" max="10" v-model.number="pointsToWin" class="transition center-column-slider">
+        <span>{{ this.currentGame.pointsToWin }}</span>
+        <input type="range" min="8" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
       </div>
       <div class="start-game-div">
         <button class="start-game-button transition" @click="showModal = true">Start Game</button>
@@ -46,34 +46,53 @@
     <div class="right-column-gamesettings-page"></div>
     <popUpGameSettingsComponent :show="showModal"
                                 @close="showModal = false"
-                                :numberOfPlayers="numberOfPlayers"
-                                :turnDuration="turnDuration"
-                                :pointsToWin="pointsToWin"
                                 :botCount="botCount"
-                                :totalPlayers="totalPlayers">
+                                :totalPlayers="totalPlayers"
+
+                                :gameSettings="currentGame"
+                                :numberOfPlayers="currentGame.numberOfPlayers"
+                                :turnDuration="currentGame.turnDuration"
+                                :pointsToWin="currentGame.pointsToWin">
     </popUpGameSettingsComponent>
+
+
   </div>
 </template>
 
 <script>
 import popUpGameSettingsComponent from "@/components/pages/popUpGameSettingsComponent.vue";
 
+
 export default {
   name: "GameSettingsComponent",
   components: {
     popUpGameSettingsComponent,
   },
+  inject:['gameService'],
+  props:{
+    selectedGame: Object,
+  },
   data() {
     return {
-      players: [
-        {name: "Susano", host: true},
-      ],
+      gameId:null,
+
+      players:[],
       numberOfPlayers: 4,
       turnDuration: 60,
       pointsToWin: 8,
       botCount: 0,
       showModal: false,
+      currentGame:Object
     };
+  },
+ async created() {
+
+   this.fetchUserInfo();
+
+   this.gameId=this.$route.params.id;
+
+  this.currentGame= await this.fetchGameById(this.gameId);
+  console.log(this.currentGame)
   },
   computed: {
     totalPlayers() {
@@ -109,7 +128,26 @@ export default {
           }
         });
       }
-    }
+    },
+
+  async  fetchUserInfo() {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      if (userInfo) {
+        this.players.push({ name: userInfo.username });
+      }
+    },
+
+    async fetchGameById(gameId) {
+      try {
+        this.game = await this.gameService.asyncGetById(gameId);
+        console.log("Game fetched by ID:", this.game);
+        return this.game
+      } catch (error) {
+        console.error("Error fetching game by ID:", error);
+      }
+    },
+
+
   }
 }
 </script>

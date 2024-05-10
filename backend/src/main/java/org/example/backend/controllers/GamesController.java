@@ -49,4 +49,12 @@ public class GamesController {
         }
     }
 
+    @PutMapping("/{id}")
+    public Game updateGame(@PathVariable String id, @RequestBody Game game) {
+        if (id != game.getId()) {
+            throw new ResourceNotFoundException("Game-id = " + game.getId() + " does not match path parameter = " + id);
+        }
+        return gamesRepository.save(game);
+    }
+
 }

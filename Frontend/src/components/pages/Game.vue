@@ -347,10 +347,12 @@
 
 <script>
 import Player from "@/models/player";
-import GameService from "@/services/GameService";
+
 
 export default {
   name: "gameComponent",
+
+
   data() {
     return {
       canPlayKnightCard: false,
@@ -426,8 +428,9 @@ export default {
 
     };
   },
-created() {
-    this.game = GameService.asyncGetById(this.gameId);
+  inject:["gameService"],
+async created() {
+    this.game = await this.gameService.asyncGetById(this.gameId);
 },
   mounted() {
     setTimeout(() => {
