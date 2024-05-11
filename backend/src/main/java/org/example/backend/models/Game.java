@@ -2,18 +2,22 @@ package org.example.backend.models;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
-@Table(name = "GAME")
+@Table(name = "\"Game\"")
 public class Game implements Identifiable<String>{
 
     @Id
-    private String id;
+    private String gameId;
     private int numberOfPlayers;
     private int turnDuration;
     private int pointsToWin;
+    @OneToMany(mappedBy = "game")
+    private List<Player> players;
 
-    public Game(String id, int numberOfPlayers, int turnDuration, int pointsToWin) {
-        this.id = id;
+    public Game(String gameId, int numberOfPlayers, int turnDuration, int pointsToWin) {
+        this.gameId = gameId;
         this.numberOfPlayers = numberOfPlayers;
         this.turnDuration = turnDuration;
         this.pointsToWin = pointsToWin;
@@ -23,14 +27,12 @@ public class Game implements Identifiable<String>{
 
     }
 
-    @Override
     public String getId() {
-        return id;
+        return gameId;
     }
 
-    @Override
     public void setId(String id) {
-        this.id = id;
+        this.gameId = id;
     }
 
     public int getNumberOfPlayers() {

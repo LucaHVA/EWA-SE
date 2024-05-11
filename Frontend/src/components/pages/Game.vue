@@ -521,9 +521,10 @@ export default {
 
     };
   },
-  created() {
-    this.game = GameService.asyncGetById(this.gameId);
-  },
+  inject:["gameService"],
+async created() {
+    this.game = await this.gameService.asyncGetById(this.gameId);
+},
   mounted() {
     setTimeout(() => {
       this.initializeBoard();
@@ -591,7 +592,7 @@ export default {
     },
 
     confirmNavigation() {
-      if (confirm('Are you sure you want to go to the previous page?')) {
+      if (confirm('Are you sure you want to go to the previous page?')){
         this.$router.push(this.previousPage);
       }
     },
@@ -599,27 +600,27 @@ export default {
       for (let i = 0; i < 3; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row1.push({resource, number});
+        this.row1.push({ resource, number });
       }
       for (let i = 0; i < 4; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row2.push({resource, number});
+        this.row2.push({ resource, number });
       }
       for (let i = 0; i < 5; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row3.push({resource, number});
+        this.row3.push({ resource, number });
       }
       for (let i = 0; i < 4; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row4.push({resource, number});
+        this.row4.push({ resource, number });
       }
       for (let i = 0; i < 3; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row5.push({resource, number});
+        this.row5.push({ resource, number });
       }
       // Set the flag to indicate resources are initialized
       this.resourcesInitialized = true;
@@ -711,6 +712,24 @@ export default {
     },
 
     getAdjacentSettlements(index) {
+      const adjacentIndices = [];
+      const roadElements = document.querySelectorAll(`.road[target~="s${index}"]`);
+
+      roadElements.forEach(roadElement => {
+        const classNames = roadElement.classList;
+        classNames.forEach(className => {
+          if (className.startsWith('r')) {
+            const neighborIndex = parseInt(className.substring(1)); // Extract the numeric part of the class name
+            const neighborSettlementIndex = roadElement.classList.contains('l') ? neighborIndex + 1 : neighborIndex - 1;
+            adjacentIndices.push(neighborSettlementIndex);
+          }
+        });
+      });
+
+      return adjacentIndices;
+    },
+
+    logConnectedSettlements(index) {
       const connectedSettlements = [];
       const roadElements = document.querySelectorAll(`.road[class*="r${index}"]`);
 

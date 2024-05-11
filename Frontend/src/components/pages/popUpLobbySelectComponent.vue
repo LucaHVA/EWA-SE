@@ -20,9 +20,7 @@
           <div class="modal-footer">
             <slot name="footer">
               <button class="close-button-pop-up transition" @click="$emit('close')">Close</button>
-              <router-link to="/gameSettings">
-                <button class="start-game-button-pop-up transition">Join Game</button>
-              </router-link>
+                <button class="start-game-button-pop-up transition" @click="moveToLobby">Join Game</button>
             </slot>
           </div>
         </div>
@@ -43,6 +41,9 @@ export default {
       // Copy id to clipboard
       let copyText = document.getElementById("lobbyGameId").textContent;
       navigator.clipboard.writeText(copyText)
+    },
+    moveToLobby(){
+      this.$router.replace({ name: 'gameSettings', params: { id: this.selectedGame.id} });
     }
   }
 };

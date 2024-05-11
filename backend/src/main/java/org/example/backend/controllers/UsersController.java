@@ -1,11 +1,14 @@
 package org.example.backend.controllers;
 
 import jakarta.transaction.Transactional;
+import org.example.backend.APIConfig;
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.User;
 import org.example.backend.repositories.UserRepository;
+import org.example.backend.security.JWToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -13,6 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author Luca Rijkbost & Armando Labega
@@ -26,6 +30,8 @@ public class UsersController {
     @Qualifier("USERS.JPA")
     @Autowired
     private UserRepository usersRepository;
+    @Autowired
+    private APIConfig apiConfig;
 
     @GetMapping("/test")
     public List<User> getMockUsers(){
@@ -69,10 +75,18 @@ public class UsersController {
     public ResponseEntity<User> loginUser(@RequestBody User loginUser) {
         // Retrieve the user from the repository by username
         User user = usersRepository.findByUsername(loginUser.getUsername());
+        long randomId = new Random().nextLong();
 
         // Check if the user exists and if the password matches
         if (user != null && user.getPassword().equals(loginUser.getPassword())) {
-            return ResponseEntity.ok(user); // Return the user with a 200 OK status code if login is successful
+
+            JWToken jwToken= new JWToken(user.getUsername(), user.getId(), "user");
+
+            String tokenString = jwToken.encode(apiConfig.getIssuer(), apiConfig.getPassphrase(), apiConfig.getTokenDurationOfValidity());
+
+            return ResponseEntity.accepted().header(HttpHeaders.AUTHORIZATION,"Bearer " + tokenString)
+                    .body(user);// Return the user with a 200 OK status code if login is successful
+
         } else {
             throw new ResourceNotFoundException("Invalid username or password."); // Throw exception if login fails
         }

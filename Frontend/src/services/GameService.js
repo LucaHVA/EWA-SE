@@ -1,5 +1,6 @@
 import Game from "@/models/game";
 
+
 export class GameService {
     games = {};
     resourcesUrl;
@@ -42,10 +43,13 @@ export class GameService {
         }
     }
 
-    generateNewGame(numberOfPlayers, turnDuration, pointsToWin) {
-        return Game.createGame(this.generateUniqueGameId(), numberOfPlayers, turnDuration, pointsToWin);
-    }
+    // generateNewGame(numberOfPlayers, turnDuration, pointsToWin) {
+    //     return Game.createGame(this.generateUniqueGameId(), numberOfPlayers, turnDuration, pointsToWin);
+    // }
 
+
+
+// adds a game if there is no gameId found if there is one updates it with the new values
     async saveGame(game, queryParams) {
 
         if (!game) {
@@ -57,6 +61,8 @@ export class GameService {
             };
         }
         try {
+            if (game.id) {
+
             const url = `${this.resourcesUrl}${queryParams ? `?${queryParams}` : ''}`;
             const options = {
                 method: 'POST',
@@ -77,10 +83,24 @@ export class GameService {
                 console.error('Failed to save game.');
                 return null;
             }
+
+        }
+            const createdGame = Game.copyConstructor(game);
+            let res;
+            res = this.fetchJson(this.resourcesUrl + "/" + game.id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(createdGame)
+            })
+            return Game.copyConstructor(res);
         } catch (error) {
             console.error("Error saving game:", error);
             throw error; //throw the error to be handled by the caller
         }
+
+
     }
 
 
@@ -95,6 +115,40 @@ export class GameService {
 
         return uniqueId;
     }
+
+    // async updateGame(game) {
+    //     try {
+    //         if (!game.id) {
+    //             console.error("Cannot update game without an ID.");
+    //             return null;
+    //         }
+    //
+    //         const url = `${this.resourcesUrl}/${game.id}`;
+    //         const options = {
+    //             method: 'PUT',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body: JSON.stringify(game)
+    //         };
+    //
+    //         console.log('Updating game:', game);
+    //         const response = await this.fetchJson(url, options);
+    //
+    //         if (response) {
+    //             console.log('Game updated successfully:', response);
+    //             return response;
+    //         } else {
+    //             console.error('Failed to update game.');
+    //             return null;
+    //         }
+    //     } catch (error) {
+    //         console.error("Error updating game:", error);
+    //         throw error;
+    //     }
+    // }
+
+
 }
 
 // Export a singleton instance of the GameService

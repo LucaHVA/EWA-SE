@@ -2,7 +2,6 @@ package org.example.backend.controllers;
 
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.Game;
-import org.example.backend.models.User;
 import org.example.backend.repositories.GamesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +47,14 @@ public class GamesController {
         } else {
             throw new ResourceNotFoundException("Game with ID: " + id + " not found.");
         }
+    }
+
+    @PutMapping("/{id}")
+    public Game updateGame(@PathVariable String id, @RequestBody Game game) {
+        if (id != game.getId()) {
+            throw new ResourceNotFoundException("Game-id = " + game.getId() + " does not match path parameter = " + id);
+        }
+        return gamesRepository.save(game);
     }
 
 }

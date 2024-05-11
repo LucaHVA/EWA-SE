@@ -12,7 +12,7 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("http://localhost:*", getHostIPAddressPattern())
+                .allowedOriginPatterns("http://localhost:*", getHostIPAddressPattern(), "https://front-end-catan.onrender.com")
                 .allowedMethods("GET", "POST", "PUT", "DELETE");
     }
 

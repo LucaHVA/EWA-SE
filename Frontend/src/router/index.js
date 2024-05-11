@@ -47,7 +47,7 @@ const routes = [
     },
 
     {
-        path: '/gameSettings',
+        path: '/gameSettings/:id',
         name: 'gameSettings',
         component: gameSettingsComponent
     },

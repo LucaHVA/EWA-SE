@@ -2,6 +2,8 @@ package org.example.backend.models;
 
 import jakarta.persistence.*;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "\"user\"")
 public class User implements Identifiable<Long>{
@@ -9,19 +11,21 @@ public class User implements Identifiable<Long>{
     @Id
     @SequenceGenerator(initialValue = 30000, name = "UserGenerator")
     @GeneratedValue(generator = "UserGenerator")
-    private Long id;
+    private Long userId;
     private String username;
     private String email;
     private String password;
     @Lob
     @Column(columnDefinition = "TEXT")
     private String profilePicture;
+    @OneToMany(mappedBy = "user")
+    private Set<Player> players;
 
     public User() {
     }
 
-    public User(Long id,String username, String email, String password) {
-        this.id= id;
+    public User(Long userId, String username, String email, String password) {
+        this.userId = userId;
         this.username = username;
         this.email = email;
         this.password = password;
@@ -29,12 +33,12 @@ public class User implements Identifiable<Long>{
 
     @Override
     public Long getId() {
-        return id;
+        return userId;
     }
 
     @Override
-    public void setId(Long id) {
-        this.id = id;
+    public void setId(Long userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {

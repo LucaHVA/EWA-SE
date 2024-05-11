@@ -32,7 +32,8 @@
 </template>
 
 <script>
-import GameService from '@/services/GameService';
+
+import Game from "@/models/game";
 
 export default {
   name: "popUpGameSettingsComponent",
@@ -43,22 +44,26 @@ export default {
     pointsToWin: Number,
     botCount: Number,
     totalPlayers: Number,
+    gameSettings:Object
   },
+  inject:['gameService'],
   methods: {
-    initializeGame() {
+    async initializeGame() {
       //todo check if all game conditions are valid
       if (this.totalPlayers !== this.numberOfPlayers){
         return;
       }
 
       // Create a game
-      this.game = GameService.generateNewGame(this.numberOfPlayers, this.turnDuration, this.pointsToWin);
+      // this.game = GameService.generateNewGame(this.numberOfPlayers, this.turnDuration, this.pointsToWin);
 
       // Save the game instance to a service
-      GameService.saveGame(this.game);
+     const newGame=  new Game(this.gameSettings.id,this.numberOfPlayers,this.turnDuration,this.pointsToWin)
+      await this.gameService.saveGame(newGame)
+      console.log("check this,",newGame)
 
       // Go to game page
-      this.$router.replace({ name: 'game', params: { id: this.game.id } });
+      this.$router.replace({ name: 'game', params: { id: this.gameSettings.id } });
     },
   },
   computed: {
