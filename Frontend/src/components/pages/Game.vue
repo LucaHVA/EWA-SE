@@ -433,7 +433,7 @@
 
 <script>
 import Player from "@/models/player";
-import GameService from "@/services/GameService";
+
 
 export default {
   name: "gameComponent",
