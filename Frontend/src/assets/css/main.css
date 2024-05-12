@@ -1,3 +1,15 @@
+:root {
+    --black: #000000;
+    --white: #FFFFFF;
+    --red: #FC1212;
+    --creme: #FFE1CC;
+    --light-gray: #D3D3D3;
+    --yellow-orange: #FFB54A;
+    --coral: #FF7B4D;
+    --shade-of-tea: #60BFB2;
+    --green: #1FAB1C;
+}
+
 /* General */
 body {
     margin: 0;
@@ -13,11 +25,23 @@ ul {
     padding: 0;
 }
 
+/*Transition*/
+.transition {
+    transition: all 0.4s ease;
+}
+
+.transition:hover {
+    transition: all 0.4s ease;
+    top: 10%;
+    transform: translateY(-10%);
+    border: none;
+}
+
 /* Button */
-.pos-button  {
-    background-color: #60BFB2;
+.pos-button {
+    background-color: var(--shade-of-tea);
     border: solid #519f9b;
-    color: white;
+    color: var(--white);
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
@@ -30,7 +54,7 @@ ul {
     font-weight: 600;
 }
 
-.pos-button:disabled{
+.pos-button:disabled {
     background-color: #519f9b;
 }
 
@@ -47,7 +71,7 @@ form input {
     background-color: rgba(244, 240, 240, 1);
 }
 
-form input::placeholder{
+form input::placeholder {
     color: rgba(0, 0, 0, 30%);
 }
 
