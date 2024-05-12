@@ -5,7 +5,7 @@
       <p>Choose two resources:</p>
       <div class="resource-cards">
         <div v-for="resource in resourceCardTypes" :key="resource">
-          <img class="resource-cardmodal" :src="resourceCardImg[resource]" :alt="resource + ' card'">
+          <img :src="resourceCardImg[resource]" :alt="resource + ' card'">
           <div>
             <button @click="incrementResource(resource)">+</button>
             <span>{{ getSelectedCount(resource) }}</span>
@@ -22,7 +22,7 @@
       <p>Choose a resource to monopolize:</p>
       <div class="resource-cards">
         <div v-for="resource in resourceCardTypes" :key="resource" @click="selectResource(resource)">
-          <img class="resource-cardmodal" :src="resourceCardImg[resource]" :alt="resource + ' card'">
+          <img :src="resourceCardImg[resource]" :alt="resource + ' card'">
           <p>{{ selectedResources.includes(resource) ? '+' : 'Click to select' }}</p>
         </div>
       </div>
@@ -39,7 +39,7 @@
         <div
             v-for="resourceType in simplifiedInventory"
             :key="resourceType"
-            class="resource-cards"
+            class="resource-card"
             :class="{ 'selected': selectedResource === resourceType }"
             @click="selectTrade(resourceType)"
         >
@@ -51,7 +51,7 @@
         <div
             v-for="resourceType in resourceCardTypes"
             :key="resourceType"
-            class="resource-cards"
+            class="resource-card"
             @click="tradeResources(resourceType)"
         >
           <img :src="resourceCardImg[resourceType]" :alt="resourceType">
@@ -380,31 +380,31 @@
           <div v-if="!hasRolledDice">Turn: {{ turn }}</div>
           <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
         </div>
-<!--        <div class="player-cards-container">-->
-<!--          <div v-for="player in players" :key="player" class="player-card">-->
-<!--            <div>Player: {{ player.playerId }}</div>-->
-<!--            <div>Points: {{ player.pointAmount }}</div>-->
-<!--            <div>Longest road: {{ player.longestRoad }}</div>-->
-<!--            <div>Settlement amount: {{ player.settlementAmount }}</div>-->
-<!--            <div>Knight cards used: {{ player.knightsUsed }}</div>-->
-<!--          </div>-->
+        <div class="player-cards-container">
+          <div v-for="player in players" :key="player" class="player-card">
+            <div>Player: {{ player.playerId }}</div>
+            <div>Points: {{ player.pointAmount }}</div>
+            <div>Longest road: {{ player.longestRoad }}</div>
+            <div>Settlement amount: {{ player.settlementAmount }}</div>
+            <div>Knight cards used: {{ player.knightsUsed }}</div>
+          </div>
 
-<!--          <div class="player-cards-container">-->
-<!--            <div v-for="player in players" :key="player" class="player-card">-->
-<!--              <div>Player: {{ player.playerId }}</div>-->
-<!--              <div>Points: {{ player.pointAmount }}</div>-->
-<!--              <div>Longest road: {{ player.longestRoad }}</div>-->
-<!--              <div>Settlement amount: {{ player.settlementAmount }}</div>-->
-<!--              <div>Knight cards used: {{ player.knightsUsed }}</div>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
+          <div class="player-cards-container">
+            <div v-for="player in players" :key="player" class="player-card">
+              <div>Player: {{ player.playerId }}</div>
+              <div>Points: {{ player.pointAmount }}</div>
+              <div>Longest road: {{ player.longestRoad }}</div>
+              <div>Settlement amount: {{ player.settlementAmount }}</div>
+              <div>Knight cards used: {{ player.knightsUsed }}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
     <div class="player-inventory-container">
       <div class="player-inventory-resources">
-        <div v-for="resource in currentPlayerResourcesInventory"  :key="resource.id">
+        <div v-for="resource in currentPlayerResourcesInventory" :key="resource">
           <div class="inventory-resource-card"><img :src=this.resourceCardImg[resource] alt="resource card"></div>
         </div>
         <div class="game-buttons-container">
@@ -422,7 +422,6 @@
             Play Road_Building Card
           </button>
           <button class="pos-button" @click="openTradeModal">Trade Resources</button>
-          <button class="pos-button" @click="upgradeSettlementToCity">Upgrade Settlement to City</button>
 
         </div>
       </div>
@@ -434,7 +433,7 @@
 
 <script>
 import Player from "@/models/player";
-import GameService from "@/services/GameService";
+
 
 export default {
   name: "gameComponent",
@@ -517,15 +516,15 @@ export default {
         wood: require("../../assets/images/game/resources/wood_card_v1.png"),
         sheep: require("../../assets/images/game/resources/sheep_card_v1.png")
       },
-      developmentCards: ['Road_Building','year_of_plenty','monopoly','knight'],
+      developmentCards: ['Road_Building','year_of_plenty'],
       hasPlayedDevelopmentCard: false,
 
     };
   },
   inject:["gameService"],
-  created() {
-    this.game = GameService.asyncGetById(this.gameId);
-  },
+async created() {
+    this.game = await this.gameService.asyncGetById(this.gameId);
+},
   mounted() {
     setTimeout(() => {
       this.initializeBoard();
@@ -558,58 +557,6 @@ export default {
     },
   },
   methods: {
-
-
-    upgradeSettlementToCity() {
-      // Set a flag to indicate that the player is in the process of upgrading a settlement to a city
-      this.isUpgradingToCity = true;
-
-      // Check if the current player has enough resources to upgrade
-      const currentPlayer = this.players[this.currentPlayerIndex];
-      const hasEnoughResources = currentPlayer.resources.filter(resource => resource === 'wheat').length >= 2 &&
-          currentPlayer.resources.filter(resource => resource === 'ore').length >= 3;
-
-      // Check if the player has enough resources to upgrade
-      if (!hasEnoughResources) {
-        this.displayError("You don't have enough resources to upgrade to a city.");
-        return;
-      }
-
-      // Deduct the required resources from the player's inventory
-      currentPlayer.resources.splice(currentPlayer.resources.indexOf('ore'), 3);
-      currentPlayer.resources.splice(currentPlayer.resources.indexOf('wheat'), 2);
-
-      // Display a message to prompt the player to select a settlement to upgrade
-      this.displayError("Click on a settlement to upgrade it to a city.");
-
-      // Add an event listener to listen for clicks on settlements
-      const settlementElements = document.querySelectorAll('.settlement');
-      settlementElements.forEach(settlementElement => {
-        settlementElement.addEventListener('click', this.handleSettlementClickForUpgrade);
-      });
-    },
-
-    handleSettlementClickForUpgrade(event) {
-      // Remove the event listener from all settlements
-      const settlementElements = document.querySelectorAll('.settlement');
-      settlementElements.forEach(settlementElement => {
-        settlementElement.removeEventListener('click', this.handleSettlementClickForUpgrade);
-      });
-
-      // Get the clicked settlement element
-      const clickedSettlement = event.currentTarget;
-
-      // Add the 'city' class to the clicked settlement element
-      clickedSettlement.classList.add('city');
-
-      // Perform any other logic related to upgrading the settlement to a city
-
-      // Reset the flag to indicate that the upgrade process is complete
-      this.isUpgradingToCity = false;
-
-      // Display a message to indicate the successful upgrade
-      this.displayError("Settlement upgraded to a city successfully.");
-    },
 
     openTradeModal() {
       // Show the trading modal
@@ -645,7 +592,7 @@ export default {
     },
 
     confirmNavigation() {
-      if (confirm('Are you sure you want to go to the previous page?')) {
+      if (confirm('Are you sure you want to go to the previous page?')){
         this.$router.push(this.previousPage);
       }
     },
@@ -653,27 +600,27 @@ export default {
       for (let i = 0; i < 3; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row1.push({resource, number});
+        this.row1.push({ resource, number });
       }
       for (let i = 0; i < 4; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row2.push({resource, number});
+        this.row2.push({ resource, number });
       }
       for (let i = 0; i < 5; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row3.push({resource, number});
+        this.row3.push({ resource, number });
       }
       for (let i = 0; i < 4; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row4.push({resource, number});
+        this.row4.push({ resource, number });
       }
       for (let i = 0; i < 3; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row5.push({resource, number});
+        this.row5.push({ resource, number });
       }
       // Set the flag to indicate resources are initialized
       this.resourcesInitialized = true;
@@ -699,17 +646,31 @@ export default {
     build(index) {
       // Check if it's the first turn
       const isFirstTurn = this.turn === 1;
-      const isSecondTurn = this.turn === 2;
+
+      // Check if the player has already built on their first turn
+      const hasBuiltFirstTurn = this.players[this.currentPlayerIndex].hasBuiltFirstTurn || false;
+
+      // Check if the player has already built a settlement or road on their first turn
+      if (isFirstTurn && hasBuiltFirstTurn) {
+        this.displayError("You have already built on your first turn.");
+        return;
+      }
+
+      // Check if the player has already built a settlement or road on their first turn
+      if (isFirstTurn && !hasBuiltFirstTurn) {
+        // Set the flag to indicate that the player has built on their first turn
+        this.players[this.currentPlayerIndex].hasBuiltFirstTurn = true;
+      }
 
       // Check if the current player has the required resources (1 wood, 1 brick, 1 sheep, and 1 wheat) on non-first turn
-      if ((!isFirstTurn && !isSecondTurn) || (isFirstTurn && !this.players[this.currentPlayerIndex].hasBuiltFirstTurn) || (isSecondTurn && !this.players[this.currentPlayerIndex].hasBuiltSecondTurn)) {
+      if (!isFirstTurn || (isFirstTurn && !hasBuiltFirstTurn)) {
         const currentPlayer = this.players[this.currentPlayerIndex];
         const hasWood = currentPlayer.resources.includes('wood');
         const hasBrick = currentPlayer.resources.includes('brick');
         const hasSheep = currentPlayer.resources.includes('sheep');
         const hasWheat = currentPlayer.resources.includes('wheat');
 
-        if (!(isFirstTurn || isSecondTurn) && (!hasWood || !hasBrick || !hasSheep || !hasWheat)) {
+        if (!isFirstTurn && (!hasWood || !hasBrick || !hasSheep || !hasWheat)) {
           // Display an error message if the player doesn't have the required resources on non-first turn
           this.displayError("You don't have enough resources to build a settlement.");
           return;
@@ -727,12 +688,12 @@ export default {
         // Check if there are at least 2 roads between settlements
         const roadsBetweenSettlements = this.getRoadsBetweenSettlements(index);
         if (roadsBetweenSettlements < 2) {
-          this.displayError("There should be at least 2 roads between settlements.");
+          this.displayWarning("There should be at least 2 roads between settlements.");
           return;
         }
 
         // Deduct the resources from the player's inventory on non-first turn
-        if (!(isFirstTurn || isSecondTurn)) {
+        if (!isFirstTurn) {
           currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
           currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
           currentPlayer.resources.splice(currentPlayer.resources.indexOf('sheep'), 1);
@@ -747,20 +708,28 @@ export default {
         if (settlementElement) {
           settlementElement.classList.add(`has-settlement-${this.currentPlayerIndex}`);
         }
-
-        // Set the flag to indicate that the player has built on their first or second turn
-        if (isFirstTurn) {
-          currentPlayer.hasBuiltFirstTurn = true;
-        } else if (isSecondTurn) {
-          currentPlayer.hasBuiltSecondTurn = true;
-        }
-      } else {
-        this.displayError("You have already built on your turn.");
-        return;
       }
     },
 
     getAdjacentSettlements(index) {
+      const adjacentIndices = [];
+      const roadElements = document.querySelectorAll(`.road[target~="s${index}"]`);
+
+      roadElements.forEach(roadElement => {
+        const classNames = roadElement.classList;
+        classNames.forEach(className => {
+          if (className.startsWith('r')) {
+            const neighborIndex = parseInt(className.substring(1)); // Extract the numeric part of the class name
+            const neighborSettlementIndex = roadElement.classList.contains('l') ? neighborIndex + 1 : neighborIndex - 1;
+            adjacentIndices.push(neighborSettlementIndex);
+          }
+        });
+      });
+
+      return adjacentIndices;
+    },
+
+    logConnectedSettlements(index) {
       const connectedSettlements = [];
       const roadElements = document.querySelectorAll(`.road[class*="r${index}"]`);
 
@@ -801,7 +770,7 @@ export default {
 
     buildRoad(fromIndex, toIndex) {
       // Check if the player can play the Road Building card and has roads left to build with the card
-      if (this.canPlayRoad_BuildingCard && this.roadsLeftToBuild > 0) {
+      if (this.canPlayRoadBuildingCard && this.roadsLeftToBuild > 0) {
         // Check if the road is adjacent to a settlement or an owned road
         if (this.isAdjacentToSettlement(fromIndex, toIndex) || this.isAdjacentToOwnRoad(fromIndex, toIndex)) {
           // Build the road for free
@@ -810,19 +779,9 @@ export default {
           this.roadsLeftToBuild--;
 
           // Check if the player has placed all roads allowed by the card
-          if (this.roadsLeftToBuild < 1) {
+          if (this.roadsLeftToBuild === 0) {
             // Disable the ability to play the Road Building card after using all available roads
-            this.canPlayRoad_BuildingCard = false;
-          }
-
-          // Set the flag to indicate that the player has built on their first or second turn
-          const isFirstTurn = this.turn === 1;
-          const isSecondTurn = this.turn === 2;
-
-          if (isFirstTurn) {
-            this.players[this.currentPlayerIndex].hasBuiltFirstTurn2 = true;
-          } else if (isSecondTurn) {
-            this.players[this.currentPlayerIndex].hasBuiltSecondTurn2 = true;
+            this.canPlayRoadBuildingCard = false;
           }
         } else {
           // Display a warning message if the road is not adjacent to the player's settlement or road
@@ -830,38 +789,24 @@ export default {
         }
       } else {
         // Perform the regular road building logic if the player didn't use the Road Building card
+        // Check if it's the first turn
         const isFirstTurn = this.turn === 1;
-        const isSecondTurn = this.turn === 2;
 
+        // Check if the player has already built on their first turn
+        const hasBuiltFirstTurn2 = this.players[this.currentPlayerIndex].hasBuiltFirstTurn2 || false;
 
-        if (isFirstTurn) {
-          // Check if the player has already built on their first turn
-          const hasBuiltFirstTurn2 = this.players[this.currentPlayerIndex].hasBuiltFirstTurn2 || false;
-
-          if (hasBuiltFirstTurn2) {
-            this.displayError("You have already built on your first turn.");
-            return;
-          }
-        } else if (isSecondTurn) {
-          // Check if the player has already built on their second turn
-          const hasBuiltSecondTurn2 = this.players[this.currentPlayerIndex].hasBuiltSecondTurn2 || false;
-
-          if (hasBuiltSecondTurn2) {
-            this.displayError("You have already built on your second turn.");
-            return;
-          }
-        } else {
-          // Check if the player has enough resources (brick and wood) to build a road
-          const currentPlayer = this.players[this.currentPlayerIndex];
-          const hasBrick = currentPlayer.resources.includes('brick');
-          const hasWood = currentPlayer.resources.includes('wood');
-
-          if (!hasBrick || !hasWood) {
-            this.displayError("You don't have enough resources to build a road.");
-            return;
-          }
-
+        // Check if the player has already built a settlement or road on their first turn
+        if (isFirstTurn && hasBuiltFirstTurn2) {
+          this.displayError("You have already built on your first turn.");
+          return;
         }
+
+        // Check if the player has already built a settlement or road on their first turn
+        if (isFirstTurn && !hasBuiltFirstTurn2) {
+          // Set the flag to indicate that the player has built on their first turn
+          this.players[this.currentPlayerIndex].hasBuiltFirstTurn2 = true;
+        }
+
 
         // Build the road only if it's adjacent to the player's settlement or road
         if (this.isAdjacentToSettlement(fromIndex, toIndex) || this.isAdjacentToOwnRoad(fromIndex, toIndex)) {
@@ -873,25 +818,6 @@ export default {
           if (roadElement) {
             roadElement.classList.add(`build-${this.currentPlayerIndex}`);
           }
-
-
-
-
-          // Set the flag to indicate that the player has built on their first or second turn
-          const isFirstTurn = this.turn === 1;
-          const isSecondTurn = this.turn === 2;
-
-          if (isFirstTurn) {
-            this.players[this.currentPlayerIndex].hasBuiltFirstTurn2 = true;
-          } else if (isSecondTurn) {
-            this.players[this.currentPlayerIndex].hasBuiltSecondTurn2 = true;
-          }else {
-            const currentPlayer = this.players[this.currentPlayerIndex];
-            // Deduct the required resources from the player's inventory
-            currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
-            currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
-          }
-
         } else {
           // Display a warning message if the road is not adjacent to the player's settlement or road
           this.displayError("Road must be adjacent to your own settlement or road.");
@@ -1076,7 +1002,7 @@ export default {
 
     playRoadBuildingCardLogic() {
       // Perform the action for the "Road Building" card
-      this.canPlayRoad_BuildingCard = true;
+      this.canPlayRoadBuildingCard = true; // Enable the "Play Road Building Card" button
       this.roadsLeftToBuild = 2; // Initialize the counter for roads left to build
     },
 
@@ -1276,15 +1202,15 @@ export default {
     initializePlayers() {
       // Dummy player data
       const player1 = new Player("red", "NaN", [], []);
-      const player2 = new Player("blue", "NaN", [], []);
-      const player3 = new Player("green", "NaN", [], []);
+      const player2 = new Player("green", "NaN", [], []);
+      const player3 = new Player("blue", "NaN", [], []);
       const player4 = new Player("orange", "NaN", [], []);
 
       // Assign initial resources to the red player
-      player1.resources = [];
-      player2.resources = [];
-      player3.resources = [];
-      player4.resources = [];
+      player1.resources = ['ore', 'wheat', 'sheep', 'sheep', 'sheep', 'sheep', 'sheep'];
+      player2.resources = ['ore', 'wheat', 'sheep'];
+      player3.resources = ['ore', 'wheat', 'sheep'];
+      player4.resources = ['ore', 'wheat', 'sheep'];
 
       // Add players to the players array
       this.players.push(player1);
@@ -1301,7 +1227,7 @@ export default {
       clearInterval(this.timerId);
 
       // Reset the timer
-      this.timeRemaining = 120; // Set the time remaining to 120 seconds
+      this.timeRemaining = 60; // Set the time remaining to 60 seconds
 
       // Start a new timer
       this.timerId = setInterval(() => {
@@ -1327,30 +1253,22 @@ export default {
         return;
       }
 
-      if (this.turn === 1) {
-        // Increment the current player index
-        if (this.currentPlayerIndex === this.players.length - 1) {
-          // If it's the last player's turn, reset to the first player and increment the turn counter
-          this.currentPlayerIndex = 3;
+      // Increment the current player index
+      if (this.currentPlayerIndex === this.players.length - 1) {
+        // If it's the last player's turn, reset to the first player and increment the turn counter
+        this.currentPlayerIndex = 0;
 
-          // Increment the turn counter
-          this.turn++;
-        } else {
-          // Otherwise, move to the next player
-          this.currentPlayerIndex++;
+        // Increment the turn counter
+        this.turn++;
+
+        // Reverse the player order starting from turn 2
+        if (this.turn === 2) {
+          this.players.reverse();
+          this.playerColors.reverse();
         }
       } else {
-        // Decrement the current player index
-        if (this.currentPlayerIndex === 0) {
-          // If it's the first player's turn, move to the last player and increment the turn counter
-          this.currentPlayerIndex = this.players.length - 1;
-
-          // Increment the turn counter
-          this.turn++;
-        } else {
-          // Otherwise, move to the previous player
-          this.currentPlayerIndex--;
-        }
+        // Otherwise, move to the next player
+        this.currentPlayerIndex++;
       }
 
       // Reset next button
@@ -1441,26 +1359,13 @@ export default {
                     // Check if the settlement belongs to the current player
                     let playerClass = `has-settlement-${i}`;
                     if (settlementElement.classList.contains(playerClass)) {
-                      // Check if the settlement is a city
-                      const city = 'city';
-                      if (settlementElement.classList.contains(city)) {
-                        // Assign twice as many resources if it's a city
-                        let resourceType = hex.classList[1]; // Assuming the resource type is the second class
-                        if (resourceType) {
-                          // Update the player's inventory with the assigned resource
-                          this.giveResourcesToPlayer(i, [resourceType, resourceType]);
-                          // Log the assignment of resources
-                          console.log(`Player ${i} received 2 ${resourceType} from hex ${hex.id} with number ${number}`);
-                        }
-                      } else {
-                        // Assign normal amount of resources if it's not a city
-                        let resourceType = hex.classList[1]; // Assuming the resource type is the second class
-                        if (resourceType) {
-                          // Update the player's inventory with the assigned resource
-                          this.giveResourcesToPlayer(i, [resourceType]);
-                          // Log the assignment of resources
-                          console.log(`Player ${i} received ${resourceType} from hex ${hex.id} with number ${number}`);
-                        }
+                      // Assign resources to the player's inventory
+                      let resourceType = hex.classList[1]; // Assuming the resource type is the second class
+                      if (resourceType) {
+                        // Update the player's inventory with the assigned resource
+                        this.giveResourcesToPlayer(i, [resourceType]);
+                        // Log the assignment of resources
+                        console.log(`Player ${i} received ${resourceType} from hex ${hex.id} with number ${number}`);
                       }
                     }
                   }
@@ -1501,16 +1406,14 @@ export default {
 };
 </script>
 
-
 <style scoped>
-
 
 
 .resource-card {
   cursor: pointer;
 }
 
-.resource-cards.selected {
+.resource-card.selected {
   border: 2px solid blue; /* Add your preferred styling for selected cards */
 }
 
@@ -1524,7 +1427,7 @@ export default {
   justify-content: center;
   align-items: center;
   pointer-events: none;
-  z-index: 2;
+  z-index: 9999;
 }
 
 .modal-content {
@@ -1532,29 +1435,15 @@ export default {
   border: solid 5px #60BFB2;
   padding: 16px;
   border-radius: 15px;
-  width: auto;
+  width: 30vw;
   pointer-events: auto; /* Enable clicks inside modal content */
-
 }
 
 .inventory-resource-card {
-  display: inline-flex;
+  display: inline-block;
   margin-right: 10px;
   cursor: pointer;
   position: relative;
-  justify-content: center;
-  align-items: center;
-}
-.resource-cards{
-  display: inline-flex;
-  margin: 5px;
-}
-.resource-cardmodal{
-  margin: 5px;
-}
-.resource-selection{
-  display: inline-flex;
-  margin: 5px;
 }
 
 /* Styles for the resource count */
@@ -1594,8 +1483,6 @@ export default {
 .mainContent {
   display: inline-flex;
   width: 90vw;
-  margin-left: 5vw;
-  margin-right: 5vw;
 }
 
 /* Previous page button */
@@ -1619,7 +1506,7 @@ export default {
 }
 
 #game-error-message {
-  z-index: 3;
+  z-index: 2;
   position: fixed;
   top: 0;
   left: 0;
@@ -1671,7 +1558,6 @@ export default {
 .has-settlement-3 {
   background-color: orange;
 }
-
 
 
 .box {
@@ -1998,6 +1884,7 @@ ol.odd {
   opacity: .4;
   border: 2px dotted;
 }
+
 /* .hex #robber::after {
   content: "R";
 } */
@@ -2113,6 +2000,7 @@ ol.odd {
   background-color: brown; /* Adjust color as needed */
   border-radius: 50%;
 }
+
 .settlement-svg {
   position: absolute;
   top: 50%;
@@ -2210,7 +2098,7 @@ ol.odd {
   margin: 5px;
 }
 
-.dice-outcome-container h2{
+.dice-outcome-container h2 {
   font-weight: 400;
   margin: 0;
 }
@@ -2218,7 +2106,7 @@ ol.odd {
 /* Player resources */
 .player-inventory-container {
   background-color: #5c86ae;
-  border: solid #2c3e50 ;
+  border: solid #2c3e50;
   padding: 10px;
   min-height: 160px;
 }
