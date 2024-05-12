@@ -91,6 +91,35 @@ export class GameService {
         }
     }
 
+    async addPlayerToGame(gameId, player) {
+        try {
+            const url = `${this.resourcesUrl}/${gameId}/players`;
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(player)
+            };
+
+            console.log('Adding player to game:', player);
+            const response = await this.fetchJson(url, options);
+
+            if (response) {
+                console.log('Player added successfully:', response);
+
+                return Player.dbConstructor(response);
+            } else {
+                console.error('Failed to add player to game.');
+                return null;
+            }
+        } catch (error) {
+            console.error("Error adding player to game:", error);
+            throw error; // Throw the error to be handled by the caller
+        }
+    }
+
+
     generateUniqueGameId(){
         //todo check (backend) for existing id and generate new one
         let uniqueId;
@@ -104,7 +133,6 @@ export class GameService {
     }
 
     async asyncFindAllPlayersForGameId(gameId){
-        // const game = await this.fetchJson(`${this.resourcesUrl}/${gameId}`);
 
         try {
             const players = await this.fetchJson(`${this.resourcesUrl}/${gameId}` +  "/players", {

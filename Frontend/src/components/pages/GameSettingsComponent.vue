@@ -98,12 +98,13 @@ export default {
 
     // Fetch all players from game
     this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+    console.log(this.fetchedPlayers)
 
     //Fixme Add players from db
     // async not quite working with pushing to players array with users
-    this.fetchedPlayers.forEach(function(player){
-      console.log(player.user.username)
-    });
+    // this.fetchedPlayers.forEach(function(player){
+    //   console.log(player.user.username)
+    // });
   },
   computed: {
     totalPlayers() {

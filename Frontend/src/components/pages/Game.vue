@@ -376,7 +376,7 @@
           </div>
           <button class="pos-button" id="next-turn-button" @click="nextTurn">Next turn</button>
           <div>Time remaining: {{ this.timeRemaining }}</div>
-          <div>Points to win: {{ this.game.pointsToWin }}</div>
+          <div>Points to win: {{this.game.pointsToWin}} </div>
           <div v-if="!hasRolledDice">Turn: {{ turn }}</div>
           <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
         </div>
@@ -434,7 +434,7 @@
 
 <script>
 import Player from "@/models/player";
-import GameService from "@/services/GameService";
+
 
 export default {
   name: "gameComponent",
@@ -523,8 +523,9 @@ export default {
     };
   },
   inject:["gameService"],
-  created() {
-    this.game = GameService.asyncGetById(this.gameId);
+ async created() {
+    this.game = await this.gameService.asyncGetById(this.gameId)
+    console.log(this.game)
   },
   mounted() {
     setTimeout(() => {
@@ -1301,7 +1302,7 @@ export default {
       clearInterval(this.timerId);
 
       // Reset the timer
-      this.timeRemaining = 120; // Set the time remaining to 120 seconds
+      this.timeRemaining = this.game.turnDuration; // Set the time remaining to 120 seconds
 
       // Start a new timer
       this.timerId = setInterval(() => {
