@@ -4,7 +4,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
-import org.example.backend.models.Game;
 import org.example.backend.models.Player;
 import org.example.backend.models.PlayerKey;
 import org.springframework.stereotype.Repository;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class PlayersRepository extends AbstractEntityRepositoryJpa<Player, PlayerKey> implements PlayerRepository{
+public class PlayersRepository extends AbstractEntityRepositoryJpa<Player, PlayerKey> {
 
     @PersistenceContext
     protected EntityManager entityManager;
@@ -56,10 +55,4 @@ public class PlayersRepository extends AbstractEntityRepositoryJpa<Player, Playe
 
         return player;
     }
-
-    @Override
-    public Player update(Player oldEntity, Player newEntity) {
-        return null;
-    }
-
 }

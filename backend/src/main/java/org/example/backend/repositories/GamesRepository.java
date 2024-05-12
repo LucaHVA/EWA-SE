@@ -5,14 +5,12 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.example.backend.models.Game;
-import org.example.backend.models.User;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class GamesRepository extends AbstractEntityRepositoryJpa<Game, String> implements GameRepository{
+public class GamesRepository extends AbstractEntityRepositoryJpa<Game, String> {
 
     @PersistenceContext
     protected EntityManager entityManager;
@@ -42,12 +40,6 @@ public class GamesRepository extends AbstractEntityRepositoryJpa<Game, String> i
     @Override
     public Game save(Game entity) {
         return entityManager.merge(entity);
-    }
-
-    @Override
-    public Game update(Game oldEntity, Game newEntity) {
-        //todo update game
-        return entityManager.merge(newEntity);
     }
 
     @Override

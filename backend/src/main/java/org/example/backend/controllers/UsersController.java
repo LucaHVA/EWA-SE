@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import org.example.backend.APIConfig;
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.User;
-import org.example.backend.repositories.UserRepository;
+import org.example.backend.repositories.UsersRepository;
 import org.example.backend.security.JWToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,7 +29,8 @@ public class UsersController {
 
     @Qualifier("USERS.JPA")
     @Autowired
-    private UserRepository usersRepository;
+    private UsersRepository usersRepository;
+
     @Autowired
     private APIConfig apiConfig;
 
