@@ -44,4 +44,9 @@ public class PlayerKey implements Serializable {
     public void setGameId(String gameId) {
         this.gameId = gameId;
     }
+
+    @Override
+    public String toString() {
+        return "game id: " + getGameId() + " / player number: " + getPlayerNumber();
+    }
 }

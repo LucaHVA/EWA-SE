@@ -85,14 +85,25 @@ export default {
       currentGame:Object
     };
   },
- async created() {
+  async created() {
 
-   this.fetchUserInfo();
+    // Fetch current user info
+    this.fetchUserInfo();
 
-   this.gameId=this.$route.params.id;
+    // Get current game id for lobby
+    this.gameId=this.$route.params.id;
 
-  this.currentGame= await this.fetchGameById(this.gameId);
-  console.log(this.currentGame)
+    // Get game
+    this.currentGame= await this.fetchGameById(this.gameId);
+
+    // Fetch all players from game
+    this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+
+    //Fixme Add players from db
+    // async not quite working with pushing to players array with users
+    this.fetchedPlayers.forEach(function(player){
+      console.log(player.user.username)
+    });
   },
   computed: {
     totalPlayers() {
@@ -130,7 +141,7 @@ export default {
       }
     },
 
-  async  fetchUserInfo() {
+    async  fetchUserInfo() {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       if (userInfo) {
         this.players.push({ name: userInfo.username });
@@ -153,17 +164,6 @@ export default {
 </script>
 
 <style scoped>
-.transition {
-  transition: all 0.4s ease;
-}
-
-.transition:hover {
-  transition: all 0.4s ease;
-  top: 10%;
-  transform: translateY(-10%);
-  border: none;
-}
-
 .container {
   display: flex;
 }
@@ -180,8 +180,8 @@ export default {
 }
 
 .header-title {
-  color: white;
-  background-color: #60BFB2;
+  color: var(--white);
+  background-color: var(--shade-of-tea);
   text-align: center;
   border-radius: 5px;
   font-weight: bold;
@@ -201,7 +201,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: white;
+  background-color: var(--white);
   padding: 0.5rem 1rem;
   border-radius: 20px;
   margin: 1rem;
@@ -210,13 +210,13 @@ export default {
 }
 
 .player-pill:hover {
-  background-color: black;
-  color: white;
+  background-color: var(--black);
+  color: var(--white);
 }
 
 .ready-button {
-  color: white;
-  background-color: #1FAB1C;
+  color: var(--white);
+  background-color: var(--green);
   font-size: 20px;
   font-weight: bold;
   border: none;
@@ -226,13 +226,13 @@ export default {
 }
 
 .ready-button:hover {
-  color: #1FAB1C;
-  background-color: white;
+  color: var(--green);
+  background-color: var(--white);
 }
 
 .start-game-button {
-  color: white;
-  background-color: #60BFB2;
+  color: var(--white);
+  background-color: var(--shade-of-tea);
   font-size: 20px;
   font-weight: bold;
   border: none;
@@ -244,8 +244,8 @@ export default {
 }
 
 .start-game-button:hover {
-  color: #60BFB2;
-  background-color: white;
+  color: var(--shade-of-tea);
+  background-color: var(--white);
 }
 
 .start-game-div {
@@ -255,8 +255,8 @@ export default {
 }
 
 .kick-button {
-  color: white;
-  background-color: #FC1212;
+  color: var(--white);
+  background-color: var(--red);
   font-size: 20px;
   font-weight: bold;
   border: none;
@@ -266,13 +266,13 @@ export default {
 }
 
 .kick-button:hover {
-  color: #FC1212;
-  background-color: white;
+  color: var(--red);
+  background-color: var(--white);
 }
 
 .add-bot-button {
-  color: white;
-  background-color: #FFB54A;
+  color: var(--white);
+  background-color: var(--yellow-orange);
   font-size: 20px;
   font-weight: bold;
   border: none;
@@ -283,8 +283,8 @@ export default {
 }
 
 .add-bot-button:hover {
-  color: #FFB54A;
-  background-color: white;
+  color: var(--yellow-orange);
+  background-color: var(--white);
 }
 
 .center-column-slider {
@@ -292,7 +292,7 @@ export default {
   width: 100%;
   height: 15px;
   border-radius: 5px;
-  background: #d3d3d3;
+  background: var(--light-gray);
   outline: none;
   opacity: 0.7;
   -webkit-transition: .2s;
@@ -304,7 +304,7 @@ export default {
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  background: #FFB54A;
+  background: var(--yellow-orange);
   cursor: pointer;
   transition: all 0.4s ease;
 }
@@ -313,24 +313,24 @@ export default {
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  background: #FFB54A;
+  background: var(--yellow-orange);
   cursor: pointer;
   transition: all 0.4s ease;
 }
 
 .center-column-slider:hover {
-  background: #60BFB2;
+  background: var(--shade-of-tea);
   height: 17px;
 }
 
 .center-column-slider::-webkit-slider-thumb:hover {
-  background: #FF7B4D;
+  background: var(--coral);
   width: 30px;
   height: 30px;
 }
 
 .center-column-slider::-moz-range-thumb:hover {
-  background: #FF7B4D;
+  background: var(--coral);
   width: 30px;
   height: 30px;
 }

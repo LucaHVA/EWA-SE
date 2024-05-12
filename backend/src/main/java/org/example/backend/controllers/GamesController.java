@@ -2,7 +2,12 @@ package org.example.backend.controllers;
 
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.Game;
+import org.example.backend.models.Player;
+import org.example.backend.models.PlayerKey;
+import org.example.backend.models.User;
 import org.example.backend.repositories.GamesRepository;
+import org.example.backend.repositories.PlayersRepository;
+import org.example.backend.repositories.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +23,14 @@ public class GamesController {
     @Autowired
     private GamesRepository gamesRepository;
 
+    @Autowired
+    private PlayersRepository playersRepository;
+
+    @Autowired
+    private UsersRepository usersRepository;
+
     @GetMapping("/all")
-    public List<Game> getAllGames(){
+    public List<Game> getAllGames() {
         return gamesRepository.findAll();
     }
 
@@ -55,6 +66,57 @@ public class GamesController {
             throw new ResourceNotFoundException("Game-id = " + game.getId() + " does not match path parameter = " + id);
         }
         return gamesRepository.save(game);
+    }
+
+    @GetMapping(path = "/{id}/players", produces = "application/json")
+    public ResponseEntity<List<Player>> getPlayersByGameId(@PathVariable String id) {
+        List<Player> players = gamesRepository.findPlayersByGameId(id);
+
+        if (players.isEmpty()) {
+            throw new ResourceNotFoundException("No players found for game ID: " + id);
+        }
+
+        return ResponseEntity.ok(players);
+    }
+
+    @PostMapping("/{id}/players")
+    public ResponseEntity<Player> addPlayerToGame(@PathVariable String id, @RequestBody Player player) {
+        // Find relationship entities
+        Game game = gamesRepository.findById(id);
+        User user = usersRepository.findById(player.getUser().getId());
+
+        // Handle no game or user instances found
+        if (game == null) {
+            throw new ResourceNotFoundException("No game found with id " + id);
+        } else if (user == null) {
+            throw new ResourceNotFoundException("No user found with id " + player.getUser().getId());
+        }
+
+        // Set relationships
+        player.setUser(user);
+        player.setGame(game);
+
+        // Save to repo
+        playersRepository.save(player);
+
+        return ResponseEntity.ok(player);
+    }
+
+    @PutMapping("/{gameId}/players/{playerNumber}")
+    public ResponseEntity<Player> updatePlayer(@PathVariable String gameId, @PathVariable int playerNumber, @RequestBody Player updatedPlayer) {
+        // Find the existing player using the composite key
+        PlayerKey playerKey = new PlayerKey(playerNumber, gameId);
+        Player existingPlayer = playersRepository.findById(playerKey);
+
+        // Handle no player found
+        if (existingPlayer == null) {
+            throw new ResourceNotFoundException("No player found with id " + playerKey);
+        }
+
+        // Call the update method from the repository
+        Player updatedEntity = playersRepository.update(existingPlayer, updatedPlayer);
+
+        return ResponseEntity.ok(updatedEntity);
     }
 
 }

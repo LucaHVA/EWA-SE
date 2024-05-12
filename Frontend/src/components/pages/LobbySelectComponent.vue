@@ -17,7 +17,7 @@
               <div>{{ game.id }}</div>
             </td>
             <td>
-<!--          TODO get amount of players in the lobby-->
+              <!--          TO DO!!! get amount of players in the lobby-->
               <div>Players {{ 1 }}/{{ game.numberOfPlayers }}</div>
             </td>
           </tr>
@@ -25,7 +25,7 @@
         </table>
       </div>
       <div class="buttons-container-lobby-select-page">
-          <button class="create-game-button transition" @click="createGame" >Create Game</button>
+        <button class="create-game-button transition" @click="createGame" >Create Game</button>
       </div>
     </div>
   </div>
@@ -102,8 +102,8 @@ export default {
 }
 
 .header-title {
-  color: white;
-  background-color: #60BFB2;
+  color: var(--white);
+  background-color: var(--shade-of-tea);
   text-align: center;
   border-radius: 5px;
   font-weight: bold;
@@ -114,14 +114,14 @@ export default {
   padding: 8px;
   width: 900px;
   border-radius: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--white);
   box-sizing: border-box;
   font-weight: bold;
 }
 
 .join-game-button {
-  color: white;
-  background-color: #60BFB2;
+  color: var(--white);
+  background-color: var(--shade-of-tea);
   font-size: 20px;
   font-weight: bold;
   border: none;
@@ -133,13 +133,13 @@ export default {
 }
 
 .join-game-button:hover {
-  color: #60BFB2;
-  background-color: white;
+  color: var(--shade-of-tea);
+  background-color: var(--white);
 }
 
 .create-game-button {
-  color: white;
-  background-color: #60BFB2;
+  color: var(--white);
+  background-color: var(--shade-of-tea);
   font-size: 20px;
   font-weight: bold;
   border: none;
@@ -151,15 +151,15 @@ export default {
 }
 
 .create-game-button:hover {
-  color: #60BFB2;
-  background-color: white;
+  color: var(--shade-of-tea);
+  background-color: var(--white);
 }
 
 .player-pill {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: white;
+  background-color: var(--white);
   padding: 0.5rem 1rem;
   border-radius: 20px;
   margin: 1rem;
@@ -170,9 +170,9 @@ export default {
 }
 
 .player-pill:hover {
-  background-color: black;
+  background-color: var(--black);
   color: white;
-  cursor: pointer; /* Add cursor pointer when hovering over player pill */
+  cursor: pointer;
 }
 
 .buttons-container-lobby-select-page {
@@ -188,3 +188,4 @@ export default {
   overflow-y: auto;
 }
 </style>
+

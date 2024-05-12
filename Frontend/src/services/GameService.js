@@ -1,4 +1,5 @@
 import Game from "@/models/game";
+import Player from "@/models/player";
 
 
 export class GameService {
@@ -20,11 +21,6 @@ export class GameService {
         }
     }
 
-    // Save a game instance with a unique gameId
-    // saveGame(game) {
-    //         this.games.set(game);
-    // }
-
     // Get a game instance by its gameId
     async asyncGetById(gameId) {
         const game = await this.fetchJson(`${this.resourcesUrl}/${gameId}`);
@@ -42,12 +38,6 @@ export class GameService {
             console.log(e)
         }
     }
-
-    // generateNewGame(numberOfPlayers, turnDuration, pointsToWin) {
-    //     return Game.createGame(this.generateUniqueGameId(), numberOfPlayers, turnDuration, pointsToWin);
-    // }
-
-
 
 // adds a game if there is no gameId found if there is one updates it with the new values
     async saveGame(game, queryParams) {
@@ -99,10 +89,7 @@ export class GameService {
             console.error("Error saving game:", error);
             throw error; //throw the error to be handled by the caller
         }
-
-
     }
-
 
     generateUniqueGameId(){
         //todo check (backend) for existing id and generate new one
@@ -116,38 +103,18 @@ export class GameService {
         return uniqueId;
     }
 
-    // async updateGame(game) {
-    //     try {
-    //         if (!game.id) {
-    //             console.error("Cannot update game without an ID.");
-    //             return null;
-    //         }
-    //
-    //         const url = `${this.resourcesUrl}/${game.id}`;
-    //         const options = {
-    //             method: 'PUT',
-    //             headers: {
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: JSON.stringify(game)
-    //         };
-    //
-    //         console.log('Updating game:', game);
-    //         const response = await this.fetchJson(url, options);
-    //
-    //         if (response) {
-    //             console.log('Game updated successfully:', response);
-    //             return response;
-    //         } else {
-    //             console.error('Failed to update game.');
-    //             return null;
-    //         }
-    //     } catch (error) {
-    //         console.error("Error updating game:", error);
-    //         throw error;
-    //     }
-    // }
+    async asyncFindAllPlayersForGameId(gameId){
+        // const game = await this.fetchJson(`${this.resourcesUrl}/${gameId}`);
 
+        try {
+            const players = await this.fetchJson(`${this.resourcesUrl}/${gameId}` +  "/players", {
+                method: 'GET'
+            })
+            return players?.map(Player.dbConstructor);
+        } catch (e) {
+            console.log(e)
+        }
+    }
 
 }
 
