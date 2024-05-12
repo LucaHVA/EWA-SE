@@ -1,14 +1,16 @@
 package org.example.backend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "\"Player\"")
-public class Player implements Identifiable<PlayerKey>{
+public class Player implements Identifiable<PlayerKey> {
     @EmbeddedId
     private PlayerKey playerId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    @ManyToOne
     @MapsId("gameId")
     @JoinColumn(name = "game_id", referencedColumnName = "gameId")
     private Game game;
@@ -36,17 +38,39 @@ public class Player implements Identifiable<PlayerKey>{
     private Integer developMonopoly;
     private Integer developVictory;
 
-    public Player(){
+    public Player() {
 
     }
 
-    public Player(int playerNumber, String gameId){
-        this.playerId = new PlayerKey(playerNumber, gameId);
+    public Player(int playerNumber, Game game) {
+        this.playerId = new PlayerKey(playerNumber, game.getId());
+        this.setGame(game);
+    }
+
+    public Player(int playerNumber, Game game, User user) {
+        this.playerId = new PlayerKey(playerNumber, game.getId());
+        this.setGame(game);
+        this.setUser(user);
+    }
+
+    public Player(PlayerKey playerId, User user, String playerColor) {
+        // Initialize fields
+        this.playerId = playerId;
+        this.user = user;
+        this.playerColor = playerColor;
     }
 
 
     public int getPlayerNumber() {
         return playerId != null ? playerId.getPlayerNumber() : 0;
+    }
+
+    public void setPlayerNumber(int playerNumber) {
+        if (this.playerId == null) {
+            this.playerId = new PlayerKey();
+        }
+        this.playerId.setPlayerNumber(playerNumber);
+        updatePlayerKey();
     }
 
     @Override
@@ -65,6 +89,7 @@ public class Player implements Identifiable<PlayerKey>{
 
     public void setGame(Game game) {
         this.game = game;
+        updatePlayerKey();
     }
 
     public User getUser() {
@@ -73,6 +98,12 @@ public class Player implements Identifiable<PlayerKey>{
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public void updatePlayerKey() {
+        if (this.game != null && this.playerId != null) {
+            this.playerId.setGameId(this.game.getId());
+        }
     }
 }
 

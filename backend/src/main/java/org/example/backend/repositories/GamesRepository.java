@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.example.backend.models.Game;
+import org.example.backend.models.Player;
 import org.example.backend.models.User;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class GamesRepository extends AbstractEntityRepositoryJpa<Game, String> implements GameRepository{
+public class GamesRepository extends AbstractEntityRepositoryJpa<Game, String> implements GameRepository {
 
     @PersistenceContext
     protected EntityManager entityManager;
@@ -61,5 +62,14 @@ public class GamesRepository extends AbstractEntityRepositoryJpa<Game, String> i
     @Override
     public Game findById(String id) {
         return entityManager.find(Game.class, id);
+    }
+
+    public List<Player> findPlayersByGameId(String gameId) {
+        TypedQuery<Player> query = entityManager.createQuery(
+                "SELECT p FROM Player p WHERE p.game.gameId = :gameId", Player.class);
+
+        query.setParameter("gameId", gameId);
+
+        return query.getResultList();
     }
 }
