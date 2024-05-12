@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository("USERS.JPA")
 @Transactional
-public class UsersRepository extends AbstractEntityRepositoryJpa<User, Long> {
+public class UsersRepository extends AbstractEntityRepositoryJpa<User, Long>  implements UserRepository {
     @PersistenceContext
     protected EntityManager entityManager;
 

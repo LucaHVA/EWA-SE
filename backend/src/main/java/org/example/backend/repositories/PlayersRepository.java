@@ -57,7 +57,6 @@ public class PlayersRepository extends AbstractEntityRepositoryJpa<Player, Playe
         return player;
     }
 
-    @Override
     public Player update(Player oldEntity, Player newEntity) {
         // Iterate through player fields
         for (Field field : Player.class.getDeclaredFields()) {
