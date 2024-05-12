@@ -58,7 +58,7 @@ export default {
       // this.game = GameService.generateNewGame(this.numberOfPlayers, this.turnDuration, this.pointsToWin);
 
       // Save the game instance to a service
-     const newGame=  new Game(this.gameSettings.id,this.numberOfPlayers,this.turnDuration,this.pointsToWin)
+      const newGame=  new Game(this.gameSettings.id,this.numberOfPlayers,this.turnDuration,this.pointsToWin)
       await this.gameService.saveGame(newGame)
       console.log("check this,",newGame)
 
@@ -76,18 +76,6 @@ export default {
 </script>
 
 <style scoped>
-/**Transitions**/
-.transition {
-  transition: all 0.4s ease;
-}
-
-.transition:hover {
-  transition: all 0.4s ease;
-  top: 10%;
-  transform: translateY(-10%);
-  border: none;
-}
-
 /**Modal (Pop Up)**/
 .modal-mask {
   position: fixed;
@@ -113,14 +101,14 @@ export default {
   width: 450px;
   margin: 0 auto;
   padding: 20px 30px;
-  background-color: #fff;
+  background-color: var(--white);
   border-radius: 2px;
   box-shadow: 0 15px 20px rgba(0, 0, 0, 0.5);
   transition: all 0.4s ease;
 }
 
 .modal-header {
-  color: #60BFB2;
+  color: var(--shade-of-tea);
   font-weight: bolder;
   font-size: 30px;
   text-align: center
@@ -149,7 +137,7 @@ export default {
 
 .error-message {
   font-size: 16px;
-  color: red;
+  color: var(--red);
   font-weight: bolder;
 }
 
@@ -175,8 +163,8 @@ export default {
 
 /**Buttons**/
 .start-game-button-pop-up {
-  background-color: #1FAB1C;
-  color: white;
+  background-color: var(--green);
+  color: var(--white);
   font-size: 20px;
   font-weight: bold;
   border: none;
@@ -186,14 +174,14 @@ export default {
 }
 
 .start-game-button-pop-up:hover {
-  color: #1FAB1C;
-  border: 1px solid #1FAB1C;
-  background-color: white;
+  color: var(--green);
+  border: 1px solid var(--green);
+  background-color: var(--white);
 }
 
 .close-button-pop-up {
-  background-color: #FC1212;
-  color: white;
+  background-color: var(--red);
+  color: var(--white);
   font-size: 20px;
   font-weight: bold;
   border: none;
@@ -203,8 +191,8 @@ export default {
 }
 
 .close-button-pop-up:hover {
-  color: #FC1212;
-  border: 1px solid #FC1212;
-  background-color: white;
+  color: var(--red);
+  border: 1px solid var(--red);
+  background-color: var(--white);
 }
 </style>

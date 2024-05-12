@@ -20,10 +20,10 @@ export class UsersAdaptor{
 
     async asyncFindAll() {
         try {
-            const scooters = await this.fetchJson(this.resourcesUrl + "/all", {
+            const users = await this.fetchJson(this.resourcesUrl + "/all", {
                 method: 'GET'
             })
-            return scooters?.map(User.copyConstructor);
+            return users?.map(User.copyConstructor);
         } catch (e) {
             console.log(e)
         }

@@ -11,7 +11,7 @@
               <li>
                 Game id: <span @click="copyText" title="click to copy id" id="lobbyGameId">{{ selectedGame.id }}</span>
               </li>
-<!--              TODO get amount of players in the lobby-->
+              <!--              TO DO!!! get amount of players in the lobby-->
               <li>Lobby size: {{ 1 }} / {{ selectedGame.numberOfPlayers }}</li>
               <li>Turn duration: {{selectedGame.turnDuration}}</li>
               <li>Points to win: {{selectedGame.pointsToWin}}</li>
@@ -20,7 +20,7 @@
           <div class="modal-footer">
             <slot name="footer">
               <button class="close-button-pop-up transition" @click="$emit('close')">Close</button>
-                <button class="start-game-button-pop-up transition" @click="moveToLobby">Join Game</button>
+              <button class="start-game-button-pop-up transition" @click="moveToLobby">Join Game</button>
             </slot>
           </div>
         </div>
@@ -162,8 +162,8 @@ export default {
 
 /**Buttons**/
 .start-game-button-pop-up {
-  background-color: #1FAB1C;
-  color: white;
+  background-color: var(--green);
+  color: var(--white);
   font-size: 20px;
   font-weight: bold;
   border: none;
@@ -173,14 +173,14 @@ export default {
 }
 
 .start-game-button-pop-up:hover {
-  color: #1FAB1C;
-  border: 1px solid #1FAB1C;
-  background-color: white;
+  color: var(--green);
+  border: 1px solid var(--green);
+  background-color: var(--white);
 }
 
 .close-button-pop-up {
-  background-color: #FC1212;
-  color: white;
+  background-color: var(--red);
+  color: var(--white);
   font-size: 20px;
   font-weight: bold;
   border: none;
@@ -190,8 +190,8 @@ export default {
 }
 
 .close-button-pop-up:hover {
-  color: #FC1212;
-  border: 1px solid #FC1212;
-  background-color: white;
+  color: var(--red);
+  border: 1px solid var(--red);
+  background-color: var(--white);
 }
 </style>

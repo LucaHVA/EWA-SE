@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository("USERS.JPA")
 @Transactional
-public class UsersRepository extends AbstractEntityRepositoryJpa<User, Long> implements UserRepository {
+public class UsersRepository extends AbstractEntityRepositoryJpa<User, Long> {
     @PersistenceContext
     protected EntityManager entityManager;
 
@@ -44,12 +44,6 @@ public class UsersRepository extends AbstractEntityRepositoryJpa<User, Long> imp
     }
 
     @Override
-    public User update(User oldEntity, User newEntity) {
-        //todo update user
-        return null;
-    }
-
-    @Override
     public List<User> findByQuery(String jpqlName, Object... params) {
         Query query = entityManager.createNamedQuery(jpqlName);
 
@@ -59,7 +53,6 @@ public class UsersRepository extends AbstractEntityRepositoryJpa<User, Long> imp
         return query.getResultList();
     }
 
-    @Override
     public User findByUsername(String username) {
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT u FROM User u WHERE u.username = :username", User.class);

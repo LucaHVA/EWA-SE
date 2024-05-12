@@ -9,7 +9,6 @@ import org.example.backend.models.Player;
 import org.example.backend.models.User;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
