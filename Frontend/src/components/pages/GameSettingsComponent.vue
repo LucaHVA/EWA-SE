@@ -87,12 +87,23 @@ export default {
   },
   async created() {
 
+    // Fetch current user info
     this.fetchUserInfo();
 
+    // Get current game id for lobby
     this.gameId=this.$route.params.id;
 
+    // Get game
     this.currentGame= await this.fetchGameById(this.gameId);
-    console.log(this.currentGame)
+
+    // Fetch all players from game
+    this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+
+    //Fixme Add players from db
+    // async not quite working with pushing to players array with users
+    this.fetchedPlayers.forEach(function(player){
+      console.log(player.user.username)
+    });
   },
   computed: {
     totalPlayers() {

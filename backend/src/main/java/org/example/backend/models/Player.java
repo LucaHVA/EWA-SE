@@ -1,6 +1,7 @@
 package org.example.backend.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 
 @Entity
@@ -73,6 +74,37 @@ public class Player implements Identifiable<PlayerKey> {
         updatePlayerKey();
     }
 
+    public void setPlayerGameInfo(int amountOfPoints, int longestRoad, int settlementPoints, int knightsUsed){
+        this.amountOfPoints = amountOfPoints;
+        this.longestRoad = longestRoad;
+        this.settlementPoints = settlementPoints;
+        this.knightsUsed = knightsUsed;
+    }
+
+    public void setPlayerResources(int resourceOre, int resourceBrick, int resourceWheat, int resourceWood, int resourceSheep) {
+        this.resourceOre = resourceOre;
+        this.resourceBrick = resourceBrick;
+        this.resourceWheat = resourceWheat;
+        this.resourceWood = resourceWood;
+        this.resourceSheep = resourceSheep;
+    }
+
+    public void setPlayerDevelopments(int developKnight, int developRoad, int developPlenty, int developMonopoly, int developVictory) {
+        this.developKnight = developKnight;
+        this.developRoad = developRoad;
+        this.developPlenty = developPlenty;
+        this.developMonopoly = developMonopoly;
+        this.developVictory = developVictory;
+    }
+
+    public String getPlayerColor() {
+        return playerColor;
+    }
+
+    public void setPlayerColor(String playerColor) {
+        this.playerColor = playerColor;
+    }
+
     @Override
     public PlayerKey getId() {
         return this.playerId;
@@ -104,6 +136,118 @@ public class Player implements Identifiable<PlayerKey> {
         if (this.game != null && this.playerId != null) {
             this.playerId.setGameId(this.game.getId());
         }
+    }
+
+    public Integer getAmountOfPoints() {
+        return amountOfPoints;
+    }
+
+    public void setAmountOfPoints(Integer amountOfPoints) {
+        this.amountOfPoints = amountOfPoints;
+    }
+
+    public Integer getLongestRoad() {
+        return longestRoad;
+    }
+
+    public void setLongestRoad(Integer longestRoad) {
+        this.longestRoad = longestRoad;
+    }
+
+    public Integer getSettlementPoints() {
+        return settlementPoints;
+    }
+
+    public void setSettlementPoints(Integer settlementPoints) {
+        this.settlementPoints = settlementPoints;
+    }
+
+    public Integer getKnightsUsed() {
+        return knightsUsed;
+    }
+
+    public void setKnightsUsed(Integer knightsUsed) {
+        this.knightsUsed = knightsUsed;
+    }
+
+    public Integer getResourceOre() {
+        return resourceOre;
+    }
+
+    public void setResourceOre(Integer resourceOre) {
+        this.resourceOre = resourceOre;
+    }
+
+    public Integer getResourceBrick() {
+        return resourceBrick;
+    }
+
+    public void setResourceBrick(Integer resourceBrick) {
+        this.resourceBrick = resourceBrick;
+    }
+
+    public Integer getResourceWheat() {
+        return resourceWheat;
+    }
+
+    public void setResourceWheat(Integer resourceWheat) {
+        this.resourceWheat = resourceWheat;
+    }
+
+    public Integer getResourceWood() {
+        return resourceWood;
+    }
+
+    public void setResourceWood(Integer resourceWood) {
+        this.resourceWood = resourceWood;
+    }
+
+    public Integer getResourceSheep() {
+        return resourceSheep;
+    }
+
+    public void setResourceSheep(Integer resourceSheep) {
+        this.resourceSheep = resourceSheep;
+    }
+
+    public Integer getDevelopKnight() {
+        return developKnight;
+    }
+
+    public void setDevelopKnight(Integer developKnight) {
+        this.developKnight = developKnight;
+    }
+
+    public Integer getDevelopRoad() {
+        return developRoad;
+    }
+
+    public void setDevelopRoad(Integer developRoad) {
+        this.developRoad = developRoad;
+    }
+
+    public Integer getDevelopPlenty() {
+        return developPlenty;
+    }
+
+    public void setDevelopPlenty(Integer developPlenty) {
+        this.developPlenty = developPlenty;
+    }
+
+    public Integer getDevelopMonopoly() {
+        return developMonopoly;
+    }
+
+    public void setDevelopMonopoly(Integer developMonopoly) {
+        this.developMonopoly = developMonopoly;
+    }
+
+    public Integer getDevelopVictory() {
+        return developVictory;
+    }
+
+    public void setDevelopVictory(Integer developVictory) {
+        this.developVictory = developVictory;
     }
 }
 
