@@ -30,8 +30,8 @@ export class UsersAdaptor{
     }
 
     async asyncFindById(id) {
-        const url = `${this.resourcesUrl}/${id}`;
-        return await this.fetchJson(url);
+        console.log(id)
+        return await this.fetchJson(`${this.resourcesUrl}/${id}`);
     }
 
     async save(user, queryParams) {

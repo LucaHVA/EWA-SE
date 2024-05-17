@@ -1,7 +1,6 @@
 import Game from "@/models/game";
 import Player from "@/models/player";
 
-
 export class GameService {
     games = {};
     resourcesUrl;
@@ -91,7 +90,23 @@ export class GameService {
         }
     }
 
-    async addPlayerToGame(gameId, player) {
+    async addNewPlayerToGame(gameId, user, playerNumber) {
+
+        console.log("game service query params");
+        console.log(user);
+
+        // let userId = user["userId"];
+        // let user = await UsersAdaptor.asyncFindById(userId);
+
+        let playerJson = {
+            "gameId": gameId,
+            "user": user,
+            "playerNumber": playerNumber
+        }
+
+        let player = Player.dbConstructor(playerJson);
+
+        //FIXME post request is not being send
         try {
             const url = `${this.resourcesUrl}/${gameId}/players`;
             const options = {

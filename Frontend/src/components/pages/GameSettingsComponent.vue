@@ -68,14 +68,14 @@ export default {
   components: {
     popUpGameSettingsComponent,
   },
-  inject:['gameService'],
+  inject:['gameService', 'usersService'],
   props:{
     selectedGame: Object,
   },
   data() {
     return {
       gameId:null,
-
+      userDetails: null,
       players:[],
       numberOfPlayers: 4,
       turnDuration: 60,
@@ -90,6 +90,8 @@ export default {
     // Fetch current user info
     this.fetchUserInfo();
 
+    this.userDetails = await JSON.parse(localStorage.getItem('userInfo'));
+
     // Get current game id for lobby
     this.gameId=this.$route.params.id;
 
@@ -98,7 +100,9 @@ export default {
 
     // Fetch all players from game
     this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
-    console.log(this.fetchedPlayers)
+    // console.log(this.fetchedPlayers)
+
+    await this.addCurrentUserToPlayers();
 
     //Fixme Add players from db
     // async not quite working with pushing to players array with users
@@ -148,7 +152,25 @@ export default {
         this.players.push({ name: userInfo.username });
       }
     },
+    async addCurrentUserToPlayers(){
+      const userInfo = await JSON.parse(localStorage.getItem('userInfo'));
 
+      console.log("comp user info");
+      console.log(userInfo)
+      if (userInfo) {
+        try {
+          let userId = await userInfo["id"];
+          console.log("comp user id");
+          console.log(userId);
+          let user = await this.usersService.asyncFindById(userId);
+          console.log("comp user");
+          console.log(user)
+          this.player = await this.gameService.addNewPlayerToGame(this.gameId, user, 1);
+        } catch (error) {
+          console.error("Error adding new player to game:", error);
+        }
+      }
+    },
     async fetchGameById(gameId) {
       try {
         this.game = await this.gameService.asyncGetById(gameId);
