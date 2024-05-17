@@ -436,6 +436,7 @@
 import Player from "@/models/player";
 
 
+
 export default {
   name: "gameComponent",
   data() {
@@ -600,8 +601,10 @@ export default {
       // Get the clicked settlement element
       const clickedSettlement = event.currentTarget;
 
-      // Add the 'city' class to the clicked settlement element
-      clickedSettlement.classList.add('city');
+
+
+      // Add the 'city' class along with the player's ID to the clicked settlement element
+      clickedSettlement.classList.add(`city-${this.currentPlayerIndex}`);
 
       // Perform any other logic related to upgrading the settlement to a city
 
@@ -1282,7 +1285,7 @@ export default {
       const player4 = new Player("orange", "NaN", [], []);
 
       // Assign initial resources to the red player
-      player1.resources = [];
+      player1.resources = ['wheat', 'wheat', 'wheat', 'ore', 'ore', 'ore'];
       player2.resources = [];
       player3.resources = [];
       player4.resources = [];
@@ -1443,7 +1446,7 @@ export default {
                     let playerClass = `has-settlement-${i}`;
                     if (settlementElement.classList.contains(playerClass)) {
                       // Check if the settlement is a city
-                      const city = 'city';
+                      const city = `city-${i}`;
                       if (settlementElement.classList.contains(city)) {
                         // Assign twice as many resources if it's a city
                         let resourceType = hex.classList[1]; // Assuming the resource type is the second class
@@ -1658,19 +1661,61 @@ export default {
 }
 
 .has-settlement-0 {
-  background-color: red;
+  background-image: url("~@/assets/images/Settlement.png");
+  background-repeat: no-repeat;
+  background-size: contain; /* or cover depending on your needs */
+  transform: rotate(90deg); /* Rotate 90 degrees clockwise */
+
 }
 
 .has-settlement-1 {
-  background-color: blue;
+  background-repeat: no-repeat;
+  background-size: contain; /* or cover depending on your needs */
+  transform: rotate(90deg); /* Rotate 90 degrees clockwise */
+  background-image: url("~@/assets/images/Settlement(3).png");
 }
 
 .has-settlement-2 {
-  background-color: green;
+  background-repeat: no-repeat;
+  background-size: contain; /* or cover depending on your needs */
+  transform: rotate(90deg); /* Rotate 90 degrees clockwise */
+  background-image: url("~@/assets/images/Settlement (1).png");
 }
 
 .has-settlement-3 {
-  background-color: orange;
+  background-repeat: no-repeat;
+  background-size: contain; /* or cover depending on your needs */
+  transform: rotate(90deg); /* Rotate 90 degrees clockwise */
+  background-image: url("~@/assets/images/Settlement (2).png");
+}
+
+.city-0 {
+  background-image: url("~@/assets/images/City.png");
+  background-repeat: no-repeat;
+  background-size: contain; /* or cover depending on your needs */
+  transform: rotate(90deg); /* Rotate 90 degrees clockwise */
+
+}
+
+.city-1 {
+  background-repeat: no-repeat;
+  background-size: contain; /* or cover depending on your needs */
+  transform: rotate(90deg); /* Rotate 90 degrees clockwise */
+  background-image: url("~@/assets/images/City (1).png");
+}
+
+.city-2 {
+  background-repeat: no-repeat;
+  background-size: contain; /* or cover depending on your needs */
+  transform: rotate(90deg); /* Rotate 90 degrees clockwise */
+  background-image: url("~@/assets/images/City (2).png");
+}
+
+.city-3 {
+  background-repeat: no-repeat;
+  background-size: contain; /* or cover depending on your needs */
+  transform: rotate(90deg); /* Rotate 90 degrees clockwise */
+  background-image: url("~@/assets/images/City (3).png");
 }
 
 
@@ -2097,8 +2142,8 @@ ol.odd {
   border-bottom: 1px solid black;
   border-right: 1px solid black; */
 
-  height: 20px;
-  width: 20px;
+  height: 40px;
+  width: 40px;
   position: absolute;
   z-index: 800;
 }
@@ -2114,15 +2159,7 @@ ol.odd {
   background-color: brown; /* Adjust color as needed */
   border-radius: 50%;
 }
-.settlement-svg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px; /* Adjust width as needed */
-  height: 40px; /* Adjust height as needed */
-  /* Add any additional styling properties here */
-}
+
 
 
 .hex .settlement.target {
@@ -2138,12 +2175,12 @@ ol.odd {
 }
 
 .hex .settlement.t {
-  top: 55px;
-  left: 100px;
+  top: 45px;
+  left: 95px;
 }
 
 .hex .settlement.tl {
-  top: -15px;
+  top: -25px;
   left: 65px;
 }
 
@@ -2163,12 +2200,12 @@ ol.odd {
 }
 
 .hex .city.t {
-  top: 55px;
-  left: 100px;
+  top: 45px;
+  left: 95px;
 }
 
 .hex .city.tl {
-  top: -15px;
+  top: -25px;
   left: 65px;
 }
 
