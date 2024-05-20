@@ -1,4 +1,4 @@
-package org.example.backend;
+package org.example.backend.security;
 
 import org.example.backend.sockets.AnnouncementDistributor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,8 @@ import java.util.Set;
 @EnableWebSocket
 public class APIConfig implements WebMvcConfigurer, WebSocketConfigurer {
 
-    public Set<String> UNSECURED_PATHS =
-            Set.of("/users/login", "/h2-console", "/favicon.ico");
+    public Set<String> SECURED_PATHS =
+            Set.of("/game");
 
     public String getIssuer() {
         return issuer;
@@ -47,7 +47,7 @@ public class APIConfig implements WebMvcConfigurer, WebSocketConfigurer {
     @Value("${jwt.issuer:private company}")
     private String issuer;
 
-    @Value("${jwt.passphrase:This is very secret information for my private encryption key.}")
+    @Value("${jwt.passphrase:This is very secret information for my private encryption key. YAPPA YAPPA YAPPA}")
     private String passphrase;
 
     @Value("${jwt.duration-of-validity:1200}") // default 20 minutes;

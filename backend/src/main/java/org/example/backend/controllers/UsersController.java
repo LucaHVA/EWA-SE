@@ -1,7 +1,7 @@
 package org.example.backend.controllers;
 
 import jakarta.transaction.Transactional;
-import org.example.backend.APIConfig;
+import org.example.backend.security.APIConfig;
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.User;
 import org.example.backend.repositories.UsersRepository;
@@ -16,7 +16,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author Luca Rijkbost & Armando Labega
@@ -76,7 +75,6 @@ public class UsersController {
     public ResponseEntity<User> loginUser(@RequestBody User loginUser) {
         // Retrieve the user from the repository by username
         User user = usersRepository.findByUsername(loginUser.getUsername());
-        long randomId = new Random().nextLong();
 
         // Check if the user exists and if the password matches
         if (user != null && user.getPassword().equals(loginUser.getPassword())) {
@@ -96,7 +94,7 @@ public class UsersController {
     @PutMapping("/{id}")
     public User updateUser(@PathVariable long id, @RequestBody User user) {
         if (id != user.getId()) {
-            throw new ResourceNotFoundException("Scooter-id = " + user.getId() + " does not match path parameter = " + id);
+            throw new ResourceNotFoundException("user-id = " + user.getId() + " does not match path parameter = " + id);
         }
         return usersRepository.save(user);
     }

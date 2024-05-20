@@ -15,6 +15,8 @@ public class User implements Identifiable<Long>{
     private String username;
     private String email;
     private String password;
+
+    private String role;
     @Lob
     @Column(columnDefinition = "TEXT")
     private String profilePicture;

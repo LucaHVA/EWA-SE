@@ -75,6 +75,8 @@ public class DataLoader implements CommandLineRunner {
         users.add(this.userRepository.save(new User(0L, "user2", "user2@mail.com", "password")));
         users.add(this.userRepository.save(new User(0L, "user3", "user3@mail.com", "password")));
         users.add(this.userRepository.save(new User(0L, "user4", "user4@mail.com", "password")));
+        users.add(this.userRepository.save(new User(0L, "user5", "user5@mail.com", "password")));
+
     }
 
     private void createInitialGameData() {

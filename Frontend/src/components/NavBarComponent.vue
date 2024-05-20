@@ -42,6 +42,8 @@
 <script>
 export default {
   name: "NavbarComponent",
+
+  inject:["usersService"],
   computed: {
     isLoggedIn() {
       // Check if user information exists in local storage
@@ -49,9 +51,10 @@ export default {
     }
   },
   methods: {
-    logout() {
+   async logout() {
       // Clear user info from local storage
       localStorage.removeItem('userInfo');
+      await this.usersService.signOut()
       window.location.reload();
     }
   }
