@@ -458,6 +458,7 @@ export default {
       currentPlayerIndex: 0,
       playerColors: ["red", "blue", "green", "orange"],
       players: [],
+      playerPoints: [0, 0, 0, 0],
       currentPlayerResources: [],
       robberHexIndex: null,
       hasRolledDice: false,
@@ -561,6 +562,80 @@ export default {
   },
   methods: {
 
+    checkConnectedRoads() {
+      // Helper function to check if two roads are connected
+      const areRoadsConnected = (road1, road2) => {
+        const from1 = parseInt(road1.dataset.from);
+        const to1 = parseInt(road1.dataset.to);
+        const from2 = parseInt(road2.dataset.from);
+        const to2 = parseInt(road2.dataset.to);
+
+        return (from1 === from2 || from1 === to2 || to1 === from2 || to1 === to2);
+      };
+
+      // Helper function to find all connected roads starting from a specific road
+      const findConnectedRoads = (startRoad, playerIndex) => {
+        const stack = [startRoad];
+        const connectedRoads = new Set();
+
+        while (stack.length > 0) {
+          const currentRoad = stack.pop();
+          if (!connectedRoads.has(currentRoad)) {
+            connectedRoads.add(currentRoad);
+            const fromIndex = parseInt(currentRoad.dataset.from);
+            const toIndex = parseInt(currentRoad.dataset.to);
+
+            // Get all roads adjacent to the current road
+            const roadsAdjacentToFrom = document.querySelectorAll(`.road.r${fromIndex}.build-${playerIndex}`);
+            const roadsAdjacentToTo = document.querySelectorAll(`.road.r${toIndex}.build-${playerIndex}`);
+            const adjacentRoads = Array.from(roadsAdjacentToFrom).concat(Array.from(roadsAdjacentToTo));
+
+            // Add all connected roads to the stack
+            for (const adjacentRoad of adjacentRoads) {
+              if (!connectedRoads.has(adjacentRoad) && areRoadsConnected(currentRoad, adjacentRoad)) {
+                stack.push(adjacentRoad);
+              }
+            }
+          }
+        }
+
+        return connectedRoads;
+      };
+
+      // Iterate through each player
+      this.players.forEach((player, playerIndex) => {
+        const playerRoads = document.querySelectorAll(`.road.build-${playerIndex}`);
+        let longestRoadLength = 0;
+        let longestRoads = [];
+
+        // Iterate through each road and find the connected roads
+        playerRoads.forEach(road => {
+          const connectedRoads = findConnectedRoads(road, playerIndex);
+          if (connectedRoads.size > longestRoadLength) {
+            longestRoadLength = connectedRoads.size;
+            longestRoads = Array.from(connectedRoads);
+          }
+        });
+
+        // Log the roads built by the player
+        console.log(`Player ${playerIndex} (${player.name}) roads:`, Array.from(playerRoads).map(road => ({
+          from: road.dataset.from,
+          to: road.dataset.to
+        })));
+
+        // Log the longest connected road for the player
+        console.log(`Player ${playerIndex} (${player.name}) longest connected road length:`, longestRoadLength);
+        console.log(`Player ${playerIndex} (${player.name}) longest connected road IDs:`,
+            longestRoads.map(road => ({
+              from: road.dataset.from,
+              to: road.dataset.to
+            }))
+        );
+      });
+    },
+
+
+
 
     upgradeSettlementToCity() {
       // Set a flag to indicate that the player is in the process of upgrading a settlement to a city
@@ -606,7 +681,7 @@ export default {
       // Add the 'city' class along with the player's ID to the clicked settlement element
       clickedSettlement.classList.add(`city-${this.currentPlayerIndex}`);
 
-      // Perform any other logic related to upgrading the settlement to a city
+      this.playerPoints[this.currentPlayerIndex] += 1;
 
       // Reset the flag to indicate that the upgrade process is complete
       this.isUpgradingToCity = false;
@@ -752,6 +827,9 @@ export default {
           settlementElement.classList.add(`has-settlement-${this.currentPlayerIndex}`);
         }
 
+        this.playerPoints[this.currentPlayerIndex] += 1;
+
+
         // Set the flag to indicate that the player has built on their first or second turn
         if (isFirstTurn) {
           currentPlayer.hasBuiltFirstTurn = true;
@@ -876,7 +954,12 @@ export default {
           const roadElement = document.querySelector(`.road.r${fromIndex}.r${toIndex}`);
           if (roadElement) {
             roadElement.classList.add(`build-${this.currentPlayerIndex}`);
+            roadElement.dataset.from = fromIndex;
+            roadElement.dataset.to = toIndex;
+            console.log(`Created road with data-from=${roadElement.dataset.from} and data-to=${roadElement.dataset.to}`);
           }
+
+          this.checkConnectedRoads();
 
 
 
@@ -1285,7 +1368,7 @@ export default {
       const player4 = new Player("orange", "NaN", [], []);
 
       // Assign initial resources to the red player
-      player1.resources = ['wheat', 'wheat', 'wheat', 'ore', 'ore', 'ore'];
+      player1.resources = [];
       player2.resources = [];
       player3.resources = [];
       player4.resources = [];
