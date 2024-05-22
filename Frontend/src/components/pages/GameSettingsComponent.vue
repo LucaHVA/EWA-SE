@@ -1,3 +1,5 @@
+<!--testing-->
+
 <template>
   <div class="container">
     <div class="left-column-gamesettings-page">
@@ -9,7 +11,8 @@
           <p class="player-name">{{ player.name }} <span v-if="player.host">(Host)</span></p>
           <div class="player-status">
             <button class="ready-button transition">Ready</button>
-            <button v-if="!player.host" class="kick-button transition" @click="kickPlayer(index)">Kick</button>
+            <button v-if="!player.host" class="kick-button transition" @click="kickPlayer(index)">Kick
+            </button>
           </div>
         </div>
         <div v-if="canAddBot" class="player-pill transition">
@@ -28,7 +31,7 @@
       </div>
       <div>
         <h3>Turn Duration (In seconds)</h3>
-        <span>{{ this.currentGame.turnDuration }}</span>
+        <span>{{ this.currentGame.turnDuration}}</span>
         <input type="range" min="30" max="90" v-model.number="currentGame.turnDuration" class="transition center-column-slider">
       </div>
       <div>
@@ -45,52 +48,68 @@
                                 @close="showModal = false"
                                 :botCount="botCount"
                                 :totalPlayers="totalPlayers"
+
                                 :gameSettings="currentGame"
                                 :numberOfPlayers="currentGame.numberOfPlayers"
                                 :turnDuration="currentGame.turnDuration"
                                 :pointsToWin="currentGame.pointsToWin">
     </popUpGameSettingsComponent>
+
+
   </div>
 </template>
 
 <script>
 import popUpGameSettingsComponent from "@/components/pages/popUpGameSettingsComponent.vue";
 
+
 export default {
   name: "GameSettingsComponent",
   components: {
     popUpGameSettingsComponent,
   },
-  inject: ['gameService', 'usersService'],
-  props: {
+  inject:['gameService', 'usersService'],
+  props:{
     selectedGame: Object,
   },
   data() {
     return {
-      gameId: null,
+      gameId:null,
       userDetails: null,
-      players: [],
+      players:[],
       numberOfPlayers: 4,
       turnDuration: 60,
       pointsToWin: 8,
       botCount: 0,
       showModal: false,
-      currentGame: {},
-      playerNumber: 1
+      currentGame:Object
     };
   },
   async created() {
-    this.userDetails = await JSON.parse(localStorage.getItem('userInfo'));
-    this.gameId = this.$route.params.id;
 
-    this.currentGame = await this.fetchGameById(this.gameId);
+    // Fetch current user info
+  await this.fetchUserInfo();
+
+    this.userDetails = await this.usersService._currentUser
+
+    // Get current game id for lobby
+    this.gameId=this.$route.params.id;
+
+    // Get game
+    this.currentGame= await this.fetchGameById(this.gameId);
+
+    // Fetch all players from game
+    this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+
+    console.log("chris ",this.fetchedPlayers)
 
     await this.addCurrentUserToPlayers();
 
-    this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
-    this.fetchedPlayers.forEach(player => {
-      this.players.push({ name: player.user.username, host: player.host });
-    });
+    //Fixme Add players from db
+    // async not quite working with pushing to players array with users
+    // this.fetchedPlayers.forEach(function(player){
+    //   console.log(player.user.username)
+    // });
   },
   computed: {
     totalPlayers() {
@@ -104,26 +123,44 @@ export default {
     addBot() {
       if (this.botCount < this.numberOfPlayers - 1) {
         this.botCount++;
-        const randomNames = ["Naruto", "Sasuke", "Goku", "Vegeta", "Luffy", "Ichigo", "Eren", "Levi", "Gon", "Killua", "Saitama", "Mikasa", "Kurama"];
+        const randomNames = ["Naruto", "Sasuke", "Goku", "Vegeta", "Luffy", "Ichigo", "Eren", "Levi",
+          "Gon", "Killua", "Saitama", "Mikasa", "Kurama"];
         const randomIndex = Math.floor(Math.random() * randomNames.length);
         const botName = randomNames[randomIndex] + " (Bot)"; // add "(bot)" to the random name
-        this.players.push({ name: botName });
+        this.players.push({name: botName});
       }
     },
     kickPlayer(index) {
       if (!this.players[index].host) {
         this.players.splice(index, 1);
-        this.botCount--;
+        if (this.players.every(player => !player.host)) {
+          this.botCount--;
+        } else {
+          this.botCount--;
+        }
+        // Update the indexes of the bots when deleted
+        this.players.forEach((player, i) => {
+          if (!player.host && player.index !== undefined) {
+            player.index = i + 1;
+          }
+        });
       }
     },
-    async addCurrentUserToPlayers() {
-      const userInfo = await JSON.parse(localStorage.getItem('userInfo'));
+
+    async  fetchUserInfo() {
+      const userInfo = this.usersService.getCurrentUser;
       if (userInfo) {
+        this.players.push({ name: userInfo.username });
+      }
+    },
+    async addCurrentUserToPlayers(){
+      const user =  this.usersService.getCurrentUser
+
+      if (user) {
         try {
-          let userId = userInfo["id"];
-          let user = await this.usersService.asyncFindById(userId);
-          this.player = await this.gameService.addNewPlayerToGame(this.gameId, user, this.playerNumber);
-          this.playerNumber++;
+
+          this.player = await this.gameService.addNewPlayerToGame(this.gameId, user, 1);
+          console.log(this.player)
         } catch (error) {
           console.error("Error adding new player to game:", error);
         }
@@ -132,11 +169,13 @@ export default {
     async fetchGameById(gameId) {
       try {
         this.game = await this.gameService.asyncGetById(gameId);
-        return this.game;
+        return this.game
       } catch (error) {
         console.error("Error fetching game by ID:", error);
       }
     },
+
+
   }
 }
 </script>

@@ -30,7 +30,7 @@ export class FetchInterceptor {
             responseError: this.responseError,
         });
 
-        console.log("FetchInterceptor has been registered for user:", this.userAdaptor.getCurrentUser);
+        // console.log("FetchInterceptor has been registered for user:", this.userAdaptor.getCurrentUser);
     }
 
     request(url, options) {
@@ -50,7 +50,7 @@ export class FetchInterceptor {
     }
 
     response(response) {
-        console.log('Received response:', response);
+        // console.log('Received response:', response);
         FetchInterceptor.theInstance.tryRecoverNewJWToken(response);
 
         if (response.status >= 400 && response.status < 600) {

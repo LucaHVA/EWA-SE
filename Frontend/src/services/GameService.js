@@ -92,8 +92,7 @@ export class GameService {
 
     async addNewPlayerToGame(gameId, user, playerNumber) {
 
-        console.log("game service query params");
-        console.log(user);
+        // console.log(user);
 
         // let userId = user["userId"];
         // let user = await UsersAdaptor.asyncFindById(userId);
