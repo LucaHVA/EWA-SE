@@ -37,10 +37,10 @@
 
       <!-- Match History Section -->
       <div class="match-history-container">
-        <h2>Recent Games</h2>
+        <h1>Recent Games</h1>
         <ul>
-          <li v-for="(game, index) in recentGames" :key="index" class="pill transition" @click="showGameDetails(game)">
-            {{ game.date }} - {{ game.result }}
+          <li v-for="(game, index) in matchHistory" :key="index" class="pill transition" @click="showGameDetails(game)">
+            {{ game.startTime }} - {{ game.placement }}
           </li>
         </ul>
         <button class="cancel-button transition" @click="showMoreHistory">See More</button>
@@ -48,23 +48,28 @@
     </div>
 
     <!-- Modal Section -->
-    <div v-if="isModalOpen" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <h2 v-if="selectedGame">Game Details</h2>
-        <h2 v-else>Match History</h2>
-        <div v-if="selectedGame">
-          <p><strong>Date:</strong> {{ selectedGame.date }}</p>
-          <p><strong>Result:</strong> {{ selectedGame.result }}</p>
-          <!-- Add more details here -->
+    <transition name="modal">
+      <div v-if="isModalOpen" class="modal-mask" @click="closeModal">
+        <div class="modal-wrapper">
+          <div class="modal-container" @click.stop>
+            <h1 v-if="selectedGameHistory">Game Details</h1>
+            <h1 v-else>Match History</h1>
+            <div v-if="selectedGameHistory">
+              <p><strong>Placement:</strong> {{ selectedGameHistory.placement }}</p>
+              <p><strong>Start Time:</strong> {{ selectedGameHistory.startTime }}</p>
+              <p><strong>End Time:</strong> {{ selectedGameHistory.endTime }}</p>
+            </div>
+            <ul v-else>
+              <li v-for="(game, index) in matchHistory" :key="index" class="pill transition"
+                  @click="showGameDetails(game)">
+                {{ game.startTime }} - {{ game.placement }}
+              </li>
+            </ul>
+            <button class="cancel-button transition" @click="closeModal">Close</button>
+          </div>
         </div>
-        <ul v-else>
-          <li v-for="(game, index) in matchHistory" :key="index" class="pill transition" @click="showGameDetails(game)">
-            {{ game.date }} - {{ game.result }}
-          </li>
-        </ul>
-        <button class="cancel-button transition" @click="closeModal">Close</button>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -85,7 +90,7 @@ export default {
       recentGames: [],
       matchHistory: [],
       isModalOpen: false,
-      selectedGame: null
+      selectedGameHistory: null
     };
   },
 
@@ -98,8 +103,8 @@ export default {
     cancel() {
       this.fetchUserInfo();
     },
-    fetchUserInfo() {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    async fetchUserInfo() {
+      const userInfo = await this.usersService.getCurrentUser;
       if (userInfo) {
         this.username = userInfo.username;
         this.email = userInfo.email;
@@ -132,7 +137,7 @@ export default {
       } else {
         this.alert = false;
       }
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const userInfo = JSON.parse(sessionStorage.getItem('undefined_ACC'));
       const userId = userInfo.id;
       const userUpdate = {
         id: userId,
@@ -149,7 +154,7 @@ export default {
           throw new Error('Failed to save profile.');
         }
         await this.usersService.asyncFindAll();
-        localStorage.setItem('userInfo', JSON.stringify(userUpdate));
+        sessionStorage.setItem('undefined_ACC', JSON.stringify(userUpdate));
         alert('Profile saved successfully!');
       } catch (e) {
         console.error('Error during save:', e);
@@ -158,21 +163,11 @@ export default {
     },
     async fetchMatchHistory() {
       try {
-        // Simulating API call
-        const history = [
-          { date: '2024-05-10', result: 'Won' },
-          { date: '2024-05-09', result: 'Lost' },
-          { date: '2024-05-08', result: 'Won' },
-          { date: '2024-05-07', result: 'Won' },
-          { date: '2024-05-06', result: 'Lost' },
-          { date: '2024-05-05', result: 'Won' },
-          { date: '2024-05-04', result: 'Lost' },
-          // more history...
-        ];
-        this.recentGames = history.slice(0, 5);
-        this.matchHistory = history;
-      } catch (e) {
-        console.error('Error fetching match history:', e);
+        const userId = JSON.parse(sessionStorage.getItem('undefined_ACC')).id;
+        this.matchHistory = await this.usersService.fetchMatchHistory(userId);
+        console.log("hello noobs " + this.matchHistory)
+      } catch (error) {
+        console.error('Failed to fetch match history:', error);
       }
     },
     showMoreHistory() {
@@ -180,13 +175,12 @@ export default {
     },
     closeModal() {
       this.isModalOpen = false;
-      this.selectedGame = null; // Reset selected game
+      this.selectedGameHistory = null;
     },
     showGameDetails(game) {
-      this.selectedGame = game;
-      this.isModalOpen = true; // Open the modal instantly when a game is clicked
+      this.selectedGameHistory = game;
+      this.isModalOpen = true;
     }
-
   }
 }
 </script>
@@ -273,7 +267,6 @@ form input::placeholder {
   opacity: 1;
 }
 
-
 /*buttons*/
 .button-container {
   display: flex;
@@ -340,8 +333,9 @@ input {
   margin-left: 20px;
 }
 
-.match-history-container h2 {
-  font-size: 24px;
+.match-history-container h1 {
+  display: flex;
+  justify-content: center;
 }
 
 .match-history-container ul {
@@ -361,12 +355,12 @@ input {
   font-weight: bolder;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   background-color: var(--white);
   padding: 0.5rem 1rem;
   border-radius: 10px;
-  width: 150px;
-  height: 20px;
+  width: 250px;
+  height: 30px;
 }
 
 .pill:hover {
@@ -375,40 +369,47 @@ input {
 }
 
 /* Modal */
-.modal-overlay {
+.modal-mask {
   position: fixed;
+  z-index: 9998;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: opacity 0.5s ease;
 }
 
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 5px;
-  width: 80%;
-  max-width: 600px;
+.modal-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 
-.modal-content h2 {
-  margin-top: 0;
+.modal-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 450px;
+  padding: 20px 30px;
+  background-color: var(--white);
+  border-radius: 2px;
+  box-shadow: 0 15px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.4s ease;
 }
 
-.modal-content ul {
-  list-style: none;
-  padding: 0;
+/* Transition for modal */
+.modal-enter-active, .modal-leave-active {
+  transition: opacity 0.5s, transform 0.5s;
 }
 
-.modal-content li {
-  margin-bottom: 10px;
-}
-
-.modal-content button {
-  margin-top: 10px;
+.modal-enter-from, .modal-leave-to {
+  opacity: 0;
+  transform: scale(1.3);
 }
 </style>
