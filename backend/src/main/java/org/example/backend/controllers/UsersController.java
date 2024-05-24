@@ -1,6 +1,8 @@
 package org.example.backend.controllers;
 
 import jakarta.transaction.Transactional;
+import org.example.backend.models.GameHistory;
+import org.example.backend.repositories.GameHistoriesRepository;
 import org.example.backend.security.APIConfig;
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.User;
@@ -30,6 +32,10 @@ public class UsersController {
     @Autowired
     private UsersRepository usersRepository;
 
+    @Qualifier("GAMEHISTORIES.JPA")
+    @Autowired
+    private GameHistoriesRepository gameHistoriesRepository;
+
     @Autowired
     private APIConfig apiConfig;
 
@@ -55,8 +61,6 @@ public class UsersController {
         }
         return ResponseEntity.ok(user);
     }
-
-
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
@@ -97,5 +101,34 @@ public class UsersController {
             throw new ResourceNotFoundException("user-id = " + user.getId() + " does not match path parameter = " + id);
         }
         return usersRepository.save(user);
+    }
+
+    @GetMapping("/{userId}/games")
+    public ResponseEntity<List<GameHistory>> getUserGameHistory(@PathVariable long userId) {
+        // Check if the user exists
+        User user = usersRepository.findById(userId);
+        if (user == null) {
+            throw new ResourceNotFoundException("User with ID " + userId + " not found.");
+        }
+
+        // Fetch game history for the user using GameHistoriesRepository
+        List<GameHistory> gameHistory = gameHistoriesRepository.findByUserId(userId);
+        return ResponseEntity.ok(gameHistory);
+    }
+
+    @PostMapping("/{userId}/games")
+    public ResponseEntity<GameHistory> addGameToUserGameHistory(@PathVariable long userId, @RequestBody GameHistory gameHistory) {
+        // Check if the user exists
+        User user = usersRepository.findById(userId);
+        if (user == null) {
+            throw new ResourceNotFoundException("User with ID " + userId + " not found.");
+        }
+
+        // Set the user for the game history
+        gameHistory.setUser(user);
+
+        // Save the game history using GameHistoriesRepository
+        GameHistory savedGameHistory = gameHistoriesRepository.save(gameHistory);
+        return ResponseEntity.ok(savedGameHistory);
     }
 }

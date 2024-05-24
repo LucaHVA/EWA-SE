@@ -1,10 +1,7 @@
 package org.example.backend;
 
 import jakarta.transaction.Transactional;
-import org.example.backend.models.Game;
-import org.example.backend.models.Player;
-import org.example.backend.models.PlayerKey;
-import org.example.backend.models.User;
+import org.example.backend.models.*;
 import org.example.backend.repositories.EntityRepository;
 import org.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.sql.Time;
 import java.util.List;
 
 @Component
@@ -24,6 +22,9 @@ public class DataLoader implements CommandLineRunner {
     private EntityRepository<Game, String> gameRepository;
     @Autowired
     private EntityRepository<Player, PlayerKey> playerRepository;
+    @Qualifier("GAMEHISTORIES.JPA")
+    @Autowired
+    private EntityRepository<GameHistory, Long> gameHistoryRepository;
 
     @Override
     @Transactional
@@ -32,6 +33,7 @@ public class DataLoader implements CommandLineRunner {
         this.createInitialUsers();
         this.createInitialGameData();
         this.createInitialPlayers();
+        this.createInitialGameHistories();
     }
 
     private void createInitialPlayers() {
@@ -59,12 +61,12 @@ public class DataLoader implements CommandLineRunner {
             Player filledPlayer = new Player(1, game3, userRepository.findById(30002L));
             filledPlayer.setPlayerColor("blue");
             filledPlayer.setPlayerGameInfo(1, 1, 1, 1);
-            filledPlayer.setPlayerResources(1,1,1,1,1);
-            filledPlayer.setPlayerDevelopments(0,0,0,0,0);
+            filledPlayer.setPlayerResources(1, 1, 1, 1, 1);
+            filledPlayer.setPlayerDevelopments(0, 0, 0, 0, 0);
             playerRepository.save(filledPlayer);
-
         }
     }
+
 
     private void createInitialUsers() {
         List<User> users = this.userRepository.findAll();
@@ -87,5 +89,31 @@ public class DataLoader implements CommandLineRunner {
         games.add(this.gameRepository.save(new Game("THY06R", 4, 60, 10)));
         games.add(this.gameRepository.save(new Game("97FYM2", 4, 60, 10)));
         games.add(this.gameRepository.save(new Game("SUS420", 4, 60, 10)));
+    }
+
+    private void createInitialGameHistories() {
+        List<User> users = this.userRepository.findAll();
+        Time startTime = new Time(System.currentTimeMillis() - 3600 * 1000); // 1 hour ago
+        Time endTime = new Time(System.currentTimeMillis());
+
+        if (!users.isEmpty()) {
+            // Assuming users.get(0) is "Armando"
+            gameHistoryRepository.save(new GameHistory(0L, users.get(0), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(0), 2, startTime, endTime));
+
+            // Assuming users.get(1) is "Ballmando"
+            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 3, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 3, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 3, startTime, endTime));
+
+
+            // Additional game histories for other users
+            for (int i = 2; i < users.size(); i++) {
+                gameHistoryRepository.save(new GameHistory(0L, users.get(i), (i % 4) + 1, startTime, endTime));
+            }
+        }
     }
 }
