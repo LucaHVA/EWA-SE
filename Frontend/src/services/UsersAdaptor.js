@@ -1,5 +1,6 @@
-import { fetch } from "whatwg-fetch";
+import {fetch} from "whatwg-fetch";
 import {User} from "@/models/user";
+import {GameHistory} from "@/models/gameHistory";
 
 export class UsersAdaptor {
     resourcesUrl;
@@ -102,7 +103,7 @@ export class UsersAdaptor {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({username, password}),
                 credentials: "include"
             };
             const response = await this.fetchJson(url, options);
@@ -160,5 +161,29 @@ export class UsersAdaptor {
 
     signOut() {
         this.saveTokenIntoBrowserStorage(null, null);
+    }
+
+    async fetchMatchHistory(userId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/games`;
+            const options = {
+                method: 'GET',
+                headers: {
+                    'Authorization': this.currentToken
+                }
+            };
+            const response = await this.fetchJson(url, options);
+            if (response) {
+                const matchHistory = await response.json();
+
+                return matchHistory.map(GameHistory.copyConstructor);
+            } else {
+                console.error('Failed to fetch match history.');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error during fetch match history:', error);
+            return null;
+        }
     }
 }
