@@ -1,7 +1,9 @@
 class Player {
 
-    playerId;
+    playerNumber;
+    gameId;
     user;
+    playerColor;
     resources;
     developmentCards;
     pointAmount;
@@ -25,9 +27,11 @@ class Player {
         VICTORY: "1 additional Victory Point"
     }
 
-    constructor(playerId, user, resources, developmentCards, pointAmount, longestRoad, settlementAmount, knightsUsed) {
-        this.playerId = playerId;
+    constructor(playerNumber, gameId, user, playerColor, resources, developmentCards, pointAmount, longestRoad, settlementAmount, knightsUsed) {
+        this.playerNumber = playerNumber;
+        this.gameId = gameId;
         this.user = user;
+        this.playerColor = playerColor;
         this.resources = resources;
         this.developmentCards = developmentCards;
         this.pointAmount = pointAmount;
@@ -36,12 +40,16 @@ class Player {
         this.knightsUsed = knightsUsed;
     }
 
+
+
     static copyConstructor(player){
         if (player==null) return null;
 
         const copy = new player(
-            player.playerId,
+            player.playerColor,
+            player.gameId,
             player.user,
+            player.playerColor,
             player.resources,
             player.developmentCards,
             player.pointAmount,
@@ -57,8 +65,10 @@ class Player {
         if (playerJson == null) return null;
 
         // Extracting individual fields from the JSON object
-        const playerId = playerJson.id;
+        const playerNumber = playerJson.playerNumber;
+        const gameId = playerJson.id.gameId;
         const user = playerJson.user;
+        const playerColor = playerJson.playerColor;
 
         // Create arrays for resources and development cards based on the quantity
         const resources = [];
@@ -82,8 +92,10 @@ class Player {
 
         // Creating a new Player instance with the extracted values
         const playerInstance = new Player(
-            playerId,
+            playerNumber,
+            gameId,
             user,
+            playerColor,
             resources,
             developmentCards,
             pointAmount,
@@ -91,6 +103,19 @@ class Player {
             settlementAmount,
             knightsUsed
         );
+
+        return playerInstance;
+    }
+
+    static dbConstructorNewPlayer(playerJson){
+        if (playerJson == null) return null;
+
+        // Extracting individual fields from the JSON object
+        const playerNumber = playerJson.playerNumber;
+        const user = playerJson.user;
+        const playerColor = playerJson.playerColor;
+
+        const playerInstance = new Player(playerNumber, null, user, playerColor);
 
         return playerInstance;
     }

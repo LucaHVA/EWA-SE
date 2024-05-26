@@ -10,7 +10,6 @@
             <!--            <li class="nav-item">-->
             <!--              <router-link to="/leaderboard" class="nav-link" active-class="active">Leaderboard</router-link>-->
             <!--            </li>-->
-            <!-- TODO: tutorial page -->
             <!-- <li class="nav-item">-->
             <!--    <router-link to="/tutorial" class="nav-link" active-class="active">Tutorial</router-link>-->
             <!-- </li>-->
@@ -18,7 +17,6 @@
         </li>
 
         <li>
-          <!-- TODO: login and sign-up (not logged in) AND logout and profile (logged in)-->
           <ul class="user-logging">
             <li class="nav-item" v-if="isLoggedIn">
               <router-link to="/profilePage" class="nav-link" active-class="active">Profile</router-link>
@@ -42,6 +40,8 @@
 <script>
 export default {
   name: "NavbarComponent",
+
+  inject:["usersService"],
   computed: {
     isLoggedIn() {
       // Check if user information exists in local storage
@@ -49,9 +49,10 @@ export default {
     }
   },
   methods: {
-    logout() {
+   async logout() {
       // Clear user info from local storage
       localStorage.removeItem('userInfo');
+      await this.usersService.signOut()
       window.location.reload();
     }
   }

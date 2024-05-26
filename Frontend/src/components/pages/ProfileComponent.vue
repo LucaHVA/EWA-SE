@@ -1,44 +1,84 @@
 <template>
   <div class="container">
-    <div class="title">
+    <div class="profile-page-title">
       <h1>Profile</h1>
     </div>
+    <div class="profile-page-content">
+      <!-- Profile Picture Section -->
+      <div class="profile-pic-container">
+        <div @click="triggerFileInput" class="profile-pic-wrapper">
+          <img :src="imageUrl" class="profile-pic" alt="Profile Picture"/>
+          <input type="file" @change="onFileChange" accept="image/*" ref="fileInput" style="display: none;"/>
+          <div class="profile-pic-overlay">Change Profile Picture</div>
+        </div>
+      </div>
+      <!-- User Info Section -->
+      <div class="profile-info">
+        <div class="form-container">
+          <form>
+            <label for="username">Change Username</label>
+            <input v-model="username" type="text" id="username" name="username" placeholder="Username">
 
-    <div class="profile-pic-container">
-      <div @click="triggerFileInput">
-        <img :src="imageUrl" class="profile-pic"  alt="Profile Picture"/>
-        <input type="file" @change="onFileChange" accept="image/*" ref="fileInput" style="display: none;" />
+            <label for="email">Change Email</label>
+            <input v-model="email" type="email" id="email" name="email" placeholder="Email">
+
+            <label for="password">Change Password</label>
+            <input v-model="password" type="password" id="password" name="password" placeholder="Password">
+            <div class="alertMessage" role="alert" v-if="alert">
+              Your password should be between 8-16 characters.
+            </div>
+          </form>
+          <div class="button-container">
+            <button type="submit" @click="cancel" class="cancel-button transition">Cancel</button>
+            <button type="submit" @click="save" class="save-button transition">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Match History Section -->
+      <div class="match-history-container">
+        <h1>Recent Games</h1>
+        <ul>
+          <li v-for="(game, index) in matchHistory" :key="index" class="pill transition" @click="showGameDetails(game)">
+            {{ game.startTime }} - {{ game.placement }}
+          </li>
+        </ul>
+        <button class="cancel-button transition" @click="showMoreHistory">See More</button>
       </div>
     </div>
 
-    <div class="form-container">
-      <form>
-        <label for="email">Change Username</label>
-        <input v-model="username" type="email" id="email" name="email" placeholder="Username">
-
-        <label for="username">Change Email</label>
-        <input v-model="email" type="text" id="username" name="username" placeholder="Email">
-
-        <label for="password">Change Password</label>
-        <input v-model="password" type="password" id="password" name="password" placeholder="Password">
-        <div class="alertMessage" role="alert" v-if="alert">
-          Your password should be between 8-16 characters.
+    <!-- Modal Section -->
+    <transition name="modal">
+      <div v-if="isModalOpen" class="modal-mask" @click="closeModal">
+        <div class="modal-wrapper">
+          <div class="modal-container" @click.stop>
+            <h1 v-if="selectedGameHistory">Game Details</h1>
+            <h1 v-else>Match History</h1>
+            <div v-if="selectedGameHistory">
+              <p><strong>Placement:</strong> {{ selectedGameHistory.placement }}</p>
+              <p><strong>Start Time:</strong> {{ selectedGameHistory.startTime }}</p>
+              <p><strong>End Time:</strong> {{ selectedGameHistory.endTime }}</p>
+            </div>
+            <ul v-else>
+              <li v-for="(game, index) in matchHistory" :key="index" class="pill transition"
+                  @click="showGameDetails(game)">
+                {{ game.startTime }} - {{ game.placement }}
+              </li>
+            </ul>
+            <button class="cancel-button transition" @click="closeModal">Close</button>
+          </div>
         </div>
-      </form>
-    </div>
-
-    <div class="button-container">
-      <button type="submit" @click="cancel" class="cancel-button">Cancel</button>
-      <button type="submit" @click="save" class="pos-button">Save</button>
-    </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
 import defaultImage from '@/assets/images/defaultpfp.png';
+
 export default {
   name: "ProfileComponent",
-  inject:['usersService'],
+  inject: ['usersService'],
 
   data() {
     return {
@@ -46,29 +86,33 @@ export default {
       username: '',
       email: '',
       password: '',
-      alert: false
+      alert: false,
+      recentGames: [],
+      matchHistory: [],
+      isModalOpen: false,
+      selectedGameHistory: null
     };
   },
 
   created() {
     this.fetchUserInfo();
+    this.fetchMatchHistory();
   },
 
   methods: {
     cancel() {
       this.fetchUserInfo();
     },
-    fetchUserInfo() {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    async fetchUserInfo() {
+      const userInfo = await this.usersService.getCurrentUser;
       if (userInfo) {
         this.username = userInfo.username;
         this.email = userInfo.email;
         this.password = userInfo.password;
-        if (userInfo.profilePicture != null){
+        if (userInfo.profilePicture != null) {
           this.imageUrl = userInfo.profilePicture;
         }
       } else {
-        // Redirect to login page if userInfo is not found
         this.$router.push({name: 'login'});
       }
     },
@@ -93,7 +137,7 @@ export default {
       } else {
         this.alert = false;
       }
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const userInfo = JSON.parse(sessionStorage.getItem('undefined_ACC'));
       const userId = userInfo.id;
       const userUpdate = {
         id: userId,
@@ -110,20 +154,40 @@ export default {
           throw new Error('Failed to save profile.');
         }
         await this.usersService.asyncFindAll();
-        localStorage.setItem('userInfo', JSON.stringify(userUpdate));
+        sessionStorage.setItem('undefined_ACC', JSON.stringify(userUpdate));
         alert('Profile saved successfully!');
       } catch (e) {
         console.error('Error during save:', e);
         alert('Failed to save profile. Please try again.');
       }
     },
+    async fetchMatchHistory() {
+      try {
+        const userId = JSON.parse(sessionStorage.getItem('undefined_ACC')).id;
+        this.matchHistory = await this.usersService.fetchMatchHistory(userId);
+        console.log("hello noobs " + this.matchHistory)
+      } catch (error) {
+        console.error('Failed to fetch match history:', error);
+      }
+    },
+    showMoreHistory() {
+      this.isModalOpen = true;
+    },
+    closeModal() {
+      this.isModalOpen = false;
+      this.selectedGameHistory = null;
+    },
+    showGameDetails(game) {
+      this.selectedGameHistory = game;
+      this.isModalOpen = true;
+    }
   }
 }
 </script>
 
 <style scoped>
 /* Title */
-.title {
+.profile-page-title {
   text-align: center;
   margin-top: 50px;
   margin-bottom: 10px;
@@ -131,15 +195,20 @@ export default {
   font-family: "Inria Sans", sans-serif;
 }
 
-.title h1 {
+.profile-page-title h1 {
   margin: 0;
 }
 
+/*content*/
+.profile-page-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/*user info container*/
 .form-container {
-  width: 100%;
   max-width: 400px;
-  margin: 0 auto;
-  box-sizing: border-box;
 }
 
 form {
@@ -169,22 +238,47 @@ form input::placeholder {
 }
 
 .profile-pic {
-  width: 150px;
-  height: 150px;
+  width: 300px;
+  height: 300px;
   border-radius: 50%;
   object-fit: cover;
 }
 
+.profile-pic-wrapper {
+  position: relative;
+}
+
+.profile-pic-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 70px;
+  border-radius: 50%;
+  font-size: 30px;
+  opacity: 0;
+  font-weight: bolder;
+  transition: opacity 0.3s ease;
+}
+
+.profile-pic-wrapper:hover .profile-pic-overlay {
+  opacity: 1;
+}
+
+/*buttons*/
 .button-container {
   display: flex;
   flex-direction: row;
   justify-content: center;
 }
 
-.cancel-button{
-  background-color: #FF7B4D;
+.cancel-button {
+  font-family: 'Raleway', sans-serif;
+  background-color: var(--coral);
   border: none;
-  color: white;
+  color: var(--white);
   padding: 15px 32px;
   text-align: center;
   text-decoration: none;
@@ -193,22 +287,129 @@ form input::placeholder {
   margin: 6px 2rem;
   cursor: pointer;
   border-radius: 8px;
-  font-family: 'Raleway', sans-serif;
-  font-weight: 600;
+  font-weight: bold;
   box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
 }
 
-.pos-button {
+.cancel-button:hover {
+  background-color: var(--white);
+  color: var(--coral);
+}
+
+.save-button {
+  font-family: 'Raleway', sans-serif;
+  background-color: var(--shade-of-tea);
+  border: none;
+  color: var(--white);
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  width: max-content;
+  font-size: 20px;
+  margin: 6px 2rem;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: bold;
   box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
-  margin: 4px 2rem!important;
+}
+
+.save-button:hover {
+  background-color: var(--white);
+  color: var(--shade-of-tea);
 }
 
 input {
   font-size: 1.2rem;
 }
 
-.alertMessage{
+.alertMessage {
   color: maroon;
   text-align: center;
+}
+
+/*match history container*/
+.match-history-container {
+  width: 300px;
+  margin-left: 20px;
+}
+
+.match-history-container h1 {
+  display: flex;
+  justify-content: center;
+}
+
+.match-history-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.match-history-container li {
+  margin-bottom: 10px;
+}
+
+.match-history-container button {
+  margin-top: 10px;
+}
+
+.pill {
+  font-weight: bolder;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--white);
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  width: 250px;
+  height: 30px;
+}
+
+.pill:hover {
+  background-color: var(--black);
+  color: var(--white);
+}
+
+/* Modal */
+.modal-mask {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.5s ease;
+}
+
+.modal-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.modal-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 450px;
+  padding: 20px 30px;
+  background-color: var(--white);
+  border-radius: 2px;
+  box-shadow: 0 15px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.4s ease;
+}
+
+/* Transition for modal */
+.modal-enter-active, .modal-leave-active {
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+.modal-enter-from, .modal-leave-to {
+  opacity: 0;
+  transform: scale(1.3);
 }
 </style>

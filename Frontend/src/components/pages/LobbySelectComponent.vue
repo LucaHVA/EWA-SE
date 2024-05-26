@@ -17,21 +17,21 @@
               <div>{{ game.id }}</div>
             </td>
             <td>
-              <!--          TO DO!!! get amount of players in the lobby-->
-              <div>Players {{ 1 }}/{{ game.numberOfPlayers }}</div>
+              <div>Players: {{ playerCounts[game.id] }}/{{ game.numberOfPlayers }}</div>
             </td>
           </tr>
           </tbody>
         </table>
       </div>
       <div class="buttons-container-lobby-select-page">
-        <button class="create-game-button transition" @click="createGame" >Create Game</button>
+        <button class="create-game-button transition" @click="createGame">Create Game</button>
       </div>
     </div>
   </div>
   <popUpLobbySelectComponent :show="showModal"
                              @close="showModal = false"
-                             :selectedGame="selectedGame">
+                              :selectedGame="selectedGame"
+                              :playerCounts="playerCounts">
   </popUpLobbySelectComponent>
 </template>
 
@@ -41,24 +41,26 @@ import popUpLobbySelectComponent from "@/components/pages/popUpLobbySelectCompon
 
 export default {
   name: "LobbySelectComponent",
-  components: { popUpLobbySelectComponent},
-  inject:['gameService'],
+  components: {popUpLobbySelectComponent},
+  inject: ['gameService'],
 
   data() {
     return {
       searchQuery: '',
       games: [],
+      playerCounts: {},
       selectedGame: null,
       showModal: false,
     }
   },
 
   async created() {
-    this.games = await this.gameService.asyncFindAll()
+    this.games = await this.gameService.asyncFindAll();
+
+    this.games.forEach(game => {
+      this.getCurrentAmountOfPlayers(game.id);
+    });
   },
-
-
-
 
   computed: {
     filteredGames() {
@@ -71,12 +73,22 @@ export default {
       this.selectedGame = game;
       this.showModal = true;
     },
-    async createGame(){
-      const game=await  this.gameService.saveGame()
-      console.log(game)
-      // this.$emit('game-created',game)
-      this.$router.replace({ name: 'gameSettings', params: { id: game.id } });
+    async createGame() {
+      // Generate new game
+      const game = await this.gameService.saveGame();
+      // Route to next page
+      this.$router.replace({name: 'gameSettings', params: {id: game.id}});
     },
+    async getCurrentAmountOfPlayers(gameId) {
+      try {
+        // Find players of a game
+        let players = await this.gameService.asyncFindAllPlayersForGameId(gameId);
+        // Add key:value to current player counts
+        this.playerCounts[gameId] = players.length;
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }
 }
 </script>

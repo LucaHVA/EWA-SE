@@ -18,6 +18,8 @@ import NavBarComponent from "@/components/NavBarComponent";
 import {UsersAdaptor} from "@/services/UsersAdaptor";
 import HeaderComponent from "@/components/HeaderComponent";
 import {GameService} from "@/services/GameService";
+import {shallowReactive} from "vue";
+import {FetchInterceptor} from "@/services/fetch-interceptor";
 
 export default {
   name: "AppComponent",
@@ -32,11 +34,23 @@ export default {
     }
   },
   provide(){
+
+    this.userService = shallowReactive(new UsersAdaptor(process.env.VUE_APP_API_URL + '/users') ) ;
+    this.theFetchInterceptor = new FetchInterceptor(this.userService, this.$router);
+
+
     return{
-      usersService: new UsersAdaptor(process.env.VUE_APP_API_URL + '/users'),
+      usersService: this.userService,
+      fetchInterceptor:this.theFetchInterceptor,
       gameService: new GameService(process.env.VUE_APP_API_URL +'/game')
     }
   },
+
+  unmounted() {
+    console.log('App.unmounted has been called');
+    this.theFetchInterceptor.unregister();
+  },
+
   methods: {
     isIgnoredRoute(path, ignoredPaths) {
       return ignoredPaths.some(ignoredPath => path.match(ignoredPath));

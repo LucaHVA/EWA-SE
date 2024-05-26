@@ -7,6 +7,9 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "\"Player\"")
 public class Player implements Identifiable<PlayerKey> {
+
+
+
     @EmbeddedId
     private PlayerKey playerId;
 

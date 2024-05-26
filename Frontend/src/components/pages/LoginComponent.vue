@@ -43,6 +43,7 @@ data(){
         if (response !== null) {
           // Login successful
           console.log('Logged in successfully:', response);
+          console.log(this.usersService.currentToken)
           localStorage.setItem('userInfo', JSON.stringify(response));
           this.$router.push({name: 'home'}).then(() => {
             window.location.reload();

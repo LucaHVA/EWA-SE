@@ -49,7 +49,7 @@ export default {
   inject:['gameService'],
   methods: {
     async initializeGame() {
-      //todo check if all game conditions are valid
+      // Check if game conditions are valid
       if (this.totalPlayers !== this.numberOfPlayers){
         return;
       }

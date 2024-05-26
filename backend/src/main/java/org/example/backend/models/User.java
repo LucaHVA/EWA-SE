@@ -1,25 +1,36 @@
 package org.example.backend.models;
 
 import jakarta.persistence.*;
-
 import java.util.Set;
 
 @Entity
 @Table(name = "\"user\"")
-public class User implements Identifiable<Long>{
+public class User implements Identifiable<Long> {
 
     @Id
     @SequenceGenerator(initialValue = 30000, name = "UserGenerator")
     @GeneratedValue(generator = "UserGenerator")
+    //@Column(name = "user_id")
     private Long userId;
+
+    //@Column(name = "username")
     private String username;
+
+    //@Column(name = "email")
     private String email;
+
+    //@Column(name = "password")
     private String password;
+
     @Lob
-    @Column(columnDefinition = "TEXT")
+    //@Column(name = "profile_picture", columnDefinition = "MEDIUMTEXT")
     private String profilePicture;
+
     @OneToMany(mappedBy = "user")
     private Set<Player> players;
+
+    @OneToMany(mappedBy = "user")
+    private Set<GameHistory> gameHistories;
 
     public User() {
     }
@@ -71,5 +82,13 @@ public class User implements Identifiable<Long>{
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    public Set<GameHistory> getGameHistories() {
+        return gameHistories;
+    }
+
+    public void setGameHistories(Set<GameHistory> gameHistories) {
+        this.gameHistories = gameHistories;
     }
 }

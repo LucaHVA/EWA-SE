@@ -7,7 +7,7 @@
         <h2 class="header-title">Players ({{ totalPlayers }})</h2>
       </div>
       <div class="left-column-players-in-lobby">
-        <div v-for="(player, index) in players" :key="index" class="player-pill transition">
+        <div v-for="(player, index) in playerNames" :key="index" class="player-pill transition">
           <p class="player-name">{{ player.name }} <span v-if="player.host">(Host)</span></p>
           <div class="player-status">
             <button class="ready-button transition">Ready</button>
@@ -62,21 +62,21 @@
 <script>
 import popUpGameSettingsComponent from "@/components/pages/popUpGameSettingsComponent.vue";
 
-
 export default {
   name: "GameSettingsComponent",
   components: {
     popUpGameSettingsComponent,
   },
-  inject:['gameService'],
+  inject:['gameService', 'usersService'],
   props:{
     selectedGame: Object,
   },
   data() {
     return {
       gameId:null,
-
-      players:[],
+      userDetails: null,
+      playerNames:[],
+      players:{},
       numberOfPlayers: 4,
       turnDuration: 60,
       pointsToWin: 8,
@@ -88,52 +88,73 @@ export default {
   async created() {
 
     // Fetch current user info
-    this.fetchUserInfo();
+  await this.fetchCurrentUserInfo();
+
+    this.userDetails = await this.usersService._currentUser
 
     // Get current game id for lobby
     this.gameId=this.$route.params.id;
+
+    console.log(this.gameService.canAddNewPlayerToGame(this.gameId))
+
 
     // Get game
     this.currentGame= await this.fetchGameById(this.gameId);
 
     // Fetch all players from game
     this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+    this.players = this.fetchedPlayers;
 
-    //Fixme Add players from db
-    // async not quite working with pushing to players array with users
-    this.fetchedPlayers.forEach(function(player){
-      console.log(player.user.username)
-    });
+    // Add players to player list
+    this.players.forEach(player => {
+      const username = player.user && player.user.username ? player.user.username : 'bot';
+      this.playerNames.push({name: username})
+    })
+
+    // Add current player to player list
+    await this.addCurrentUserToPlayers();
   },
   computed: {
     totalPlayers() {
-      return this.players.length;
+      return this.playerNames.length;
     },
     canAddBot() {
       return this.totalPlayers < this.numberOfPlayers;
     }
   },
   methods: {
-    addBot() {
+    async addBot() {
       if (this.botCount < this.numberOfPlayers - 1) {
         this.botCount++;
         const randomNames = ["Naruto", "Sasuke", "Goku", "Vegeta", "Luffy", "Ichigo", "Eren", "Levi",
           "Gon", "Killua", "Saitama", "Mikasa", "Kurama"];
         const randomIndex = Math.floor(Math.random() * randomNames.length);
         const botName = randomNames[randomIndex] + " (Bot)"; // add "(bot)" to the random name
-        this.players.push({name: botName});
+
+        //FIXME add bot player to backend
+        // Getting a token error from the back-end ~Steef
+        //TODO player numbers available
+        try {
+          this.player = await this.gameService.addNewPlayerToGame(this.gameId, null,3);
+        } catch (error) {
+          console.error("Error adding new bot player to game:", error);
+        }
+
+        this.playerNames.push({name: botName});
       }
     },
     kickPlayer(index) {
-      if (!this.players[index].host) {
-        this.players.splice(index, 1);
-        if (this.players.every(player => !player.host)) {
+      //TODO delete player in backend
+      // deletePlayerFromGame() method is already present in gameService and backend DELETE works
+      if (!this.playerNames[index].host) {
+        this.playerNames.splice(index, 1);
+        if (this.playerNames.every(player => !player.host)) {
           this.botCount--;
         } else {
           this.botCount--;
         }
         // Update the indexes of the bots when deleted
-        this.players.forEach((player, i) => {
+        this.playerNames.forEach((player, i) => {
           if (!player.host && player.index !== undefined) {
             player.index = i + 1;
           }
@@ -141,17 +162,37 @@ export default {
       }
     },
 
-    async  fetchUserInfo() {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    async  fetchCurrentUserInfo() {
+      const userInfo = this.usersService.getCurrentUser;
       if (userInfo) {
-        this.players.push({ name: userInfo.username });
+        this.playerNames.push({ name: userInfo.username });
       }
     },
+    async addCurrentUserToPlayers(){
+      const user =  this.usersService.getCurrentUser
 
+      //TODO get player number for to be added user (check free slots)
+      console.log("can add new player? ");
+      console.log(this.gameService.canAddNewPlayerToGame(this.gameId));
+
+      if (this.gameService.canAddNewPlayerToGame(this.gameId)){
+        //todo add new player
+      } else if (!this.gameService.canAddNewPlayerToGame(this.gameId)){
+        //todo game is full -> error catching
+      }
+
+      if (user) {
+        try {
+          //TODO player number available
+          this.player = await this.gameService.addNewPlayerToGame(this.gameId, user, 3);
+        } catch (error) {
+          console.error("Error adding new player to game:", error);
+        }
+      }
+    },
     async fetchGameById(gameId) {
       try {
         this.game = await this.gameService.asyncGetById(gameId);
-        console.log("Game fetched by ID:", this.game);
         return this.game
       } catch (error) {
         console.error("Error fetching game by ID:", error);
