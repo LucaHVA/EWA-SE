@@ -69,11 +69,9 @@ export class UsersAdaptor {
                     body: JSON.stringify(user)
                 };
 
-                console.log('Saving user:', user);
                 const response = await this.fetchJson(url, options);
 
                 if (response) {
-                    console.log('User saved successfully:', response);
                     return response;
                 } else {
                     console.error('Failed to save user.');
@@ -98,7 +96,6 @@ export class UsersAdaptor {
 
     async login(username, password) {
         try {
-            console.log('Sending login request...');
             const url = `${this.resourcesUrl}/login`;
             const options = {
                 method: 'POST',
@@ -110,7 +107,6 @@ export class UsersAdaptor {
             };
             const response = await this.fetchJson(url, options);
             if (response) {
-                console.log('Login successful:', response);
                 const user = await response.json();
                 this.saveTokenIntoBrowserStorage(response.headers.get('Authorization'), user);
                 return response;
@@ -128,8 +124,9 @@ export class UsersAdaptor {
         this._currentToken = token;
         this._currentUser = user;
 
-        console.log('Saving token into storage:', token);
-        console.log('Saving user JSON into storage:', JSON.stringify(user));
+        // console.log('Saving token into storage:', token);
+        // console.log('Saving user JSON into storage:', JSON.stringify(user));
+        //FIXME remove password from being saved in browser storage for security reason
 
         if (token == null) {
             this._currentUser = null;
@@ -148,7 +145,7 @@ export class UsersAdaptor {
         const jsonUser = window.sessionStorage.getItem(this.BROWSER_STORAGE_ITEM_NAME + "_ACC");
 
         console.log('Retrieved token from storage:', this._currentToken);
-        console.log('Retrieved user JSON from storage:', jsonUser);
+        // console.log('Retrieved user JSON from storage:', jsonUser);
 
         if (jsonUser != null) {
             this._currentUser = JSON.parse(jsonUser);

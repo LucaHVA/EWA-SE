@@ -1481,7 +1481,6 @@ export default {
       // Assign resources to players based on the rolled number
       this.assignResourcesToPlayers(rolledNumber);
 
-      //TODO Activate robber if outcome is 7
 
       // User can end their turn after rolling the dice
       this.hasRolledDice = true;

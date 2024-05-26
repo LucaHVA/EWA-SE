@@ -1,5 +1,6 @@
 package org.example.backend.controllers;
 
+import jakarta.transaction.Transactional;
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.Game;
 import org.example.backend.models.Player;
@@ -73,12 +74,13 @@ public class GamesController {
         List<Player> players = gamesRepository.findPlayersByGameId(id);
 
         if (players.isEmpty()) {
-            throw new ResourceNotFoundException("No players found for game ID: " + id);
+            return ResponseEntity.ok(null);
         }
 
         return ResponseEntity.ok(players);
     }
 
+    @Transactional
     @PostMapping("/{id}/players")
     public ResponseEntity<Player> addPlayerToGame(@PathVariable String id, @RequestBody Player player) {
         // Find relationship entities
@@ -117,6 +119,24 @@ public class GamesController {
         Player updatedEntity = playersRepository.update(existingPlayer, updatedPlayer);
 
         return ResponseEntity.ok(updatedEntity);
+    }
+
+    @DeleteMapping("/{gameId}/players/{playerNumber}")
+    public ResponseEntity<?> deletePlayer(@PathVariable String gameId, @PathVariable int playerNumber) {
+        // Find the existing player using the composite key
+        PlayerKey playerKey = new PlayerKey(playerNumber, gameId);
+        Player existingPlayer = playersRepository.findById(playerKey);
+
+        // Handle no player found
+        if (existingPlayer == null) {
+            throw new ResourceNotFoundException("No player found with id " + playerKey);
+        }
+
+        // Call the delete method from the repository
+        playersRepository.deleteById(playerKey);
+
+        // Return a response entity with no content to indicate successful deletion
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -40,11 +40,9 @@ export class FetchInterceptor {
             console.log('No token available. Requesting without token.');
             return [url, options];
         } else if (options == null) {
-            console.log('Adding token to headers. Requesting with token.');
             return [url, { headers: { Authorization: token } }];
         } else {
             let newOptions = { ...options, headers: { ...options.headers, Authorization: token } };
-            console.log('Adding token to existing headers. Requesting with token.');
             return [url, newOptions];
         }
     }

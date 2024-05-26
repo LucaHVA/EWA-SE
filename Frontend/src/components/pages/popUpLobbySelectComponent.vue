@@ -11,10 +11,9 @@
               <li>
                 Game id: <span @click="copyText" title="click to copy id" id="lobbyGameId">{{ selectedGame.id }}</span>
               </li>
-              <!--              TO DO!!! get amount of players in the lobby-->
-              <li>Lobby size: {{ 1 }} / {{ selectedGame.numberOfPlayers }}</li>
-              <li>Turn duration: {{selectedGame.turnDuration}}</li>
-              <li>Points to win: {{selectedGame.pointsToWin}}</li>
+              <li>Lobby size: {{ this.playerCounts[selectedGame.id] }} / {{ selectedGame.numberOfPlayers }}</li>
+              <li>Turn duration: {{ selectedGame.turnDuration }}</li>
+              <li>Points to win: {{ selectedGame.pointsToWin }}</li>
             </ul>
           </div>
           <div class="modal-footer">
@@ -35,15 +34,16 @@ export default {
   props: {
     show: Boolean,
     selectedGame: Object,
+    playerCounts: Array,
   },
   methods: {
-    copyText(){
+    copyText() {
       // Copy id to clipboard
       let copyText = document.getElementById("lobbyGameId").textContent;
       navigator.clipboard.writeText(copyText)
     },
-    moveToLobby(){
-      this.$router.replace({ name: 'gameSettings', params: { id: this.selectedGame.id} });
+    moveToLobby() {
+      this.$router.replace({name: 'gameSettings', params: {id: this.selectedGame.id}});
     }
   }
 };
@@ -57,7 +57,7 @@ export default {
   padding: 0 6px;
 }
 
-#lobbyGameId:hover{
+#lobbyGameId:hover {
   background-color: rgba(206, 198, 198, 0.5);
   cursor: pointer;
 }

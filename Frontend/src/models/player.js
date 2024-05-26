@@ -66,7 +66,7 @@ class Player {
 
         // Extracting individual fields from the JSON object
         const playerNumber = playerJson.playerNumber;
-        const gameId= playerJson.gameId;
+        const gameId = playerJson.id.gameId;
         const user = playerJson.user;
         const playerColor = playerJson.playerColor;
 
@@ -103,6 +103,19 @@ class Player {
             settlementAmount,
             knightsUsed
         );
+
+        return playerInstance;
+    }
+
+    static dbConstructorNewPlayer(playerJson){
+        if (playerJson == null) return null;
+
+        // Extracting individual fields from the JSON object
+        const playerNumber = playerJson.playerNumber;
+        const user = playerJson.user;
+        const playerColor = playerJson.playerColor;
+
+        const playerInstance = new Player(playerNumber, null, user, playerColor);
 
         return playerInstance;
     }

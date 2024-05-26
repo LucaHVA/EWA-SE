@@ -43,26 +43,25 @@ public class DataLoader implements CommandLineRunner {
             //Fill a game with players
             Game game1 = this.gameRepository.findById("BACK04");
             // Create new Player instance (user)
-            playerRepository.save(new Player(1, game1, userRepository.findById(30003L)));
-            playerRepository.save(new Player(2, game1, userRepository.findById(30004L)));
-            playerRepository.save(new Player(3, game1, userRepository.findById(30005L)));
+            playerRepository.save(new Player(0, game1, userRepository.findById(30003L)));
             // Create new Player instance (bot)
-            playerRepository.save(new Player(4, game1));
+            playerRepository.save(new Player(1, game1));
 
             // Fill a game with players
             Game game2 = this.gameRepository.findById("SUS420");
-            playerRepository.save(new Player(1, game2, userRepository.findById(30002L)));
-            playerRepository.save(new Player(2, game2, userRepository.findById(30003L)));
-            playerRepository.save(new Player(3, game2));
+            playerRepository.save(new Player(0, game2, userRepository.findById(30004L)));
+            playerRepository.save(new Player(1, game2));
 
             Game game3 = this.gameRepository.findById("BACK05");
-            Player filledPlayer = new Player(1, game3, userRepository.findById(30002L));
+            Player filledPlayer = new Player(0, game3, userRepository.findById(30002L));
             filledPlayer.setPlayerColor("blue");
             filledPlayer.setPlayerGameInfo(1, 1, 1, 1);
-            filledPlayer.setPlayerResources(1,1,1,1,1);
-            filledPlayer.setPlayerDevelopments(0,0,0,0,0);
+            filledPlayer.setPlayerResources(1, 1, 1, 1, 1);
+            filledPlayer.setPlayerDevelopments(0, 0, 0, 0, 0);
             playerRepository.save(filledPlayer);
 
+            Game game4 = this.gameRepository.findById("BACK03");
+            playerRepository.save(new Player(0, game4, userRepository.findById(30003L)));
         }
     }
 
@@ -84,8 +83,6 @@ public class DataLoader implements CommandLineRunner {
         games.add(this.gameRepository.save(new Game("BACK03", 3, 30, 3)));
         games.add(this.gameRepository.save(new Game("BACK04", 4, 40, 4)));
         games.add(this.gameRepository.save(new Game("BACK05", 4, 50, 5)));
-        games.add(this.gameRepository.save(new Game("THY06R", 4, 60, 10)));
-        games.add(this.gameRepository.save(new Game("97FYM2", 4, 60, 10)));
         games.add(this.gameRepository.save(new Game("SUS420", 4, 60, 10)));
     }
 }
