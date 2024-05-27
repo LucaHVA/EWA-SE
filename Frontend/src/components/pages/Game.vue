@@ -496,7 +496,7 @@ export default {
       currentPlayerIndex: 0,
       playerColors: ["red", "blue", "green", "orange"],
       players: [],
-      playerPoints: [],
+      playerPoints: [0, 0, 0, 0],
       currentPlayerResources: [],
       robberHexIndex: null,
       hasRolledDice: false,
@@ -998,7 +998,7 @@ export default {
       this.resourcesInitialized = true;
     },
     getRandomResource() {
-      const resources = ['desert', 'ore', 'brick', 'wheat', 'wood', 'sheep'];
+      const resources = ['ore', 'brick', 'wheat', 'wood', 'sheep'];
       const availableResources = resources.filter(resource => this.resourceCounts[resource] > 0);
 
       const randomIndex = Math.floor(Math.random() * availableResources.length);
@@ -1974,7 +1974,10 @@ export default {
 }
 
 .red-number {
-  color: #c0392b;
+  background-image: url("~@/assets/images/Robber.png");
+  background-repeat: no-repeat;
+  background-size: contain; /* or cover depending on your needs */
+  transform: rotate(90deg); /* Rotate 90 degrees clockwise */
 }
 
 .robber-number {
