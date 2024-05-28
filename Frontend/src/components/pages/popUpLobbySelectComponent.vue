@@ -48,7 +48,7 @@ export default {
       const currentUser = await this.usersService.getCurrentUser;
       // Add user to game as player
       //TODO update: player number
-      await this.gameService.addNewPlayerToGame(this.gameId, currentUser, 1);
+      await this.gameService.addNewPlayerToGame(this.selectedGame.id, currentUser, 2);
       // Route to game settings
       this.$router.replace({name: 'gameSettings', params: {id: this.selectedGame.id}});
     }

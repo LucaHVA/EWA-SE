@@ -104,6 +104,7 @@ export default {
     // Fetch all players from game
     this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
     this.players = this.fetchedPlayers;
+    console.log("players", this.players)
 
     // Add players to player list
     this.players.forEach(player => {
