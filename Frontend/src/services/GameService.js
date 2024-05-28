@@ -45,6 +45,16 @@ export class GameService {
         }
     }
 
+    async asyncGetAllFiltered() {
+        try {
+            const games = await this.fetchJson(this.resourcesUrl + "/filter", {
+                method: 'GET'
+            })
+            return games?.map(Game.copyConstructor);
+        } catch (e) {
+            console.log(e)
+        }
+    }
     /**
      * Based on the given game's id this method will create or update a game.
      * @param game
@@ -54,14 +64,19 @@ export class GameService {
     async saveGame(game, queryParams) {
 
         // Create new game instance if no game was given
-        if (!game) {
-            game = {
-                numberOfPlayers: 4,
-                turnDuration: 60,
-                pointsToWin: 8,
-                id: await this.generateUniqueGameId()
-            };
-        }
+        // if (!game) {
+        //     game = {
+        //         numberOfPlayers: 4,
+        //         turnDuration: 60,
+        //         pointsToWin: 8,
+        //         id: await this.generateUniqueGameId(),
+        //         status:"open",
+        //
+        //     };
+        // }
+
+        console.log("savegame: ", game)
+
         try {
             if (game.id) {
 
@@ -92,7 +107,8 @@ export class GameService {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(createdGame)
-            })
+            });
+            res.status = "closed";
             return Game.copyConstructor(res);
         } catch (error) {
             console.error("Error saving game:", error);

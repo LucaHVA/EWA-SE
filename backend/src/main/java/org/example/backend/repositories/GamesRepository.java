@@ -65,4 +65,12 @@ public class GamesRepository extends AbstractEntityRepositoryJpa<Game, String> i
 
         return query.getResultList();
     }
+
+    public List<Game> filteredGames() {
+        TypedQuery<Game> query = entityManager.createQuery(
+                "SELECT g FROM Game g WHERE g.status = :status", Game.class);
+        query.setParameter("status", Game.STATUS_OPEN);
+
+        return query.getResultList();
+    }
 }

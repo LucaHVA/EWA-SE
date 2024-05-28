@@ -81,11 +81,16 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void createInitialGameData() {
+
+        List<User> users = this.userRepository.findAll();
+        User host = users.get(0); // Armando
+
+
         List<Game> games = this.gameRepository.findAll();
-        games.add(this.gameRepository.save(new Game("BACK03", 3, 30, 3)));
-        games.add(this.gameRepository.save(new Game("BACK04", 4, 40, 4)));
-        games.add(this.gameRepository.save(new Game("BACK05", 4, 50, 5)));
-        games.add(this.gameRepository.save(new Game("SUS420", 4, 60, 10)));
+        games.add(this.gameRepository.save(new Game("BACK03", 3, 33, 3,  Game.STATUS_OPEN, host)));
+        games.add(this.gameRepository.save(new Game("BACK04", 4, 40, 4, Game.STATUS_OPEN, host)));
+        games.add(this.gameRepository.save(new Game("BACK05", 4, 50, 5,  Game.STATUS_OPEN, host)));
+        games.add(this.gameRepository.save(new Game("SUS420", 4, 60, 10,  Game.STATUS_CLOSED, host)));
     }
 
     private void createInitialGameHistories() {

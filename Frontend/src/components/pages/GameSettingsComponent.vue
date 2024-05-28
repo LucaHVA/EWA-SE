@@ -87,8 +87,6 @@ export default {
   },
   async created() {
 
-    // Fetch current user info
-  await this.fetchCurrentUserInfo();
 
     this.userDetails = await this.usersService._currentUser
 
@@ -101,6 +99,8 @@ export default {
     // Get game
     this.currentGame= await this.fetchGameById(this.gameId);
 
+    // await this.addCurrentUserToPlayers();
+
     // Fetch all players from game
     this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
     this.players = this.fetchedPlayers;
@@ -111,8 +111,7 @@ export default {
       this.playerNames.push({name: username})
     })
 
-    // Add current player to player list
-    await this.addCurrentUserToPlayers();
+
   },
   computed: {
     totalPlayers() {
@@ -143,6 +142,7 @@ export default {
         this.playerNames.push({name: botName});
       }
     },
+
     kickPlayer(index) {
       //TODO delete player in backend
       // deletePlayerFromGame() method is already present in gameService and backend DELETE works
@@ -161,32 +161,13 @@ export default {
         });
       }
     },
-
-    async  fetchCurrentUserInfo() {
-      const userInfo = this.usersService.getCurrentUser;
-      if (userInfo) {
-        this.playerNames.push({ name: userInfo.username });
-      }
-    },
-    async addCurrentUserToPlayers(){
-      const user =  this.usersService.getCurrentUser
-
-      //TODO get player number for to be added user (check free slots)
-      console.log("can add new player? ");
-      console.log(this.gameService.canAddNewPlayerToGame(this.gameId));
-
-      if (this.gameService.canAddNewPlayerToGame(this.gameId)){
-        //todo add new player
-      } else if (!this.gameService.canAddNewPlayerToGame(this.gameId)){
-        //todo game is full -> error catching
-      }
-
-      if (user) {
+    async removeCurrentUserFromGame() {
+      const user = this.userDetails;
+      if (user && user.playerNumber) {
         try {
-          //TODO player number available
-          this.player = await this.gameService.addNewPlayerToGame(this.gameId, user, 3);
+          await this.gameService.deletePlayerFromGame(this.gameId, user.playerNumber);
         } catch (error) {
-          console.error("Error adding new player to game:", error);
+          console.error("Error deleting player from game:", error);
         }
       }
     },

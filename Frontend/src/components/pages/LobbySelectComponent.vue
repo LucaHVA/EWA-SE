@@ -42,7 +42,7 @@ import popUpLobbySelectComponent from "@/components/pages/popUpLobbySelectCompon
 export default {
   name: "LobbySelectComponent",
   components: {popUpLobbySelectComponent},
-  inject: ['gameService'],
+  inject: ['gameService', 'usersService'],
 
   data() {
     return {
@@ -55,7 +55,7 @@ export default {
   },
 
   async created() {
-    this.games = await this.gameService.asyncFindAll();
+    this.games = await this.gameService.asyncGetAllFiltered();
 
     this.games.forEach(game => {
       this.getCurrentAmountOfPlayers(game.id);
