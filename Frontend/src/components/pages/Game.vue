@@ -469,8 +469,6 @@
 <script>
 import Player from "@/models/player";
 
-
-
 export default {
   name: "gameComponent",
   data() {
@@ -567,10 +565,12 @@ export default {
       hasPlayedDevelopmentCard: false,
     };
   },
-  inject:["gameService"],
- async created() {
+  inject: ["gameService"],
+  async created() {
     this.game = await this.gameService.asyncGetById(this.gameId)
     console.log(this.game)
+    await this.fetchGameDetails();
+    await this.fetchPlayers();
   },
   mounted() {
     setTimeout(() => {
@@ -604,6 +604,34 @@ export default {
     },
   },
   methods: {
+    async fetchGameDetails() {
+      console.log("Fetching game details for game ID:", this.gameId);
+      try {
+        this.game = await this.gameService.asyncGetById(this.gameId);
+        console.log("Fetched game details:", this.game);
+      } catch (error) {
+        console.error("Error fetching game details:", error);
+      }
+    },
+    async fetchPlayers() {
+      console.log("Fetching players for game ID:", this.gameId);
+      try {
+        const fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+        console.log("Raw fetched players:", fetchedPlayers);
+
+        // Filter out invalid player entries
+        const validPlayers = fetchedPlayers.filter(player =>
+            typeof player.playerNumber === 'number' && player.gameId === this.gameId
+        );
+
+        // Set valid players to the players array
+        this.players = validPlayers;
+
+        console.log("Fetched valid players:", this.players);
+      } catch (error) {
+        console.error("Error fetching players:", error);
+      }
+    },
 
 
     botLogic() {
@@ -1610,28 +1638,31 @@ export default {
 
 
     initializePlayers() {
-      // Dummy player data
-      const player1 = new Player("red", "NaN", [], []);
-      const player2 = new Player("blue", "NaN", [], []);
-      const player3 = new Player("green", "NaN", [], []);
-      const player4 = new Player("orange", "NaN", [], []);
+      console.log("Initializing players");
 
-      // Assign initial resources to the red player
-      player1.resources = [];
-      player2.resources = [];
-      player3.resources = [];
-      player4.resources = [];
+      const totalPlayers = 4;
+      const fetchedPlayersCount = this.players.length;
 
-      player1.developmentCards = [];
-      player2.developmentCards = [];
-      player3.developmentCards = [];
-      player4.developmentCards = [];
+      if (fetchedPlayersCount === 0) {
+        console.warn("No players fetched, initializing with dummy data");
+      }
 
-      // Add players to the players array
-      this.players.push(player1);
-      this.players.push(player2);
-      this.players.push(player3);
-      this.players.push(player4);
+      // Assign colors to fetched players
+      this.players.forEach((player, index) => {
+        player.playerColor = this.playerColors[index];
+        player.resources = [];
+        player.developmentCards = [];
+      });
+
+      // Add bots if necessary to make up to totalPlayers
+      for (let i = fetchedPlayersCount; i < totalPlayers; i++) {
+        const botPlayer = new Player(this.playerColors[i], "NaN", [], []);
+        botPlayer.resources = [];
+        botPlayer.developmentCards = [];
+        this.players.push(botPlayer);
+      }
+
+      console.log("Players initialized:", this.players);
 
       // Start the countdown timer after initializing players
       this.startCountdown();
