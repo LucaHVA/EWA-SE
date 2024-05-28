@@ -74,8 +74,13 @@ export default {
       this.showModal = true;
     },
     async createGame() {
+      // Get current user (host)
+      const currentUser = await this.usersService.getCurrentUser;
       // Generate new game
-      const game = await this.gameService.saveGame();
+      const game = await this.gameService.createGame(currentUser);
+
+      await this.gameService.addNewPlayerToGame(game.id, currentUser, 1);
+
       // Route to next page
       this.$router.replace({name: 'gameSettings', params: {id: game.id}});
     },

@@ -116,6 +116,14 @@ export class GameService {
         }
     }
 
+    async createGame(user){
+        let newId = await this.generateUniqueGameId();
+        // Create game instance with default settings
+        let newGame = await new Game(newId, 4, 60, 8,"open", user);
+        // Save created game
+        return await this.saveGame(newGame);
+    }
+
     /**
      * Add a new player to the game with id <gameId>
      * @param {String} gameId

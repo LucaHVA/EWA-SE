@@ -133,7 +133,7 @@ export default {
 
         //FIXME add bot player to backend
         // Getting a token error from the back-end ~Steef
-        //TODO player numbers available
+        //TODO update: player number available
         try {
           this.player = await this.gameService.addNewPlayerToGame(this.gameId, null,3);
         } catch (error) {

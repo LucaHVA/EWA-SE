@@ -492,7 +492,7 @@ export default {
       canPlayVictory_PointCard: false,
       game: null,
       gameId: this.$route.params.id,
-      previousPage: "/gameSettings",
+      previousPage: "/lobbySelect",
       currentPlayerIndex: 0,
       playerColors: ["red", "blue", "green", "orange"],
       players: [],
