@@ -1,5 +1,6 @@
 package org.example.backend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -92,7 +93,7 @@ public class User implements Identifiable<Long> {
     public Set<GameHistory> getGameHistories() {
         return gameHistories;
     }
-
+@JsonIgnore
     public void setGameHistories(Set<GameHistory> gameHistories) {
         this.gameHistories = gameHistories;
     }

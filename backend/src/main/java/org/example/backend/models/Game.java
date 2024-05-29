@@ -12,7 +12,7 @@ public class Game implements Identifiable<String> {
     private int numberOfPlayers;
     private int turnDuration;
     private int pointsToWin;
-    private String status;
+    private Status status;
 
     @OneToMany(mappedBy = "game")
     private List<Player> players;
@@ -25,13 +25,19 @@ public class Game implements Identifiable<String> {
     public static final String STATUS_OPEN = "open";
     public static final String STATUS_CLOSED = "closed";
 
-    public Game(String gameId, int numberOfPlayers, int turnDuration, int pointsToWin, String status, User host) {
+    public enum Status {
+        open,
+        ongoing,
+        closed
+    }
+
+    public Game(String gameId, int numberOfPlayers, int turnDuration, int pointsToWin, Status status, User host) {
         this.gameId = gameId;
         this.numberOfPlayers = numberOfPlayers;
         this.turnDuration = turnDuration;
         this.pointsToWin = pointsToWin;
-        this.host=host;
-        setStatus(status);
+        this.status = status;
+        this.host = host;
     }
 
     public Game() {
@@ -69,14 +75,11 @@ public class Game implements Identifiable<String> {
         this.pointsToWin = pointsToWin;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
-        if (!STATUS_OPEN.equals(status) && !STATUS_CLOSED.equals(status)) {
-            throw new IllegalArgumentException("Invalid status: " + status);
-        }
+    public void setStatus(Status status) {
         this.status = status;
     }
 
