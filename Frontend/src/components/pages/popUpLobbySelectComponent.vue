@@ -36,13 +36,20 @@ export default {
     selectedGame: Object,
     playerCounts: Array,
   },
+  inject:['usersService','gameService'],
   methods: {
     copyText() {
       // Copy id to clipboard
       let copyText = document.getElementById("lobbyGameId").textContent;
       navigator.clipboard.writeText(copyText)
     },
-    moveToLobby() {
+    async moveToLobby() {
+      // Get current user
+      const currentUser = await this.usersService.getCurrentUser;
+      // Add user to game as player
+      //TODO update: player number
+      await this.gameService.addNewPlayerToGame(this.selectedGame.id, currentUser, 2);
+      // Route to game settings
       this.$router.replace({name: 'gameSettings', params: {id: this.selectedGame.id}});
     }
   }

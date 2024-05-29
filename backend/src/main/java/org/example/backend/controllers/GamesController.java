@@ -35,6 +35,11 @@ public class GamesController {
         return gamesRepository.findAll();
     }
 
+    @GetMapping("/filter")
+    public List<Game> getOpenGames() {
+        return gamesRepository.filteredGames();
+    }
+
     @PostMapping
     public ResponseEntity<Game> createGame(@RequestBody Game game) {
         gamesRepository.save(game);

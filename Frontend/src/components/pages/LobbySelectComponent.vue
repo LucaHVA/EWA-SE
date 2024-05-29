@@ -42,7 +42,7 @@ import popUpLobbySelectComponent from "@/components/pages/popUpLobbySelectCompon
 export default {
   name: "LobbySelectComponent",
   components: {popUpLobbySelectComponent},
-  inject: ['gameService'],
+  inject: ['gameService', 'usersService'],
 
   data() {
     return {
@@ -55,7 +55,7 @@ export default {
   },
 
   async created() {
-    this.games = await this.gameService.asyncFindAll();
+    this.games = await this.gameService.asyncGetAllFiltered();
 
     this.games.forEach(game => {
       this.getCurrentAmountOfPlayers(game.id);
@@ -74,8 +74,13 @@ export default {
       this.showModal = true;
     },
     async createGame() {
+      // Get current user (host)
+      const currentUser = await this.usersService.getCurrentUser;
       // Generate new game
-      const game = await this.gameService.saveGame();
+      const game = await this.gameService.createGame(currentUser);
+
+      await this.gameService.addNewPlayerToGame(game.id, currentUser, 1);
+
       // Route to next page
       this.$router.replace({name: 'gameSettings', params: {id: game.id}});
     },
