@@ -1,6 +1,5 @@
 <template>
   <div class="front-blob-container">
-    <header-component></header-component>
     <nav-bar-component v-if="!isIgnoredRoute(this.$route.path, ignoredNavBarPaths)"></nav-bar-component>
     <router-view></router-view>
   </div>
@@ -15,7 +14,6 @@
 
 <script>
 import NavBarComponent from "@/components/NavBarComponent";
-import HeaderComponent from "@/components/HeaderComponent";
 import { GameService } from "@/services/GameService";
 import { shallowReactive } from "vue";
 import { FetchInterceptor } from "@/services/fetch-interceptor";
@@ -25,7 +23,6 @@ import { UsersAdaptor } from "@/services/UsersAdaptor"; // Import the WebSocket 
 export default {
   name: "AppComponent",
   components: {
-    HeaderComponent,
     NavBarComponent
   },
   data() {
