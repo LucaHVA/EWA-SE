@@ -16,7 +16,6 @@ export class AnnouncementsAdaptor {
 
         this.socket.onopen = () => {
             console.log("Socket opened");
-            // Reconnection
             this.reconnect = true;
         };
         this.socket.onmessage = (event) => this.handler(event.data);
@@ -38,16 +37,13 @@ export class AnnouncementsAdaptor {
     handleClose() {
         console.log(`Socket closed for ${this.socketUrl}`);
         if (this.reconnect) {
-            // Try to reconnect after a delay
             setTimeout(() => this.initWebSocket(), 3000);
         }
     }
 
     handleError(error) {
         console.error("WebSocket error:", error);
-        // Handle error
         if (this.reconnect) {
-            // Try to reconnect
             this.initWebSocket();
         }
     }
@@ -55,7 +51,7 @@ export class AnnouncementsAdaptor {
     close() {
         if (this.socket) {
             console.log(`Closed announcements adaptor on ${this.socketUrl}`);
-            this.reconnect = false; // Stop reconnection attempts
+            this.reconnect = false;
             this.socket.close();
         }
     }

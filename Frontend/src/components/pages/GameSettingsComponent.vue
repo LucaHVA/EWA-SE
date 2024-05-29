@@ -67,7 +67,7 @@ export default {
   components: {
     popUpGameSettingsComponent,
   },
-  inject:['gameService', 'usersService'],
+  inject:['gameService', 'usersService', '$socketConnection'],
   props:{
     selectedGame: Object,
   },
@@ -86,33 +86,52 @@ export default {
     };
   },
   async created() {
+    // Listen for WebSocket open event
+    this.$socketConnection.socket.onopen = () => {
+      console.log("WebSocket connection opened");
+    };
 
+    // Listen for WebSocket message event
+    this.$socketConnection.socket.onmessage = (event) => {
+      console.log("Received WebSocket message:", event.data);
+      // Process the received message as needed
+    };
+
+    // Listen for WebSocket close event
+    this.$socketConnection.socket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    // Listen for WebSocket error event
+    this.$socketConnection.socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
     // Fetch current user info
-  await this.fetchCurrentUserInfo();
-
-    this.userDetails = await this.usersService._currentUser
-
+    await this.fetchCurrentUserInfo();
+    this.userDetails = await this.usersService._currentUser;
     // Get current game id for lobby
-    this.gameId=this.$route.params.id;
-
-    console.log(this.gameService.canAddNewPlayerToGame(this.gameId))
-
-
+    this.gameId = this.$route.params.id;
     // Get game
-    this.currentGame= await this.fetchGameById(this.gameId);
-
+    this.currentGame = await this.fetchGameById(this.gameId);
     // Fetch all players from game
     this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
     this.players = this.fetchedPlayers;
-
     // Add players to player list
     this.players.forEach(player => {
       const username = player.user && player.user.username ? player.user.username : 'bot';
       this.playerNames.push({name: username})
-    })
-
+    });
     // Add current player to player list
     await this.addCurrentUserToPlayers();
+
+    // Subscribe to WebSocket messages
+    this.$socketConnection.socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === 'START_GAME') {
+        // Redirect to the game page when game starts
+        this.$router.replace({ name: 'game', params: { id: message.gameId } });
+      }
+    };
   },
   computed: {
     totalPlayers() {
