@@ -12,72 +12,45 @@
           <button class="multiplayer-button buttons-welcome-page transition">Play Multiplayer</button>
         </router-link>
       </div>
-      <div>
-        <button @click="connect" v-if="!connected">Connect</button>
-        <button @click="disconnect" v-if="connected">Disconnect</button>
-      </div>
-      <div v-if="connected">
-        <input v-model="message" placeholder="Type a message" />
-        <button @click="sendMessage">Send</button>
-        <div v-for="(msg, index) in messages" :key="index">{{ msg }}</div>
-      </div>
+      <textarea v-on:keyup.enter="onNewAnnouncement($event)"></textarea>
     </div>
   </div>
 </template>
 
 <script>
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
-
+import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
+import CONFIG from '@/app-config.js';
 export default {
   name: "WelcomeComponent",
-  data() {
-    return {
-      client: null,
-      connected: false,
-      message: '',
-      messages: []
-    };
+  created() {
+    // setup a new service with a web socket
+    this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement)
   },
+  beforeUnmount() {
+    // close down the service with the web socket
+    this.announcementsService.close();
+  },
+  data() { return {
+    announcements: []
+  }
+  },
+
   methods: {
-    connect() {
-      // Initialize the client
-      this.client = new Client({
-        brokerURL: process.env.VUE_APP_WEBSOCKET_URL,
-        webSocketFactory: () => new SockJS(process.env.VUE_APP_WEBSOCKET_URL),
-        onConnect: this.onConnect.bind(this),
-        onStompError: this.onStompError.bind(this),
-        onWebSocketClose: this.onWebSocketClose.bind(this),
-      });
-
-      // Activate the client
-      this.client.activate();
+    onReceiveAnnouncement(message) {
+      // this method is called when an announcement is distributed
+      console.log("Received announcement:", message);
+      this.announcements.push(message);
     },
+    onNewAnnouncement(event) {
+      // this method is called when enter is pressed within the input text field
 
-// Callback function for successful connection
-    onConnect() {
-      this.connected = true;
-      console.log('Connected');
+      // for demo purpose of a simple web socket
+      this.announcementsService.sendMessage(event.target.value);
+      // a persistent announcement system would save the announcement here via the REST api
+      // and let the rest controller issue the websocket notification to inform all clients about the update
 
-      // Subscribe to topic
-      this.client.subscribe('/topic/messages', this.onMessageReceived.bind(this));
-    },
-
-// Callback function for errors
-    onStompError(error) {
-      console.error('Error', error);
-      // Handle error if needed
-    },
-
-// Callback function for WebSocket close
-    onWebSocketClose() {
-      this.connected = false;
-      console.log('Disconnected');
-    },
-
-// Callback function for received messages
-    onMessageReceived(message) {
-      this.messages.push(message.body);
+      // reset the input in the text area
+      event.target.value = "";
     }
   }
 };

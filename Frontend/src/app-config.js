@@ -1,5 +1,5 @@
 export default {
     BACKEND_URL: "http://localhost:8085",
     ANNOUNCEMENTS: "http://localhost:8085/announcements",
-    WEBSOCKET_URL: "ws://localhost:8080"
+    NOTIFICATIONS: "http://localhost:8085/notifications",
 }
