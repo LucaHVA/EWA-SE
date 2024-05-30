@@ -1,9 +1,6 @@
 <template>
   <nav class="navigation">
     <div class="navbar">
-      <router-link to="/home" class="logo-link">
-        <img alt="logo" class="navbar_logo" src="../assets/images/codeboard_black_logo.png">
-      </router-link>
       <ul class="navbar-list">
         <li class="nav-item">
           <router-link to="/home" class="nav-link" active-class="active">Home</router-link>
@@ -11,9 +8,6 @@
         <li class="nav-item" v-if="isLoggedIn">
           <router-link to="/leaderboard" class="nav-link" active-class="active">Leaderboard</router-link>
         </li>
-<!--        <li class="nav-item" v-if="isLoggedIn">-->
-<!--          <router-link to="/friends" class="nav-link" active-class="active">Friends List</router-link>-->
-<!--        </li>-->
       </ul>
       <ul class="user-logging">
         <li class="nav-item" v-if="isLoggedIn">
@@ -57,17 +51,6 @@ export default {
 </script>
 
 <style scoped>
-/* Logo */
-.navbar_logo {
-  width: 100%;
-  margin: 0;
-}
-
-.logo-link {
-  width: 15%; /* Set the width of the router-link */
-  display: inline-block;
-  margin: 20px;
-}
 /* General */
 nav {
   position: relative;
@@ -81,7 +64,7 @@ nav ul {
   display: flex;
   list-style-type: none;
   padding: 0;
-  margin: 3.5rem;
+  margin: 0;
 }
 
 /* Navigation */

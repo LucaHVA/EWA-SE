@@ -35,7 +35,7 @@ export class UsersAdaptor {
     async fetchJson(url, options = null) {
         let res = await fetch(url, options);
         if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-            return await res.json();
+            return res;
         } else {
             console.log(res, !res.bodyUsed ? await res.text() : "");
             return null;
@@ -47,10 +47,9 @@ export class UsersAdaptor {
             const users = await this.fetchJson(this.resourcesUrl + "/all", {
                 method: 'GET'
             });
-            return users ? users.map(User.copyConstructor) : [];  // Check for null and return an empty array if needed
+            return users?.map(User.copyConstructor);
         } catch (e) {
             console.log(e);
-            return [];
         }
     }
 
@@ -74,7 +73,7 @@ export class UsersAdaptor {
                 const response = await this.fetchJson(url, options);
 
                 if (response) {
-                    return User.copyConstructor(response);
+                    return response;
                 } else {
                     console.error('Failed to save user.');
                     return null;
@@ -107,7 +106,7 @@ export class UsersAdaptor {
                 body: JSON.stringify({username, password}),
                 credentials: "include"
             };
-            const response = await fetch(url, options);
+            const response = await this.fetchJson(url, options);
             if (response) {
                 const user = await response.json();
                 this.saveTokenIntoBrowserStorage(response.headers.get('Authorization'), user);
@@ -187,6 +186,4 @@ export class UsersAdaptor {
             return null;
         }
     }
-
-
 }

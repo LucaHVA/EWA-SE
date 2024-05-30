@@ -1,6 +1,5 @@
-
 <template>
-  <transition name="modal">
+  <Transition name="modal">
     <div v-if="show" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
@@ -29,10 +28,11 @@
         </div>
       </div>
     </div>
-  </transition>
+  </Transition>
 </template>
 
 <script>
+
 import Game from "@/models/game";
 
 export default {
@@ -44,38 +44,34 @@ export default {
     pointsToWin: Number,
     botCount: Number,
     totalPlayers: Number,
-    gameSettings: Object
+    gameSettings:Object
   },
-  inject: ['gameService', '$socketConnection'],
+  inject:['gameService'],
   methods: {
     async initializeGame() {
-      if (this.totalPlayers !== this.numberOfPlayers) {
+      // Check if game conditions are valid
+      if (this.totalPlayers !== this.numberOfPlayers){
         return;
       }
 
-      const newGame = new Game(this.gameSettings.id, this.numberOfPlayers, this.turnDuration, this.pointsToWin);
-      await this.gameService.saveGame(newGame);
-      console.log("Game initialized:", newGame);
+      // Create a game
+      // this.game = GameService.generateNewGame(this.numberOfPlayers, this.turnDuration, this.pointsToWin);
 
-      // Notify other players that the game has started
-      this.$socketConnection.sendMessage(JSON.stringify({ type: 'START_GAME', gameId: this.gameSettings.id }));
+      // Save the game instance to a service
+      const newGame=  new Game(this.gameSettings.id,this.numberOfPlayers,this.turnDuration,this.pointsToWin)
+      await this.gameService.saveGame(newGame)
+      console.log("check this,",newGame)
+
+      // Go to game page
+      this.$router.replace({ name: 'game', params: { id: this.gameSettings.id } });
     },
   },
   computed: {
     missingBotsCount() {
+      // Calculate the number of bots needed to fill the lobby
       return Math.max(this.numberOfPlayers - this.totalPlayers, 0);
-    }
+    },
   },
-  created() {
-    // Listen for WebSocket messages
-    this.$socketConnection.socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message.type === 'START_GAME') {
-        // Redirect to the game page
-        this.$router.replace({ name: 'game', params: { id: message.gameId } });
-      }
-    };
-  }
 };
 </script>
 
