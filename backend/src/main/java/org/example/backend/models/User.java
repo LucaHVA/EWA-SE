@@ -1,6 +1,9 @@
 package org.example.backend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -31,6 +34,9 @@ public class User implements Identifiable<Long> {
 
     @OneToMany(mappedBy = "user")
     private Set<GameHistory> gameHistories;
+
+    @OneToMany(mappedBy = "host")
+    private List<Game> games;
 
     public User() {
     }
@@ -87,7 +93,7 @@ public class User implements Identifiable<Long> {
     public Set<GameHistory> getGameHistories() {
         return gameHistories;
     }
-
+@JsonIgnore
     public void setGameHistories(Set<GameHistory> gameHistories) {
         this.gameHistories = gameHistories;
     }
