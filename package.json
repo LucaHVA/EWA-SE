@@ -1,6 +1,9 @@
 {
   "dependencies": {
+    "@stomp/stompjs": "^7.0.0",
     "fetch-intercept": "^2.4.0",
+    "sockjs-client": "^1.6.1",
+    "stompjs": "^2.3.3",
     "whatwg-fetch": "^3.6.20"
   }
 }

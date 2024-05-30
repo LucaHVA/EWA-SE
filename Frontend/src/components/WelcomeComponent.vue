@@ -5,23 +5,84 @@
       <div class="sub-title">Play for free</div>
       <p class="extra-info">Enjoy an online game of the classic board game Settlers of Catan!</p>
       <div class="welcome-page-button-container">
-      <router-link to="/gameSettings">
-        <button class="singleplayer-button buttons-welcome-page transition">Play SinglePlayer</button>
-      </router-link>
-      <router-link to="/lobbySelect">
-        <button class="multiplayer-button buttons-welcome-page transition">Play Multiplayer</button>
-      </router-link>
+        <router-link to="/gameSettings">
+          <button class="singleplayer-button buttons-welcome-page transition">Play SinglePlayer</button>
+        </router-link>
+        <router-link to="/lobbySelect">
+          <button class="multiplayer-button buttons-welcome-page transition">Play Multiplayer</button>
+        </router-link>
+      </div>
+      <div>
+        <button @click="connect" v-if="!connected">Connect</button>
+        <button @click="disconnect" v-if="connected">Disconnect</button>
+      </div>
+      <div v-if="connected">
+        <input v-model="message" placeholder="Type a message" />
+        <button @click="sendMessage">Send</button>
+        <div v-for="(msg, index) in messages" :key="index">{{ msg }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-export default {
-  name: "WelcomeComponent"
-}
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
+export default {
+  name: "WelcomeComponent",
+  data() {
+    return {
+      client: null,
+      connected: false,
+      message: '',
+      messages: []
+    };
+  },
+  methods: {
+    connect() {
+      // Initialize the client
+      this.client = new Client({
+        brokerURL: process.env.VUE_APP_WEBSOCKET_URL,
+        webSocketFactory: () => new SockJS(process.env.VUE_APP_WEBSOCKET_URL),
+        onConnect: this.onConnect.bind(this),
+        onStompError: this.onStompError.bind(this),
+        onWebSocketClose: this.onWebSocketClose.bind(this),
+      });
+
+      // Activate the client
+      this.client.activate();
+    },
+
+// Callback function for successful connection
+    onConnect() {
+      this.connected = true;
+      console.log('Connected');
+
+      // Subscribe to topic
+      this.client.subscribe('/topic/messages', this.onMessageReceived.bind(this));
+    },
+
+// Callback function for errors
+    onStompError(error) {
+      console.error('Error', error);
+      // Handle error if needed
+    },
+
+// Callback function for WebSocket close
+    onWebSocketClose() {
+      this.connected = false;
+      console.log('Disconnected');
+    },
+
+// Callback function for received messages
+    onMessageReceived(message) {
+      this.messages.push(message.body);
+    }
+  }
+};
 </script>
+
 
 <style scoped>
 /* General */

@@ -71,4 +71,5 @@ public class APIConfig implements WebMvcConfigurer, WebSocketConfigurer {
                 .exposedHeaders(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE)
                 .allowCredentials(true);
     }
+
 }
