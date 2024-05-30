@@ -7,12 +7,11 @@
         <h2 class="header-title">Players ({{ totalPlayers }})</h2>
       </div>
       <div class="left-column-players-in-lobby">
-        <div v-for="(player, index) in playerNames" :key="index" class="player-pill transition">
-          <p class="player-name">{{ player.name }} <span v-if="player.host">(Host)</span></p>
+        <div v-for="(player, index) in players" :key="index" class="player-pill transition">
+          <p class="player-name">{{ player.user ? player.user.username : 'bot' }} <span v-if="player.host">(Host)</span></p>
           <div class="player-status">
             <button class="ready-button transition">Ready</button>
-            <button v-if="!player.host" class="kick-button transition" @click="kickPlayer(index)">Kick
-            </button>
+            <button v-if="!player.host" class="kick-button transition" @click="kickPlayer(index, player.playerNumber)">Kick</button>
           </div>
         </div>
         <div v-if="canAddBot" class="player-pill transition">
@@ -54,8 +53,6 @@
                                 :turnDuration="currentGame.turnDuration"
                                 :pointsToWin="currentGame.pointsToWin">
     </popUpGameSettingsComponent>
-
-
   </div>
 </template>
 
@@ -67,56 +64,50 @@ export default {
   components: {
     popUpGameSettingsComponent,
   },
-  inject:['gameService', 'usersService'],
-  props:{
+  inject: ['gameService', 'usersService'],
+  props: {
     selectedGame: Object,
   },
   data() {
     return {
-      gameId:null,
+      gameId: null,
       userDetails: null,
-      playerNames:[],
-      players:{},
+      players: [],
       numberOfPlayers: 4,
       turnDuration: 60,
       pointsToWin: 8,
       botCount: 0,
       showModal: false,
-      currentGame:Object
+      currentGame: Object
     };
   },
   async created() {
-
-
-    this.userDetails = await this.usersService._currentUser
+    this.userDetails = await this.usersService._currentUser;
 
     // Get current game id for lobby
-    this.gameId=this.$route.params.id;
+    this.gameId = this.$route.params.id;
 
-    console.log(this.gameService.canAddNewPlayerToGame(this.gameId))
-
+    console.log(this.gameService.canAddNewPlayerToGame(this.gameId));
 
     // Get game
-    this.currentGame= await this.fetchGameById(this.gameId);
-
-    // await this.addCurrentUserToPlayers();
+    this.currentGame = await this.fetchGameById(this.gameId);
 
     // Fetch all players from game
-    this.fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
-    this.players = this.fetchedPlayers;
-    console.log("players", this.players)
+    this.players = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+    console.log("players", this.players);
 
-    // Add players to player list
-    this.players.forEach(player => {
-      const username = player.user && player.user.username ? player.user.username : 'bot';
-      this.playerNames.push({name: username})
-    })
-
-
+  },
+  beforeRouteLeave(to, from, next) {
+    this.removeCurrentUserFromGame().then(() => {
+      next();
+    }).catch(error => {
+      console.error("Error removing current user from game:", error);
+      next();
+    });
   },
   computed: {
     totalPlayers() {
-      return this.playerNames.length;
+      return this.players.length;
     },
     canAddBot() {
       return this.totalPlayers < this.numberOfPlayers;
@@ -126,65 +117,56 @@ export default {
     async addBot() {
       if (this.botCount < this.numberOfPlayers - 1) {
         this.botCount++;
-        const randomNames = ["Naruto", "Sasuke", "Goku", "Vegeta", "Luffy", "Ichigo", "Eren", "Levi",
-          "Gon", "Killua", "Saitama", "Mikasa", "Kurama"];
+        const randomNames = ["Naruto", "Sasuke", "Goku", "Vegeta", "Luffy", "Ichigo", "Eren", "Levi", "Gon", "Killua", "Saitama", "Mikasa", "Kurama"];
         const randomIndex = Math.floor(Math.random() * randomNames.length);
-        const botName = randomNames[randomIndex] + " (Bot)"; // add "(bot)" to the random name
+        const botName = randomNames[randomIndex] + " (Bot)";
 
-        //FIXME add bot player to backend
-        // Getting a token error from the back-end ~Steef
-        //TODO update: player number available
         try {
-          this.player = await this.gameService.addNewPlayerToGame(this.gameId, null,3);
+          const newBot = await this.gameService.addNewPlayerToGame(this.gameId, null, 3);
+          newBot.user = { username: botName };
+          this.players.push(newBot);
         } catch (error) {
           console.error("Error adding new bot player to game:", error);
         }
-
-        this.playerNames.push({name: botName});
       }
     },
 
-    kickPlayer(index) {
-      //TODO delete player in backend
-      // deletePlayerFromGame() method is already present in gameService and backend DELETE works
-      if (!this.playerNames[index].host) {
-        this.playerNames.splice(index, 1);
-        if (this.playerNames.every(player => !player.host)) {
-          this.botCount--;
-        } else {
-          this.botCount--;
-        }
-        // Update the indexes of the bots when deleted
-        this.playerNames.forEach((player, i) => {
-          if (!player.host && player.index !== undefined) {
-            player.index = i + 1;
-          }
-        });
-      }
-    },
-    async removeCurrentUserFromGame() {
-      const user = this.userDetails;
-      if (user && user.playerNumber) {
+    async kickPlayer(index, playerNumber) {
+      if (!this.players[index].host) {
         try {
-          await this.gameService.deletePlayerFromGame(this.gameId, user.playerNumber);
+          console.log(`Attempting to delete player number: ${playerNumber}`);
+          await this.gameService.deletePlayerFromGame(this.gameId, playerNumber);
+
+          this.players.splice(index, 1);
+          this.botCount = this.players.filter(player => player.user.username.includes("(Bot)")).length;
         } catch (error) {
           console.error("Error deleting player from game:", error);
         }
       }
     },
+    async removeCurrentUserFromGame() {
+      this.currentPlayer= await this.gameService.findPlayerByUserId(this.gameId, this.userDetails.id)
+
+      console.log("this is you id: ", this.gameId)
+        try {
+          await this.gameService.deletePlayerFromGame(this.gameId, this.currentPlayer.playerNumber);
+        } catch (error) {
+          console.error("Error deleting player from game:", error);
+        }
+
+    },
     async fetchGameById(gameId) {
       try {
-        this.game = await this.gameService.asyncGetById(gameId);
-        return this.game
+        const game = await this.gameService.asyncGetById(gameId);
+        return game;
       } catch (error) {
         console.error("Error fetching game by ID:", error);
       }
     },
-
-
   }
-}
+};
 </script>
+
 
 <style scoped>
 .container {

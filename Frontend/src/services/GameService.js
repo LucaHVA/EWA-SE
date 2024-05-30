@@ -260,6 +260,16 @@ export class GameService {
         } else return true;
     }
 
+    async findPlayerByUserId(gameId, userId) {
+        try {
+            const players = await this.asyncFindAllPlayersForGameId(gameId);
+            return players.find(player => player.user.id === userId) || null;
+        } catch (error) {
+            console.error('Error finding player by user ID:', error);
+            throw error;
+        }
+    }
+
 }
 
 // Export a singleton instance of the GameService
