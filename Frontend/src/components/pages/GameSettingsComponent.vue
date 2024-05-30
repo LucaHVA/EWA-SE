@@ -8,10 +8,10 @@
       </div>
       <div class="left-column-players-in-lobby">
         <div v-for="(player, index) in players" :key="index" class="player-pill transition">
-          <p class="player-name">{{ player.user ? player.user.username : 'bot' }} <span v-if="player.host">(Host)</span></p>
+          <p class="player-name">{{ player.user ? player.user.username : 'bot' }} <span v-if="isCurrentUserHost">(Host)</span></p>
           <div class="player-status">
-            <button class="ready-button transition">Ready</button>
-            <button v-if="!player.host" class="kick-button transition" @click="kickPlayer(index, player.playerNumber)">Kick</button>
+            <button v-if="isCurrentUser(player.user)" class="ready-button transition">Ready</button>
+            <button v-if="isCurrentUserHost" class="kick-button transition" @click="kickPlayer(index, player.playerNumber)">Kick</button>
           </div>
         </div>
         <div v-if="canAddBot" class="player-pill transition">
@@ -91,26 +91,43 @@ export default {
 
     // Get game
     this.currentGame = await this.fetchGameById(this.gameId);
+    console.log("the game: ", this.currentGame.host)
 
+    console
     // Fetch all players from game
     this.players = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
     console.log("players", this.players);
 
   },
   beforeRouteLeave(to, from, next) {
-    this.removeCurrentUserFromGame().then(() => {
+    this.removeCurrentUserFromGame().then(async () => {
+
+      const remainingPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+      console.log("remaining players ", remainingPlayers);
+
+      if (this.isCurrentUserHost|| !remainingPlayers || remainingPlayers.length === 0 || remainingPlayers === "0") {
+        console.log(`No remaining players. Deleting game with ID: ${this.gameId}`);
+        await this.gameService.deleteGame(this.gameId);
+      } else {
+        console.log("no reason to delete the game" )
+      }
       next();
     }).catch(error => {
       console.error("Error removing current user from game:", error);
       next();
     });
   },
+
   computed: {
     totalPlayers() {
       return this.players.length;
     },
     canAddBot() {
       return this.totalPlayers < this.numberOfPlayers;
+    },
+
+    isCurrentUserHost() {
+      return this.userDetails && this.currentGame && this.userDetails.id === this.currentGame.host.id;
     }
   },
   methods: {
@@ -144,10 +161,14 @@ export default {
         }
       }
     },
+
+    isCurrentUser(user) {
+      return user && user.id === this.userDetails.id;
+    },
     async removeCurrentUserFromGame() {
       this.currentPlayer= await this.gameService.findPlayerByUserId(this.gameId, this.userDetails.id)
 
-      console.log("this is you id: ", this.gameId)
+      console.log("this is the user: ", this.currentPlayer)
         try {
           await this.gameService.deletePlayerFromGame(this.gameId, this.currentPlayer.playerNumber);
         } catch (error) {
