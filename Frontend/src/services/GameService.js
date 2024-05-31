@@ -41,7 +41,7 @@ export class GameService {
             })
             return games?.map(Game.copyConstructor);
         } catch (e) {
-            console.log(e)
+            console.error(e)
         }
     }
 
@@ -52,7 +52,7 @@ export class GameService {
             })
             return games?.map(Game.copyConstructor);
         } catch (e) {
-            console.log(e)
+            console.error(e)
         }
     }
     /**
@@ -62,20 +62,6 @@ export class GameService {
      * @returns {Promise<Game|null|any>}
      */
     async saveGame(game, queryParams) {
-
-        // Create new game instance if no game was given
-        // if (!game) {
-        //     game = {
-        //         numberOfPlayers: 4,
-        //         turnDuration: 60,
-        //         pointsToWin: 8,
-        //         id: await this.generateUniqueGameId(),
-        //         status:"open",
-        //
-        //     };
-        // }
-
-        console.log("savegame: ", game)
 
         try {
             if (game.id) {
@@ -128,10 +114,19 @@ export class GameService {
      * Add a new player to the game with id <gameId>
      * @param {String} gameId
      * @param {object} user
-     * @param {int} playerNumber
      * @returns {Promise<Player|null>}
      */
-    async addNewPlayerToGame(gameId, user, playerNumber) {
+    async addNewPlayerToGame(gameId, user) {
+
+        //TODO error catching: check if user is already in game
+
+        if (!(await this.canAddNewPlayerToGame(gameId))) {
+            console.error("Game is full. Player not added.");
+            return null;
+        }
+
+        let playerNumber = await this.getLastAvailablePlayerNumber(gameId);
+
 
         let playerJson = {
             "gameId": gameId,
@@ -163,6 +158,18 @@ export class GameService {
             console.error("Error adding player to game:", error);
             throw error; // Throw the error to be handled by the caller
         }
+    }
+
+    async getLastAvailablePlayerNumber(gameId) {
+        // Check if there are open slots
+        if (!(await this.canAddNewPlayerToGame(gameId))){
+            console.error("cannot add new player to ", gameId)
+            return;
+        }
+
+        let players = await this.asyncFindAllPlayersForGameId(gameId);
+
+        return players.length;
     }
 
     async deletePlayerFromGame(gameId, playerNumber){
@@ -235,7 +242,27 @@ export class GameService {
                 return "0"; // Return "0" if no players are found
             }
         } catch (e) {
-            console.log(e)
+            console.error(e)
+        }
+    }
+
+    /**
+     * Find all players for game with id <gameId> and return simplified JSON
+     * @param gameId
+     * @returns {Promise<string|*>} map of simplified players
+     */
+    async asyncFindAllSimplePlayersForGameId(gameId){
+        try {
+            const players = await this.fetchJson(`${this.resourcesUrl}/${gameId}` +  "/players/simple", {
+                method: 'GET'
+            })
+            if (players && players.length > 0) {
+                return players.map(Player.dbConstructor);
+            } else {
+                return "0"; // Return "0" if no players are found
+            }
+        } catch (e) {
+            console.error(e)
         }
     }
 

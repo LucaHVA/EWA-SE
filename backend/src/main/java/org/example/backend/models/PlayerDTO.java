@@ -16,7 +16,9 @@ public class PlayerDTO {
     public PlayerDTO(Player player){
         this.playerNumber = player.getPlayerNumber();
         this.gameId = player.getGame().getId();
-        this.user = new UserDTO(player.getUser());
+        if (player.getUser() == null){
+            this.user = null;
+        } else this.user = new UserDTO(player.getUser());
         this.playerColor = player.getPlayerColor();
     }
 }

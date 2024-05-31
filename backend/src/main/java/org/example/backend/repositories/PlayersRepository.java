@@ -96,22 +96,4 @@ public class PlayersRepository extends AbstractEntityRepositoryJpa<Player, Playe
         return originalPlayers;
     }
 
-
-    public Player update(Player oldEntity, Player newEntity) {
-        // Iterate through player fields
-        for (Field field : Player.class.getDeclaredFields()) {
-            field.setAccessible(true); // Allow access to private fields
-            try {
-                Object newValue = field.get(newEntity);
-                if (newValue != null) {
-                    // Update value
-                    field.set(oldEntity, newValue);
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-        return newEntity;
-    }
-
 }

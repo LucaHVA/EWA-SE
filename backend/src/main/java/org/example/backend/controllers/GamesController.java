@@ -74,7 +74,7 @@ public class GamesController {
         return gamesRepository.save(game);
     }
 
-    @GetMapping(path = "/{id}/players/all", produces = "application/json")
+    @GetMapping(path = "/{id}/players", produces = "application/json")
     public ResponseEntity<List<Player>> getAllPlayersByGameId(@PathVariable String id) {
         List<Player> players = gamesRepository.findPlayersByGameId(id);
 
@@ -85,7 +85,7 @@ public class GamesController {
         return ResponseEntity.ok(players);
     }
 
-    @GetMapping(path = "/{id}/players", produces = "application/json")
+    @GetMapping(path = "/{id}/players/simple", produces = "application/json")
     public ResponseEntity<List<PlayerDTO>> getSimplifiedPlayersByGameId(@PathVariable String id) {
         List<Player> players = gamesRepository.findPlayersByGameId(id);
 
@@ -147,8 +147,8 @@ public class GamesController {
     }
 
     @Transactional
-    @PutMapping("/{gameId}/players/{playerNumber}")
-    public ResponseEntity<Player> updatePlayer(@PathVariable String gameId, @PathVariable int playerNumber, @RequestBody Player updatedPlayer) {
+    @GetMapping("/{gameId}/players/{playerNumber}")
+    public ResponseEntity<Player> updatePlayer(@PathVariable String gameId, @PathVariable int playerNumber) {
         // Find the existing player using the composite key
         PlayerKey playerKey = new PlayerKey(playerNumber, gameId);
         Player existingPlayer = playersRepository.findById(playerKey);
@@ -158,10 +158,7 @@ public class GamesController {
             throw new ResourceNotFoundException("No player found with id " + playerKey);
         }
 
-        // Call the update method from the repository
-        Player updatedEntity = playersRepository.update(existingPlayer, updatedPlayer);
-
-        return ResponseEntity.ok(updatedEntity);
+        return ResponseEntity.ok(existingPlayer);
     }
 
     @DeleteMapping("/{gameId}/players/{playerNumber}")

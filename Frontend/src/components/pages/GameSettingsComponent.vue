@@ -154,7 +154,7 @@ export default {
         // Getting a token error from the back-end ~Steef
         //TODO player numbers available
         try {
-          this.player = await this.gameService.addNewPlayerToGame(this.gameId, null,3);
+          this.player = await this.gameService.addNewPlayerToGame(this.gameId, null);
         } catch (error) {
           console.error("Error adding new bot player to game:", error);
         }
@@ -190,22 +190,15 @@ export default {
     async addCurrentUserToPlayers(){
       const user =  this.usersService.getCurrentUser
 
-      //TODO get player number for to be added user (check free slots)
-      console.log("can add new player? ");
-      console.log(this.gameService.canAddNewPlayerToGame(this.gameId));
 
-      if (this.gameService.canAddNewPlayerToGame(this.gameId)){
-        //todo add new player
-      } else if (!this.gameService.canAddNewPlayerToGame(this.gameId)){
-        //todo game is full -> error catching
-      }
+      if (user){
+        if (!(await this.gameService.canAddNewPlayerToGame(this.gameId))){
+          //TODO cancel adding user
 
-      if (user) {
-        try {
-          //TODO player number available
-          this.player = await this.gameService.addNewPlayerToGame(this.gameId, user, 3);
-        } catch (error) {
-          console.error("Error adding new player to game:", error);
+          console.error("User cannot be added, sorry");
+        } else {
+          // Add user as player to game
+          await this.gameService.addNewPlayerToGame(this.gameId, user);
         }
       }
     },
