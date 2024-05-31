@@ -7,8 +7,8 @@
         <h2 class="header-title">Players ({{ totalPlayers }})</h2>
       </div>
       <div class="left-column-players-in-lobby">
-        <div v-for="(player, index) in players" :key="index" class="player-pill transition">
-          <p class="player-name">{{ player.user ? player.user.username : 'bot' }} <span v-if="isCurrentUserHost">(Host)</span></p>
+        <div v-for="(player, index) in players" :key="index" @click="console.log(player.playerNumber)" class="player-pill transition">
+          <p class="player-name">{{ player.user ? player.user.username : 'bot' }} <span v-if="isHost(player)">(Host)</span></p>
           <div class="player-status">
             <button v-if="isCurrentUser(player.user)" class="ready-button transition">Ready</button>
             <button v-if="isCurrentUserHost" class="kick-button transition" @click="kickPlayer(index, player.playerNumber)">Kick</button>
@@ -97,24 +97,31 @@ export default {
     // console.log("players", this.players);
 
   },
-  // beforeRouteLeave(to, from, next) {
-  //   this.removeCurrentUserFromGame().then(async () => {
-  //
-  //     const remainingPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
-  //     console.log("remaining players ", remainingPlayers);
-  //
-  //     if (this.isCurrentUserHost|| !remainingPlayers || remainingPlayers.length === 0 || remainingPlayers === "0") {
-  //       console.log(`No remaining players. Deleting game with ID: ${this.gameId}`);
-  //       await this.gameService.deleteGame(this.gameId);
-  //     } else {
-  //       console.log("no reason to delete the game" )
-  //     }
-  //     next();
-  //   }).catch(error => {
-  //     console.error("Error removing current user from game:", error);
-  //     next();
-  //   });
-  // },
+  beforeRouteLeave(to, from, next) {
+    // Check if the player is leaving the page by clicking on the "Start Game" button
+    const isLeavingByStartGame = to.name === 'game';
+
+    if (!isLeavingByStartGame) {
+      // Player is leaving the page for another reason (not starting the game)
+      this.removeCurrentUserFromGame().then(async () => {
+        const remainingPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+        console.log("remaining players ", remainingPlayers);
+
+        if (this.isCurrentUserHost || !remainingPlayers || remainingPlayers.length === 0 || remainingPlayers === "0") {
+          console.log(`No remaining players. Deleting game with ID: ${this.gameId}`);
+          await this.gameService.deleteGame(this.gameId);
+        } else {
+          console.log("no reason to delete the game")
+        }
+        next();
+      }).catch(error => {
+        console.error("Error removing current user from game:", error);
+        next();
+      });
+    } else {
+      next();
+    }
+  },
 
   computed: {
     totalPlayers() {
@@ -125,7 +132,8 @@ export default {
     },
 
     isCurrentUserHost() {
-      return this.userDetails && this.currentGame && this.userDetails.id === this.currentGame.host.id;
+      return this.userDetails && this.currentGame && this.userDetails.id === this.currentGame.host.id
+
     }
   },
   methods: {
@@ -146,6 +154,10 @@ export default {
           console.error("Error adding new bot player to game:", error);
         }
       }
+    },
+
+    isHost(player){
+      return player.playerNumber===0;
     },
 
     async kickPlayer(index, playerNumber) {
