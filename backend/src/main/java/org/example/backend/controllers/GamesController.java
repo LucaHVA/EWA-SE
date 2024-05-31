@@ -77,11 +77,6 @@ public class GamesController {
     @GetMapping(path = "/{id}/players", produces = "application/json")
     public ResponseEntity<List<Player>> getPlayersByGameId(@PathVariable String id) {
         List<Player> players = gamesRepository.findPlayersByGameId(id);
-
-        if (players.isEmpty()) {
-            return ResponseEntity.ok(null);
-        }
-
         return ResponseEntity.ok(players);
     }
 

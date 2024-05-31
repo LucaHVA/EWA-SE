@@ -467,7 +467,8 @@
 </template>
 
 <script>
-import Player from "@/models/player";
+import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
+import CONFIG from '@/app-config.js';
 
 export default {
   name: "gameComponent",
@@ -491,8 +492,8 @@ export default {
       game: null,
       gameId: this.$route.params.id,
       previousPage: "/lobbySelect",
-      currentPlayerIndex: 0,
       playerColors: ["red", "blue", "green", "orange"],
+      currentPlayerIndex: 0,
       players: [],
       playerPoints: [0, 0, 0, 0],
       currentPlayerResources: [],
@@ -527,6 +528,7 @@ export default {
         [41, 45, 46, 49, 50, 53]
       ],
       resourcesInitialized: false,
+      initialResources: { brick: 0, wood: 0, wheat: 0, ore: 0, sheep: 0 },
       settlements: [],
       playersSettlements: [
         [], // Player 0 settlements
@@ -563,20 +565,36 @@ export default {
       },
       developmentCards: ['Road_Building','year_of_plenty','monopoly','knight'],
       hasPlayedDevelopmentCard: false,
+      announcements: [],
+      gameState: null,
+      currentUser: null,
     };
   },
-  inject: ["gameService"],
+  inject: ['gameService', 'usersService'],
   async created() {
-    this.game = await this.gameService.asyncGetById(this.gameId)
-    console.log(this.game)
+    // Ensure currentUser is defined before proceeding
+    this.userDetails = await this.usersService._currentUser;
+    console.log(this.userDetails)
+
+    this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement);
     await this.fetchGameDetails();
     await this.fetchPlayers();
+
+    if (this.isFirstPlayer()) {
+      this.initializeBoard();
+    }
+
+    await this.initializePlayers();
   },
+
   mounted() {
     setTimeout(() => {
-      this.initializeBoard();
       this.initializePlayers();
     }, 1000);
+  },
+  beforeUnmount() {
+    // close down the service with the web socket
+    this.announcementsService.close();
   },
   computed: {
     currentPlayer() {
@@ -604,33 +622,231 @@ export default {
     },
   },
   methods: {
+
+    updateGameState(action) {
+      const message = {
+        action: action.action,
+        currentPlayerIndex: this.currentPlayerIndex,
+        game: this.serializeGameState(),
+      };
+
+      if (action.action === 'build') {
+        message.index = action.index;
+      } else if (action.action === 'buildroad') {
+        message.fromIndex = action.fromIndex;
+        message.toIndex = action.toIndex;
+      }
+
+      this.announcementsService.sendMessage(JSON.stringify(message));
+    },
+
+    serializeGameState() {
+      return {
+        settlements: this.settlements,
+        playersSettlements: this.playersSettlements,
+        playerPoints: this.playerPoints,
+        currentPlayerIndex: this.currentPlayerIndex,
+      };
+    },
+
+    onReceiveAnnouncement(message) {
+      console.log("Received announcement:", message);
+      const parsedMessage = JSON.parse(message);
+
+      if (parsedMessage.action === 'initializeBoard' && parsedMessage.boardState) {
+        this.updateBoardState(parsedMessage.boardState);
+      } else if (parsedMessage.action === 'build') {
+        this.updateBoard(parsedMessage.game);
+        this.updateSettlementUI(parsedMessage.index, parsedMessage.currentPlayerIndex);
+      }else if (parsedMessage.action === 'buildroad') {
+        this.updateBoard(parsedMessage.game);
+        this.updateroadUI(parsedMessage.fromindex,parsedMessage.toindex, parsedMessage.currentPlayerIndex);
+      }
+
+      this.announcements.push(parsedMessage);
+    },
+
+    updateBoard(gameState) {
+      if (gameState && gameState.settlements && gameState.playersSettlements && gameState.playerPoints) {
+        this.settlements = gameState.settlements || [];
+        this.playersSettlements = gameState.playersSettlements || [[], [], [], []];
+        this.playerPoints = gameState.playerPoints || [0, 0, 0, 0];
+        this.currentPlayerIndex = gameState.currentPlayerIndex; // Update currentPlayerIndex from gameState
+      } else {
+        console.error('Malformed game state:', gameState);
+      }
+    },
+
+    updateSettlementUI(index, playerIndex) {
+      console.log(`Updating settlement UI: index=${index}, player=${playerIndex}`);
+      // Find the settlement element in the DOM
+      this.build(index)
+    },
+    updateroadUI(fromindex, toindex,) {
+      // Find the settlement element in the DOM
+      this.buildRoad(fromindex, toindex)
+    },
+
+    build(index) {
+      // Check if the current player is defined
+      if (this.currentPlayerIndex === null || this.players[this.currentPlayerIndex] === undefined) {
+        console.error("Current player is undefined.");
+        return;
+      }
+
+      const currentPlayer = this.players[this.currentPlayerIndex];
+
+      // Check if it's the first or second turn
+      const isFirstTurn = this.turn === 1;
+      const isSecondTurn = this.turn === 2;
+
+      // Check if the current player has already built on their turn
+      if ((!isFirstTurn && !isSecondTurn) ||
+          (isFirstTurn && !currentPlayer.hasBuiltFirstTurn) ||
+          (isSecondTurn && !currentPlayer.hasBuiltSecondTurn)) {
+
+        const hasWood = currentPlayer.resources.includes('wood');
+        const hasBrick = currentPlayer.resources.includes('brick');
+        const hasSheep = currentPlayer.resources.includes('sheep');
+        const hasWheat = currentPlayer.resources.includes('wheat');
+
+        // Check if the player has required resources to build
+        if (!(isFirstTurn || isSecondTurn) && (!hasWood || !hasBrick || !hasSheep || !hasWheat)) {
+          this.displayError("You don't have enough resources to build a settlement.");
+          return;
+        }
+
+        // Check if there are settlements adjacent to the road
+        const adjacentSettlements = this.getAdjacentSettlements(index);
+
+        // Check if any adjacent settlement is occupied
+        if (adjacentSettlements.some(settlement => settlement.player !== null && settlement.player !== this.currentPlayerIndex)) {
+          this.displayError("You cannot build a settlement adjacent to another player's settlement.");
+          return;
+        }
+
+        // Check if there are at least 2 roads between settlements
+        const roadsBetweenSettlements = this.getRoadsBetweenSettlements(index);
+        if (roadsBetweenSettlements < 2) {
+          this.displayError("There should be at least 2 roads between settlements.");
+          return;
+        }
+
+        // Deduct the resources from the player's inventory on non-first turn
+        if (!(isFirstTurn || isSecondTurn)) {
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('sheep'), 1);
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wheat'), 1);
+        }
+
+        // Store the owner of the settlement
+        this.settlements[index] = { player: this.currentPlayerIndex };
+
+        // Update the playersSettlements array
+        this.playersSettlements[this.currentPlayerIndex].push(index);
+
+        // Add a CSS class to the settlement position
+        const settlementElement = document.getElementById('s' + index);
+        if (settlementElement) {
+          settlementElement.classList.add(`has-settlement-${this.currentPlayerIndex}`);
+        }
+
+        this.playerPoints[this.currentPlayerIndex] += 1;
+
+        if (isFirstTurn) {
+          currentPlayer.hasBuiltFirstTurn = true;
+        } else if (isSecondTurn) {
+          currentPlayer.hasBuiltSecondTurn = true;
+        }
+
+        // Update the game state and broadcast the build action
+        this.updateGameState({ action: 'build', index: index });
+      } else {
+        this.displayError("You have already built on your turn.");
+      }
+    },
+
+
     async fetchGameDetails() {
       console.log("Fetching game details for game ID:", this.gameId);
       try {
+        // Check if this.gameId is defined before making the request
+        if (!this.gameId) {
+          console.error("Game ID is undefined.");
+          return;
+        }
+
         this.game = await this.gameService.asyncGetById(this.gameId);
         console.log("Fetched game details:", this.game);
       } catch (error) {
         console.error("Error fetching game details:", error);
       }
     },
+
     async fetchPlayers() {
       console.log("Fetching players for game ID:", this.gameId);
       try {
+        if (!this.gameId) {
+          console.error("Game ID is undefined.");
+          return;
+        }
+
         const fetchedPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
         console.log("Raw fetched players:", fetchedPlayers);
 
-        // Filter out invalid player entries
-        const validPlayers = fetchedPlayers.filter(player =>
-            typeof player.playerNumber === 'number' && player.gameId === this.gameId
-        );
+        if (Array.isArray(fetchedPlayers)) {
+          this.players = fetchedPlayers;
+          console.log("Fetched players:", this.players);
+        } else {
+          console.warn("No players fetched.");
+          this.players = [];
+        }
 
-        // Set valid players to the players array
-        this.players = validPlayers;
-
-        console.log("Fetched valid players:", this.players);
       } catch (error) {
         console.error("Error fetching players:", error);
       }
+    },
+
+
+
+    async initializePlayers() {
+      console.log("Initializing players");
+
+      const totalPlayers = 4;
+
+      // If no players fetched, add dummy data
+      if (!Array.isArray(this.players) || this.players.length === 0) {
+        console.warn("No players fetched, initializing with dummy data");
+        this.players = Array.from({ length: totalPlayers }, (_, i) => this.createBotPlayer(i));
+      } else if (this.players.length < totalPlayers) {
+        console.warn(`Only ${this.players.length} players fetched, initializing remaining with bot data`);
+        for (let i = this.players.length; i < totalPlayers; i++) {
+          this.players.push(this.createBotPlayer(i));
+        }
+      }
+
+      // Assign colors and resources to all players
+      this.players.forEach((player, index) => {
+        player.playerColor = this.playerColors[index];
+        player.resources = [];
+        player.developmentCards = [];
+      });
+
+      console.log("Players initialized:", this.players);
+
+      // Start the countdown timer after initializing players
+      this.startCountdown();
+    },
+
+    createBotPlayer(index) {
+      const botPlayer = {
+        playerColor: this.playerColors[index],
+        user: { id: `bot-${index}`, name: `Bot ${index + 1}` },
+        resources: [],
+        developmentCards: [],
+      };
+      return botPlayer;
     },
 
 
@@ -997,33 +1213,32 @@ export default {
       }
     },
     initializeBoard() {
-      for (let i = 0; i < 3; i++) {
+      // Only initialize the board if this is the first player
+      if (this.isFirstPlayer()) {
+        this.row1 = this.generateRow(3);
+        this.row2 = this.generateRow(4);
+        this.row3 = this.generateRow(5);
+        this.row4 = this.generateRow(4);
+        this.row5 = this.generateRow(3);
+        this.resourcesInitialized = true;
+
+        // Send the initial board state to the server
+        const initialBoardState = this.serializeBoardState();
+        this.announcementsService.sendMessage(JSON.stringify({
+          action: 'initializeBoard',
+          boardState: initialBoardState,
+          gameId: this.gameId
+        }));
+      }
+    },
+    generateRow(size) {
+      const row = [];
+      for (let i = 0; i < size; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        this.row1.push({resource, number});
+        row.push({ resource, number });
       }
-      for (let i = 0; i < 4; i++) {
-        const resource = this.getRandomResource();
-        const number = this.assignRandomNumber();
-        this.row2.push({resource, number});
-      }
-      for (let i = 0; i < 5; i++) {
-        const resource = this.getRandomResource();
-        const number = this.assignRandomNumber();
-        this.row3.push({resource, number});
-      }
-      for (let i = 0; i < 4; i++) {
-        const resource = this.getRandomResource();
-        const number = this.assignRandomNumber();
-        this.row4.push({resource, number});
-      }
-      for (let i = 0; i < 3; i++) {
-        const resource = this.getRandomResource();
-        const number = this.assignRandomNumber();
-        this.row5.push({resource, number});
-      }
-      // Set the flag to indicate resources are initialized
-      this.resourcesInitialized = true;
+      return row;
     },
     getRandomResource() {
       const resources = ['ore', 'brick', 'wheat', 'wood', 'sheep'];
@@ -1034,84 +1249,34 @@ export default {
       this.resourceCounts[selectedResource]--;
       return selectedResource;
     },
-
     assignRandomNumber() {
       let randomNumber;
       do {
         randomNumber = Math.floor(Math.random() * 11) + 2;
-      } while (randomNumber === 7);
+      } while (randomNumber === 7); // Assuming you want to avoid the number 7
       return randomNumber;
     },
-
-    build(index) {
-      // Check if it's the first turn
-      const isFirstTurn = this.turn === 1;
-      const isSecondTurn = this.turn === 2;
-
-      // Check if the current player has the required resources (1 wood, 1 brick, 1 sheep, and 1 wheat) on non-first turn
-      if ((!isFirstTurn && !isSecondTurn) || (isFirstTurn && !this.players[this.currentPlayerIndex].hasBuiltFirstTurn) || (isSecondTurn && !this.players[this.currentPlayerIndex].hasBuiltSecondTurn)) {
-        const currentPlayer = this.players[this.currentPlayerIndex];
-        const hasWood = currentPlayer.resources.includes('wood');
-        const hasBrick = currentPlayer.resources.includes('brick');
-        const hasSheep = currentPlayer.resources.includes('sheep');
-        const hasWheat = currentPlayer.resources.includes('wheat');
-
-        if (!(isFirstTurn || isSecondTurn) && (!hasWood || !hasBrick || !hasSheep || !hasWheat)) {
-          // Display an error message if the player doesn't have the required resources on non-first turn
-          this.displayError("You don't have enough resources to build a settlement.");
-          return;
-        }
-
-        // Check if there are settlements adjacent to the road
-        const adjacentSettlements = this.getAdjacentSettlements(index);
-
-        // Check if any adjacent settlement is occupied
-        if (adjacentSettlements.some(settlement => settlement.player !== null && settlement.player !== this.currentPlayerIndex)) {
-          this.displayError("You cannot build a settlement adjacent to another player's settlement.");
-          return;
-        }
-
-        // Check if there are at least 2 roads between settlements
-        const roadsBetweenSettlements = this.getRoadsBetweenSettlements(index);
-        if (roadsBetweenSettlements < 2) {
-          this.displayError("There should be at least 2 roads between settlements.");
-          return;
-        }
-
-        // Deduct the resources from the player's inventory on non-first turn
-        if (!(isFirstTurn || isSecondTurn)) {
-          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
-          currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
-          currentPlayer.resources.splice(currentPlayer.resources.indexOf('sheep'), 1);
-          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wheat'), 1);
-        }
-
-        // Store the owner of the settlement
-        this.settlements[index] = { player: this.currentPlayerIndex };
-
-        // Update the playersSettlements array
-        this.playersSettlements[this.currentPlayerIndex].push(index);
-
-        // Add a CSS class to the settlement position
-        const settlementElement = document.getElementById('s' + index);
-        if (settlementElement) {
-          settlementElement.classList.add(`has-settlement-${this.currentPlayerIndex}`);
-        }
-
-        this.playerPoints[this.currentPlayerIndex] += 1;
-
-
-        // Set the flag to indicate that the player has built on their first or second turn
-        if (isFirstTurn) {
-          currentPlayer.hasBuiltFirstTurn = true;
-        } else if (isSecondTurn) {
-          currentPlayer.hasBuiltSecondTurn = true;
-        }
-      } else {
-        this.displayError("You have already built on your turn.");
-        return;
-      }
+    serializeBoardState() {
+      return {
+        row1: this.row1,
+        row2: this.row2,
+        row3: this.row3,
+        row4: this.row4,
+        row5: this.row5,
+      };
     },
+    updateBoardState(boardState) {
+      this.row1 = boardState.row1;
+      this.row2 = boardState.row2;
+      this.row3 = boardState.row3;
+      this.row4 = boardState.row4;
+      this.row5 = boardState.row5;
+      this.resourcesInitialized = true;
+    },
+    isFirstPlayer() {
+      return this.players.length === 0 || this.currentPlayerIndex === 0;
+    },
+
 
     getAdjacentSettlements(index) {
       const connectedSettlements = [];
@@ -1249,6 +1414,9 @@ export default {
             currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
             currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
           }
+
+          // Update the game state and broadcast the build action
+          this.updateGameState({ action: 'buildroad', fromindex: fromIndex, toindex: toIndex });
 
         } else {
           // Display a warning message if the road is not adjacent to the player's settlement or road
@@ -1637,36 +1805,6 @@ export default {
     },
 
 
-    initializePlayers() {
-      console.log("Initializing players");
-
-      const totalPlayers = 4;
-      const fetchedPlayersCount = this.players.length;
-
-      if (fetchedPlayersCount === 0) {
-        console.warn("No players fetched, initializing with dummy data");
-      }
-
-      // Assign colors to fetched players
-      this.players.forEach((player, index) => {
-        player.playerColor = this.playerColors[index];
-        player.resources = [];
-        player.developmentCards = [];
-      });
-
-      // Add bots if necessary to make up to totalPlayers
-      for (let i = fetchedPlayersCount; i < totalPlayers; i++) {
-        const botPlayer = new Player(this.playerColors[i], "NaN", [], []);
-        botPlayer.resources = [];
-        botPlayer.developmentCards = [];
-        this.players.push(botPlayer);
-      }
-
-      console.log("Players initialized:", this.players);
-
-      // Start the countdown timer after initializing players
-      this.startCountdown();
-    },
 
     startCountdown() {
       // Clear any existing timer

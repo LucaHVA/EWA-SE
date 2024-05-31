@@ -221,21 +221,17 @@ export class GameService {
     /**
      * Find all players for a game with id <gameId>
      * @param gameId
-     * @returns {Promise<*>} map of players
+     * @returns {Promise<*>} array of players
      */
-    async asyncFindAllPlayersForGameId(gameId){
-
+    async asyncFindAllPlayersForGameId(gameId) {
         try {
-            const players = await this.fetchJson(`${this.resourcesUrl}/${gameId}` +  "/players", {
+            const players = await this.fetchJson(`${this.resourcesUrl}/${gameId}/players`, {
                 method: 'GET'
-            })
-            if (players && players.length > 0) {
-                return players.map(Player.dbConstructor);
-            } else {
-                return "0"; // Return "0" if no players are found
-            }
+            });
+            return players || []; // Return an empty array if no players are found
         } catch (e) {
-            console.log(e)
+            console.error(e);
+            throw e; // Rethrow the error to be caught by the caller
         }
     }
 

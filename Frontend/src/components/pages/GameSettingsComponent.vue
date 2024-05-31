@@ -97,14 +97,14 @@ export default {
     console.log("players", this.players);
 
   },
-  beforeRouteLeave(to, from, next) {
-    this.removeCurrentUserFromGame().then(() => {
-      next();
-    }).catch(error => {
-      console.error("Error removing current user from game:", error);
-      next();
-    });
-  },
+  // beforeRouteLeave(to, from, next) {
+  //   this.removeCurrentUserFromGame().then(() => {
+  //     next();
+  //   }).catch(error => {
+  //     console.error("Error removing current user from game:", error);
+  //     next();
+  //   });
+  // },
   computed: {
     totalPlayers() {
       return this.players.length;

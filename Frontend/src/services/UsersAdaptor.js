@@ -108,10 +108,11 @@ export class UsersAdaptor {
                 credentials: "include"
             };
             const response = await fetch(url, options);
-            if (response) {
+            if (response.ok) {
                 const user = await response.json();
-                this.saveTokenIntoBrowserStorage(response.headers.get('Authorization'), user);
-                return response;
+                const token = response.headers.get('Authorization');
+                this.saveTokenIntoBrowserStorage(token, user);
+                return user; // Return the logged-in user
             } else {
                 console.error('Login failed: Invalid username or password.');
                 return null;
@@ -120,6 +121,36 @@ export class UsersAdaptor {
             console.error('Error during login:', error);
             return null;
         }
+    }
+
+
+
+    getTokenFromBrowserStorage() {
+        this._currentToken = window.sessionStorage.getItem(this.BROWSER_STORAGE_ITEM_NAME);
+        const jsonUser = window.sessionStorage.getItem(this.BROWSER_STORAGE_ITEM_NAME + "_ACC");
+
+        if (jsonUser) {
+            this._currentUser = JSON.parse(jsonUser);
+        } else {
+            this._currentUser = null;
+        }
+
+        return this._currentToken;
+    }
+
+    get currentUser() {
+        if (!this._currentUser) {
+            this.getTokenFromBrowserStorage();
+        }
+        return this._currentUser;
+    }
+
+    isAuthenticated() {
+        return this.currentUser != null;
+    }
+
+    signOut() {
+        this.saveTokenIntoBrowserStorage(null, null);
     }
 
     saveTokenIntoBrowserStorage(token, user) {
@@ -140,29 +171,7 @@ export class UsersAdaptor {
         }
     }
 
-    getTokenFromBrowserStorage() {
-        if (this._currentToken != null) return this._currentToken;
 
-        this._currentToken = window.sessionStorage.getItem(this.BROWSER_STORAGE_ITEM_NAME);
-        const jsonUser = window.sessionStorage.getItem(this.BROWSER_STORAGE_ITEM_NAME + "_ACC");
-
-        console.log('Retrieved token from storage:', this._currentToken);
-        // console.log('Retrieved user JSON from storage:', jsonUser);
-
-        if (jsonUser != null) {
-            this._currentUser = JSON.parse(jsonUser);
-        }
-
-        return this._currentToken;
-    }
-
-    isAuthenticated() {
-        return this._currentUser != null;
-    }
-
-    signOut() {
-        this.saveTokenIntoBrowserStorage(null, null);
-    }
 
     async fetchMatchHistory(userId) {
         try {

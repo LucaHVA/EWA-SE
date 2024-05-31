@@ -24,6 +24,8 @@ export class AnnouncementsAdaptor {
         console.log("New announcement:" ,message);
         this.socket.send(message);
     }
+
+
     close() {
         console.log(`Closed announcements adaptor on ${this.socketUrl}`)
         this.socket.close();
