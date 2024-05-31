@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <div class="profile-page-title">
-      <h1>Profile</h1>
+    <div>
+      <h1 class="profile-page-title">Profile</h1>
     </div>
     <div class="profile-page-content">
       <!-- Profile Picture Section -->
@@ -16,20 +16,27 @@
       <div class="profile-info">
         <div class="form-container">
           <form>
-            <label for="username">Change Username</label>
-            <input v-model="username" type="text" id="username" name="username" placeholder="Username">
+            <div class="input_box">
+              <input v-model="username" type="text" id="username" name="username" required/>
+              <span>Change Username</span>
+            </div>
 
-            <label for="email">Change Email</label>
-            <input v-model="email" type="email" id="email" name="email" placeholder="Email">
+            <div class="input_box">
+              <input v-model="email" type="email" id="email" name="email" required/>
+              <span>Change Email</span>
+            </div>
 
-            <label for="password">Change Password</label>
-            <input v-model="password" type="password" id="password" name="password" placeholder="Password">
+            <div class="input_box">
+              <input v-model="password" type="password" id="password" name="password" required/>
+              <span>Change Password</span>
+            </div>
+
             <div class="alertMessage" role="alert" v-if="alert">
               Your password should be between 8-16 characters.
             </div>
           </form>
           <div class="button-container">
-            <button type="submit" @click="cancel" class="cancel-button transition">Cancel</button>
+            <button type="submit" @click="cancel" class="orange-button transition">Cancel</button>
             <button type="submit" @click="save" class="save-button transition">Save</button>
           </div>
         </div>
@@ -37,13 +44,14 @@
 
       <!-- Match History Section -->
       <div class="match-history-container">
-        <h1>Recent Games</h1>
+        <h1 class="match-history-title">Recent Games</h1>
         <ul>
-          <li v-for="(game, index) in matchHistory" :key="index" class="pill transition" @click="showGameDetails(game)">
-            {{ game.startTime }} - {{ game.placement }}
+          <li v-for="(game, index) in matchHistory.slice(0, 4)" :key="index" class="pill transition"
+              @click="showGameDetails(game)">
+            {{ game.startTime }} - {{ formatPlacement(game.placement) }}
           </li>
         </ul>
-        <button class="cancel-button transition" @click="showMoreHistory">See More</button>
+        <button class="orange-button transition" @click="showMoreHistory">See More</button>
       </div>
     </div>
 
@@ -52,26 +60,30 @@
       <div v-if="isModalOpen" class="modal-mask" @click="closeModal">
         <div class="modal-wrapper">
           <div class="modal-container" @click.stop>
-            <h1 v-if="selectedGameHistory">Game Details</h1>
-            <h1 v-else>Match History</h1>
+            <h1 class="match-history-title" v-if="selectedGameHistory">Game Details</h1>
+            <h1 class="match-history-title" v-else>Match History</h1>
             <div v-if="selectedGameHistory">
-              <p><strong>Placement:</strong> {{ selectedGameHistory.placement }}</p>
+              <p><strong>Placement:</strong> {{ formatPlacement(selectedGameHistory.placement) }}</p>
               <p><strong>Start Time:</strong> {{ selectedGameHistory.startTime }}</p>
               <p><strong>End Time:</strong> {{ selectedGameHistory.endTime }}</p>
             </div>
-            <ul v-else>
-              <li v-for="(game, index) in matchHistory" :key="index" class="pill transition"
-                  @click="showGameDetails(game)">
-                {{ game.startTime }} - {{ game.placement }}
-              </li>
-            </ul>
-            <button class="cancel-button transition" @click="closeModal">Close</button>
+            <div class="modal-match-history-list" v-else>
+              <ul>
+                <li v-for="(game, index) in matchHistory" :key="index" class="pill transition"
+                    @click="showGameDetails(game)">
+                  {{ game.startTime }} - {{ formatPlacement(game.placement) }}
+                </li>
+              </ul>
+            </div>
+            <button class="orange-button transition" @click="closeModal">Close</button>
           </div>
         </div>
       </div>
     </transition>
   </div>
 </template>
+
+
 
 <script>
 import defaultImage from '@/assets/images/defaultpfp.png';
@@ -180,6 +192,18 @@ export default {
     showGameDetails(game) {
       this.selectedGameHistory = game;
       this.isModalOpen = true;
+    },
+    formatPlacement(placement) {
+      const number = placement;
+      let addBehindPlacement = "th";
+      if (number === 1) {
+        addBehindPlacement = "st";
+      } else if (number === 2) {
+        addBehindPlacement = "nd";
+      } else if (number === 3) {
+        addBehindPlacement = "rd";
+      }
+      return placement + addBehindPlacement;
     }
   }
 }
@@ -190,13 +214,10 @@ export default {
 .profile-page-title {
   text-align: center;
   margin-top: 50px;
-  margin-bottom: 10px;
-  font-size: 30px;
+  margin-bottom: 20px;
+  font-size: 45px;
   font-family: "Inria Sans", sans-serif;
-}
-
-.profile-page-title h1 {
-  margin: 0;
+  font-weight: bolder;
 }
 
 /*content*/
@@ -216,25 +237,14 @@ form {
   flex-direction: column;
 }
 
-form label {
-  margin-bottom: 5px;
-  display: block;
-  font-size: 25px;
-}
-
-form input {
-  margin-bottom: 1rem;
-}
-
-form input::placeholder {
-  font-size: 15px;
-}
-
 /* Profile picture container */
 .profile-pic-container {
   display: flex;
   justify-content: center;
   margin: 20px 0;
+  position: relative;
+  left: 125px;
+  bottom: 20px;
 }
 
 .profile-pic {
@@ -267,75 +277,26 @@ form input::placeholder {
   opacity: 1;
 }
 
-/*buttons*/
-.button-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-
-.cancel-button {
-  font-family: 'Raleway', sans-serif;
-  background-color: var(--coral);
-  border: none;
-  color: var(--white);
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  width: max-content;
-  font-size: 20px;
-  margin: 6px 2rem;
-  cursor: pointer;
-  border-radius: 8px;
-  font-weight: bold;
-  box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
-}
-
-.cancel-button:hover {
-  background-color: var(--white);
-  color: var(--coral);
-}
-
-.save-button {
-  font-family: 'Raleway', sans-serif;
-  background-color: var(--shade-of-tea);
-  border: none;
-  color: var(--white);
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  width: max-content;
-  font-size: 20px;
-  margin: 6px 2rem;
-  cursor: pointer;
-  border-radius: 8px;
-  font-weight: bold;
-  box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
-}
-
-.save-button:hover {
-  background-color: var(--white);
-  color: var(--shade-of-tea);
-}
-
-input {
-  font-size: 1.2rem;
-}
-
-.alertMessage {
-  color: maroon;
-  text-align: center;
-}
-
 /*match history container*/
 .match-history-container {
   width: 300px;
-  margin-left: 20px;
+  margin: 0;
+  position: relative;
+  right: 100px;
+  bottom: 107px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.match-history-container h1 {
+.match-history-title {
   display: flex;
   justify-content: center;
+  text-align: center;
+  font-size: 45px;
+  font-family: "Inria Sans", sans-serif;
+  font-weight: bolder;
 }
 
 .match-history-container ul {
@@ -353,6 +314,7 @@ input {
 
 .pill {
   font-weight: bolder;
+  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -361,11 +323,18 @@ input {
   border-radius: 10px;
   width: 250px;
   height: 30px;
+
 }
 
 .pill:hover {
   background-color: var(--black);
   color: var(--white);
+}
+
+/* Alert Message */
+.alertMessage {
+  color: maroon;
+  text-align: center;
 }
 
 /* Modal */
@@ -403,6 +372,29 @@ input {
   transition: all 0.4s ease;
 }
 
+.modal-match-history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.modal-container .pill {
+  font-weight: bolder;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--white);
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  width: 400px;
+  height: 30px;
+}
+
+.modal-container .pill:hover {
+  background-color: var(--black);
+  color: var(--white);
+}
+
 /* Transition for modal */
 .modal-enter-active, .modal-leave-active {
   transition: opacity 0.5s, transform 0.5s;
@@ -411,5 +403,105 @@ input {
 .modal-enter-from, .modal-leave-to {
   opacity: 0;
   transform: scale(1.3);
+}
+
+/*buttons*/
+.button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.orange-button {
+  font-family: 'Raleway', sans-serif;
+  background-color: var(--coral);
+  border: none;
+  color: var(--white);
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  width: max-content;
+  font-size: 20px;
+  margin: 6px 2rem;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
+}
+
+.orange-button:hover {
+  background-color: var(--white);
+  color: var(--coral);
+}
+
+.save-button {
+  font-family: 'Raleway', sans-serif;
+  background-color: var(--shade-of-tea);
+  border: none;
+  color: var(--white);
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  width: max-content;
+  font-size: 20px;
+  margin: 6px 2rem;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
+}
+
+.save-button:hover {
+  background-color: var(--white);
+  color: var(--shade-of-tea);
+}
+
+/*Input fields*/
+.input_box {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 55px;
+  margin: 10px 0 25px 0;
+}
+
+.input_box input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid var(--black);
+  background: var(--white);
+  border-radius: 5px;
+  outline: none;
+  color: var(--black);
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.input_box span {
+  position: absolute;
+  left: 0;
+  padding: 10px;
+  pointer-events: none;
+  font-size: 20px;
+  font-weight: bolder;
+  color: var(--black);
+  text-transform: uppercase;
+  transition: 0.5s;
+}
+
+.input_box input:focus ~ span,
+.input_box input:valid ~ span {
+  color: var(--black);
+  transform: translateX(10px) translateY(-7px);
+  font-size: 0.8em;
+  padding: 0 10px;
+  background: var(--white);
+  border-left: 2px solid var(--black);
+  border-right: 2px solid var(--black);
+  letter-spacing: 0.2em;
+}
+
+.input_box input:focus {
+  border: 3px solid var(--coral);
 }
 </style>
