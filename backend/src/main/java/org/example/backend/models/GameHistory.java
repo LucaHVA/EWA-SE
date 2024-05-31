@@ -10,22 +10,15 @@ import java.sql.Time;
 public class GameHistory implements Identifiable<Long> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    //@Column(name = "game_history_id")
+    @SequenceGenerator(initialValue = 30000, name = "GameHistoryGenerator")
+    @GeneratedValue(generator = "GameHistoryGenerator")
     private Long gameHistoryId;
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.ALL)
-    //@JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
-
-    //@Column(name = "placement")
     private int placement;
-
-    //@Column(name = "startTime")
     private Time startTime;
-
-    //@Column(name = "endTime")
     private Time endTime;
 
     public GameHistory() {

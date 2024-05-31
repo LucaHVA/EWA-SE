@@ -43,12 +43,20 @@ export class UsersAdaptor {
         }
     }
 
+    //The [] is used as a fallback value to handle cases where the expected data might be null or undefined remember noobs.
     async asyncFindAll() {
         try {
             const users = await this.fetchJson(this.resourcesUrl + "/all", {
-                method: 'GET'
+                method: "GET",
             });
-            return users ? users.map(User.copyConstructor) : [];  // Check for null and return an empty array if needed
+            if (users) {
+                for (let user of users) {
+                    user.points = await this.calculatePlayerPoints(user.id);
+                }
+                return users.map(User.copyConstructor);
+            } else {
+                return [];
+            }
         } catch (e) {
             console.log(e);
             return [];
@@ -171,24 +179,38 @@ export class UsersAdaptor {
         try {
             const url = `${this.resourcesUrl}/${userId}/games`;
             const options = {
-                method: 'GET',
+                method: "GET",
                 headers: {
-                    'Authorization': this.currentToken
-                }
+                    Authorization: this.currentToken,
+                },
             };
             const response = await this.fetchJson(url, options);
-            if (response) {
-                const matchHistory = await response.json();
-
-                return matchHistory.map(GameHistory.copyConstructor);
-            } else {
-                console.error('Failed to fetch match history.');
-                return null;
-            }
+            return response ? response.map(GameHistory.copyConstructor) : [];
         } catch (error) {
-            console.error('Error during fetch match history:', error);
-            return null;
+            console.error("Error during fetch match history:", error);
+            return [];
         }
+    }
+
+    async calculatePlayerPoints(userId) {
+        const matchHistory = await this.fetchMatchHistory(userId);
+        let playerPoints = 0;
+        for (const match of matchHistory) {
+            switch (match.placement) {
+                case 1:
+                    playerPoints += 5;
+                    break;
+                case 2:
+                    playerPoints += 3;
+                    break;
+                case 3:
+                    playerPoints += 1;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return playerPoints;
     }
 
     async getFriends(userId) {

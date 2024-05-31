@@ -115,7 +115,16 @@ public class DataLoader implements CommandLineRunner {
         User adminUser = new User(0L, "admin", "admin@mail.com", "adminPassword");
         adminUser.getRoles().add(User.Role.ADMIN);
         users.add(this.userRepository.save(adminUser));
-
+        users.add(this.userRepository.save(new User(0L, "Naruto Uzumaki", "naruto@anime.com", "rasengan")));
+        users.add(this.userRepository.save(new User(0L, "Sakura Haruno", "sakura@anime.com", "cherryblossom")));
+        users.add(this.userRepository.save(new User(0L, "Sasuke Uchiha", "sasuke@anime.com", "sharingan")));
+        users.add(this.userRepository.save(new User(0L, "Goku", "goku@anime.com", "kamehameha")));
+        users.add(this.userRepository.save(new User(0L, "Vegeta", "vegeta@anime.com", "galickgun")));
+        users.add(this.userRepository.save(new User(0L, "Luffy D. Monkey", "luffy@anime.com", "gumgum")));
+        users.add(this.userRepository.save(new User(0L, "Zoro Roronoa", "zoro@anime.com", "santoryu")));
+        users.add(this.userRepository.save(new User(0L, "Ichigo Kurosaki", "ichigo@anime.com", "bankai")));
+        users.add(this.userRepository.save(new User(0L, "Edward Elric", "edward@anime.com", "alchemy")));
+        users.add(this.userRepository.save(new User(0L, "Levi Ackerman", "levi@anime.com", "blades")));
     }
 
     private void createInitialGameData() {
@@ -126,7 +135,7 @@ public class DataLoader implements CommandLineRunner {
 
         List<Game> games = this.gameRepository.findAll();
         games.add(this.gameRepository.save(new Game("BACK03", 3, 33, 3, Game.Status.open, host)));
-        games.add(this.gameRepository.save(new Game("BACK04", 4, 40, 4,Game.Status.open, host)));
+        games.add(this.gameRepository.save(new Game("BACK04", 4, 40, 4, Game.Status.open, host)));
         games.add(this.gameRepository.save(new Game("BACK05", 4, 50, 5, Game.Status.open, host)));
         games.add(this.gameRepository.save(new Game("SUS420", 4, 60, 10, Game.Status.closed, host)));
         games.add(this.gameRepository.save(new Game("FULL01", 4, 60, 10, Game.Status.ongoing, null)));
@@ -142,18 +151,59 @@ public class DataLoader implements CommandLineRunner {
         Time endTime = new Time(System.currentTimeMillis());
 
         if (!users.isEmpty()) {
-            // Assuming users.get(0) is "Armando"
+            // 18 points
+            gameHistoryRepository.save(new GameHistory(0L, users.get(0), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(0), 1, startTime, endTime));
             gameHistoryRepository.save(new GameHistory(0L, users.get(0), 1, startTime, endTime));
             gameHistoryRepository.save(new GameHistory(0L, users.get(0), 2, startTime, endTime));
 
-            // Assuming users.get(1) is "Ballmando"
+            // 20 points
+            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 1, startTime, endTime));
             gameHistoryRepository.save(new GameHistory(0L, users.get(1), 1, startTime, endTime));
             gameHistoryRepository.save(new GameHistory(0L, users.get(1), 3, startTime, endTime));
-            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 1, startTime, endTime));
-            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 3, startTime, endTime));
-            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(1), 2, startTime, endTime));
             gameHistoryRepository.save(new GameHistory(0L, users.get(1), 3, startTime, endTime));
 
+            // 37 points
+            gameHistoryRepository.save(new GameHistory(0L, users.get(10), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(10), 2, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(10), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(10), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(10), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(10), 2, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(10), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(10), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(10), 3, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(10), 4, startTime, endTime));
+
+            // 11 points
+            gameHistoryRepository.save(new GameHistory(0L, users.get(7), 4, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(7), 4, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(7), 4, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(7), 3, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(7), 3, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(7), 3, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(7), 2, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(7), 1, startTime, endTime));
+
+            // 15 points
+            gameHistoryRepository.save(new GameHistory(0L, users.get(13), 2, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(13), 2, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(13), 2, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(13), 2, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(13), 2, startTime, endTime));
+
+            // 45 points
+            gameHistoryRepository.save(new GameHistory(0L, users.get(12), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(12), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(12), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(12), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(12), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(12), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(12), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(12), 1, startTime, endTime));
+            gameHistoryRepository.save(new GameHistory(0L, users.get(12), 1, startTime, endTime));
 
             // Additional game histories for other users
             for (int i = 2; i < users.size(); i++) {
