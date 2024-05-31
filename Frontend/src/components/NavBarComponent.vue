@@ -11,9 +11,9 @@
         <li class="nav-item" v-if="isLoggedIn">
           <router-link to="/leaderboard" class="nav-link" active-class="active">Leaderboard</router-link>
         </li>
-<!--        <li class="nav-item" v-if="isLoggedIn">-->
-<!--          <router-link to="/friends" class="nav-link" active-class="active">Friends List</router-link>-->
-<!--        </li>-->
+        <li class="nav-item" v-if="isLoggedIn">
+          <router-link to="/friends" class="nav-link" active-class="active">Friends List</router-link>
+        </li>
       </ul>
       <ul class="user-logging">
         <li class="nav-item" v-if="isLoggedIn">
