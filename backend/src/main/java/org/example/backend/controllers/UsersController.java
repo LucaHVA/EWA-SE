@@ -1,7 +1,10 @@
 package org.example.backend.controllers;
 
 import jakarta.transaction.Transactional;
+import org.example.backend.enums.FriendshipStatus;
+import org.example.backend.models.Friend;
 import org.example.backend.models.GameHistory;
+import org.example.backend.repositories.FriendsRepository;
 import org.example.backend.repositories.GameHistoriesRepository;
 import org.example.backend.security.APIConfig;
 import org.example.backend.exceptions.ResourceNotFoundException;
@@ -17,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,6 +39,10 @@ public class UsersController {
     @Qualifier("GAMEHISTORIES.JPA")
     @Autowired
     private GameHistoriesRepository gameHistoriesRepository;
+
+    @Qualifier("FRIENDS.JPA")
+    @Autowired
+    private FriendsRepository friendsRepository;
 
     @Autowired
     private APIConfig apiConfig;
@@ -130,5 +138,95 @@ public class UsersController {
         // Save the game history using GameHistoriesRepository
         GameHistory savedGameHistory = gameHistoriesRepository.save(gameHistory);
         return ResponseEntity.ok(savedGameHistory);
+    }
+
+    @PostMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<Friend> sendFriendRequest(@PathVariable long id, @PathVariable long friendId) {
+        User user = usersRepository.findById(id);
+        User friend = usersRepository.findById(friendId);
+
+        if (user == null || friend == null) {
+            throw new ResourceNotFoundException("User or friend not found.");
+        }
+
+        Friend friendRequest = new Friend(0L, user, friend, FriendshipStatus.PENDING);
+        friendsRepository.save(friendRequest);
+
+        return ResponseEntity.ok(friendRequest);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}/accept")
+    public ResponseEntity<Friend> acceptFriendRequest(@PathVariable long id, @PathVariable long friendId) {
+        List<Friend> friendRequests = friendsRepository.findByQuery("Get_received_friend_request", id);
+
+        for (Friend friendRequest : friendRequests) {
+            if (friendRequest.getUser().getId().equals(friendId)) {
+                friendRequest.setStatus(FriendshipStatus.ACCEPTED);
+                friendsRepository.save(friendRequest);
+                return ResponseEntity.ok(friendRequest);
+            }
+        }
+
+        throw new ResourceNotFoundException("Friend request not found.");
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}/decline")
+    public ResponseEntity<Void> declineFriendRequest(@PathVariable long id, @PathVariable long friendId) {
+        List<Friend> friends = friendsRepository.findByQuery("Find_friends_by_userId_or_friendId", id);
+
+        for (Friend friend : friends) {
+            if (friend.getUser().getId() == friendId || friend.getFriend().getId() == friendId) {
+                friendsRepository.deleteById(friend.getId());
+                return ResponseEntity.noContent().build();
+            }
+        }
+
+        throw new ResourceNotFoundException("Friend request not found.");
+    }
+
+    @GetMapping("/{id}/friends")
+    public ResponseEntity<List<User>> getFriends(@PathVariable long id) {
+        List<Friend> friends = friendsRepository.findByQuery("Get_accepted_friends", id);
+
+        List<User> friendList = new ArrayList<>();
+        for (Friend friend : friends) {
+            if (friend.getUser().getId() == id) {
+                friendList.add(friend.getFriend());
+            } else if (friend.getFriend().getId() == id) {
+                friendList.add(friend.getUser());
+            }
+        }
+
+        return ResponseEntity.ok(friendList);
+    }
+
+    @GetMapping("/{id}/friendRequests")
+    public ResponseEntity<List<User>> getFriendRequests(@PathVariable long id) {
+        List<Friend> friendRequests = friendsRepository.findByQuery("Get_received_friend_request", id);
+
+        // Create a list to hold the users
+        List<User> users = new ArrayList<>();
+
+        // Iterate over the friend requests and collect the users
+        for (Friend friendRequest : friendRequests) {
+            users.add(friendRequest.getUser());
+        }
+
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/{id}/sentFriendRequests")
+    public ResponseEntity<List<User>> getSentFriendRequests(@PathVariable long id) {
+        List<Friend> friendRequests = friendsRepository.findByQuery("Get_sent_friend_request", id);
+
+        // Create a list to hold the users
+        List<User> users = new ArrayList<>();
+
+        // Iterate over the friend requests and collect the users
+        for (Friend friendRequest : friendRequests) {
+            users.add(friendRequest.getFriend());
+        }
+
+        return ResponseEntity.ok(users);
     }
 }

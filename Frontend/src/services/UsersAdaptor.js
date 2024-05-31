@@ -1,6 +1,7 @@
 import {fetch} from "whatwg-fetch";
 import {User} from "@/models/user";
 import {GameHistory} from "@/models/gameHistory";
+import {Friend} from "@/models/friend";
 
 export class UsersAdaptor {
     resourcesUrl;
@@ -188,5 +189,97 @@ export class UsersAdaptor {
         }
     }
 
+    async getFriends(userId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friends`;
+            const options = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            return await this.fetchJson(url, options);
+        } catch (error) {
+            console.error('Error fetching friends:', error);
+            return null;
+        }
+    }
 
+    async sendFriendRequest(userId, friendId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friends/${friendId}`;
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            const response = await this.fetchJson(url, options);
+            if (!response) {
+                throw new Error('Failed to send friend request');
+            }
+            return Friend.copyConstructor(response);
+        } catch (error) {
+            console.error('Error sending friend request:', error);
+            return null;
+        }
+    }
+
+    async getFriendRequests(userId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friendRequests`;
+            const options = {
+                method: 'GET'
+            };
+            return await this.fetchJson(url, options);
+        } catch (error) {
+            console.error('Error fetching friend requests:', error);
+            return null;
+        }
+    }
+
+    async getSentFriendRequests(userId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/sentFriendRequests`;
+            const options = {
+                method: 'GET'
+            };
+            return await this.fetchJson(url, options);
+        } catch (error) {
+            console.error('Error fetching sent friend requests:', error);
+            return null;
+        }
+    }
+
+    async acceptFriendRequest(userId, requestId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friends/${requestId}/accept`;
+            const options = {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            return await this.fetchJson(url, options);
+        } catch (error) {
+            console.error('Error accepting friend request:', error);
+            return null;
+        }
+    }
+
+    async declineFriendRequest(userId, requestId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friends/${requestId}/decline`;
+            const options = {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            return await this.fetchJson(url, options);
+        } catch (error) {
+            console.error('Error declining friend request:', error);
+            return null;
+        }
+    }
 }

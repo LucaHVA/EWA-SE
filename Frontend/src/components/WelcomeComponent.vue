@@ -5,23 +5,57 @@
       <div class="sub-title">Play for free</div>
       <p class="extra-info">Enjoy an online game of the classic board game Settlers of Catan!</p>
       <div class="welcome-page-button-container">
-      <router-link to="/gameSettings">
-        <button class="singleplayer-button buttons-welcome-page transition">Play SinglePlayer</button>
-      </router-link>
-      <router-link to="/lobbySelect">
-        <button class="multiplayer-button buttons-welcome-page transition">Play Multiplayer</button>
-      </router-link>
+        <router-link to="/gameSettings">
+          <button class="singleplayer-button buttons-welcome-page transition">Play SinglePlayer</button>
+        </router-link>
+        <router-link to="/lobbySelect">
+          <button class="multiplayer-button buttons-welcome-page transition">Play Multiplayer</button>
+        </router-link>
       </div>
+      <textarea v-on:keyup.enter="onNewAnnouncement($event)"></textarea>
     </div>
   </div>
 </template>
 
 <script>
+import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
+import CONFIG from '@/app-config.js';
 export default {
-  name: "WelcomeComponent"
-}
+  name: "WelcomeComponent",
+  created() {
+    // setup a new service with a web socket
+    this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement)
+  },
+  beforeUnmount() {
+    // close down the service with the web socket
+    this.announcementsService.close();
+  },
+  data() { return {
+    announcements: []
+  }
+  },
 
+  methods: {
+    onReceiveAnnouncement(message) {
+      // this method is called when an announcement is distributed
+      console.log("Received announcement:", message);
+      this.announcements.push(message);
+    },
+    onNewAnnouncement(event) {
+      // this method is called when enter is pressed within the input text field
+
+      // for demo purpose of a simple web socket
+      this.announcementsService.sendMessage(event.target.value);
+      // a persistent announcement system would save the announcement here via the REST api
+      // and let the rest controller issue the websocket notification to inform all clients about the update
+
+      // reset the input in the text area
+      event.target.value = "";
+    }
+  }
+};
 </script>
+
 
 <style scoped>
 /* General */

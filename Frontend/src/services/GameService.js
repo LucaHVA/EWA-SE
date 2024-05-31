@@ -287,6 +287,41 @@ export class GameService {
         } else return true;
     }
 
+    async findPlayerByUserId(gameId, userId) {
+        try {
+            const players = await this.asyncFindAllPlayersForGameId(gameId);
+            return players.find(player => player.user.id === userId) || null;
+        } catch (error) {
+            console.error('Error finding player by user ID:', error);
+            throw error;
+        }
+    }
+
+    async deleteGame(gameId) {
+        try {
+            const url = `${this.resourcesUrl}/${gameId}`;
+            const options = {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            const response = await this.fetchJson(url, options);
+
+            if (response) {
+                console.log(`Game with ID: ${gameId} deleted successfully.`);
+                return true;
+            } else {
+                console.error('Failed to delete game.');
+                return false;
+            }
+        } catch (error) {
+            console.error("Error deleting game:", error);
+            throw error; // Throw the error to be handled by the caller
+        }
+    }
+
 }
 
 // Export a singleton instance of the GameService

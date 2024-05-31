@@ -179,4 +179,17 @@ public class GamesController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteGame(@PathVariable String id) {
+        Game existingGame = gamesRepository.findById(id);
+
+        if (existingGame == null) {
+            throw new ResourceNotFoundException("Game with ID: " + id + " not found.");
+        }
+
+        gamesRepository.deleteById(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

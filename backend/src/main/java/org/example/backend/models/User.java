@@ -1,6 +1,7 @@
 package org.example.backend.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -37,6 +38,14 @@ public class User implements Identifiable<Long> {
 
     @OneToMany(mappedBy = "host")
     private List<Game> games;
+
+    @OneToMany(mappedBy = "user")
+    @JsonManagedReference("user-friend")
+    private Set<Friend> friendRequests;
+
+    @OneToMany(mappedBy = "friend")
+    @JsonManagedReference("friend-user")
+    private Set<Friend> receivedFriendRequests;
 
     public User() {
     }
@@ -96,5 +105,21 @@ public class User implements Identifiable<Long> {
 @JsonIgnore
     public void setGameHistories(Set<GameHistory> gameHistories) {
         this.gameHistories = gameHistories;
+    }
+
+    public Set<Friend> getReceivedFriendRequests() {
+        return receivedFriendRequests;
+    }
+
+    public void setReceivedFriendRequests(Set<Friend> receivedFriendRequests) {
+        this.receivedFriendRequests = receivedFriendRequests;
+    }
+
+    public Set<Friend> getFriendRequests() {
+        return friendRequests;
+    }
+
+    public void setFriendRequests(Set<Friend> friendRequests) {
+        this.friendRequests = friendRequests;
     }
 }
