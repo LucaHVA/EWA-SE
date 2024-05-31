@@ -96,4 +96,10 @@ public class PlayersRepository extends AbstractEntityRepositoryJpa<Player, Playe
         return originalPlayers;
     }
 
+    public void deleteByUserId(Long userId) {
+        Query query = entityManager.createQuery("DELETE FROM Player p WHERE p.user.id = :userId");
+        query.setParameter("userId", userId);
+        query.executeUpdate();
+    }
+
 }

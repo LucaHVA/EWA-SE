@@ -60,10 +60,12 @@ export class UsersAdaptor {
         return await this.fetchJson(`${this.resourcesUrl}/${id}`);
     }
 
+
     async save(user, queryParams) {
         try {
             if (user.id === 0) {
                 const url = `${this.resourcesUrl}${queryParams ? `?${queryParams}` : ''}`;
+                user.roles = ["USER"];
                 const options = {
                     method: 'POST',
                     headers: {
@@ -279,6 +281,29 @@ export class UsersAdaptor {
             return await this.fetchJson(url, options);
         } catch (error) {
             console.error('Error declining friend request:', error);
+            return null;
+        }
+    }
+
+    async deleteUser(userId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}`;
+            const options = {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': this.currentToken
+                }
+            };
+            const response = await fetch(url, options);
+            if (response.ok) {
+                return response;
+            } else {
+                console.error('Failed to delete user:', response.statusText);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
             return null;
         }
     }

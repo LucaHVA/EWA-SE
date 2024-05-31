@@ -15,7 +15,7 @@ public class GameHistory implements Identifiable<Long> {
     private Long gameHistoryId;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     //@JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
 

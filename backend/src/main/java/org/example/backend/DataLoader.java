@@ -112,6 +112,9 @@ public class DataLoader implements CommandLineRunner {
         users.add(this.userRepository.save(new User(0L, "user5", "user5@mail.com", "password")));
         users.add(this.userRepository.save(new User(0L, "Armando", "Cringe@ball.nl", "fout")));
         users.add(this.userRepository.save(new User(0L, "Ballmando", "yep@huh.be", "goed")));
+        User adminUser = new User(0L, "admin", "admin@mail.com", "adminPassword");
+        adminUser.getRoles().add(User.Role.ADMIN);
+        users.add(this.userRepository.save(adminUser));
 
     }
 

@@ -3,7 +3,7 @@ package org.example.backend.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -11,24 +11,27 @@ import java.util.Set;
 @Table(name = "\"user\"")
 public class User implements Identifiable<Long> {
 
+    public enum Role {
+        ADMIN, USER
+    }
+
     @Id
     @SequenceGenerator(initialValue = 30000, name = "UserGenerator")
     @GeneratedValue(generator = "UserGenerator")
-    //@Column(name = "user_id")
     private Long userId;
 
-    //@Column(name = "username")
     private String username;
-
-    //@Column(name = "email")
     private String email;
-
-    //@Column(name = "password")
     private String password;
 
     @Lob
-    //@Column(name = "profile_picture", columnDefinition = "MEDIUMTEXT")
     private String profilePicture;
+
+    @ElementCollection(targetClass = Role.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    private Set<Role> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "user")
     private Set<Player> players;
@@ -48,6 +51,7 @@ public class User implements Identifiable<Long> {
     private Set<Friend> receivedFriendRequests;
 
     public User() {
+        this.roles.add(Role.USER);  // Default role
     }
 
     public User(Long userId, String username, String email, String password) {
@@ -55,6 +59,7 @@ public class User implements Identifiable<Long> {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.roles.add(Role.USER);  // Default role
     }
 
     @Override
@@ -97,6 +102,14 @@ public class User implements Identifiable<Long> {
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
     public Set<GameHistory> getGameHistories() {

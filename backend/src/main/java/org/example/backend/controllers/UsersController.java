@@ -3,9 +3,11 @@ package org.example.backend.controllers;
 import jakarta.transaction.Transactional;
 import org.example.backend.enums.FriendshipStatus;
 import org.example.backend.models.Friend;
+import org.example.backend.models.Game;
 import org.example.backend.models.GameHistory;
 import org.example.backend.repositories.FriendsRepository;
 import org.example.backend.repositories.GameHistoriesRepository;
+import org.example.backend.repositories.PlayersRepository;
 import org.example.backend.security.APIConfig;
 import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.User;
@@ -43,6 +45,9 @@ public class UsersController {
     @Qualifier("FRIENDS.JPA")
     @Autowired
     private FriendsRepository friendsRepository;
+
+    @Autowired
+    private PlayersRepository playersRepository;
 
     @Autowired
     private APIConfig apiConfig;
@@ -228,5 +233,22 @@ public class UsersController {
         }
 
         return ResponseEntity.ok(users);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        User existingUser= usersRepository.findById(id);
+
+        if (existingUser== null) {
+            throw new ResourceNotFoundException("Game with ID: " + id + " not found.");
+        }
+
+        // Delete associated game histories
+        gameHistoriesRepository.deleteAllByUserId(id);
+        playersRepository.deleteByUserId(id);
+
+        usersRepository.deleteById(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
