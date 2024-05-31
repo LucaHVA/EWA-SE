@@ -86,6 +86,18 @@ public class DataLoader implements CommandLineRunner {
             playerRepository.save(new Player(1, fullGame2, userRepository.findById(30004L)));
             playerRepository.save(new Player(2, fullGame2, userRepository.findById(30005L)));
             playerRepository.save(new Player(3, fullGame2, userRepository.findById(30006L)));
+
+            Game game11 = this.gameRepository.findById("BACK11");
+            playerRepository.save(new Player(0, game11, user3));
+            game11.setHost(user3);
+
+            Game game12 = this.gameRepository.findById("BACK12");
+            playerRepository.save(new Player(0, game12, user3));
+            game12.setHost(user3);
+
+            Game game13 = this.gameRepository.findById("BACK13");
+            playerRepository.save(new Player(0, game13, user3));
+            game13.setHost(user3);
         }
     }
 
@@ -116,6 +128,9 @@ public class DataLoader implements CommandLineRunner {
         games.add(this.gameRepository.save(new Game("SUS420", 4, 60, 10, Game.Status.closed, host)));
         games.add(this.gameRepository.save(new Game("FULL01", 4, 60, 10, Game.Status.ongoing, null)));
         games.add(this.gameRepository.save(new Game("FULL02", 4, 60, 10, Game.Status.ongoing, null)));
+        games.add(this.gameRepository.save(new Game("BACK11", 4, 60, 8, Game.Status.open, null)));
+        games.add(this.gameRepository.save(new Game("BACK12", 4, 60, 8, Game.Status.open, null)));
+        games.add(this.gameRepository.save(new Game("BACK13", 4, 60, 8, Game.Status.open, null)));
     }
 
     private void createInitialGameHistories() {

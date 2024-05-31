@@ -16,9 +16,10 @@
               <li>Points to win: {{ selectedGame.pointsToWin }}</li>
             </ul>
           </div>
+          <div id="pop-up-lobby-error" class="error-message" v-if="this.popUpErrorMessage">{{this.popUpErrorMessage}}</div>
           <div class="modal-footer">
             <slot name="footer">
-              <button class="close-button-pop-up transition" @click="$emit('close')">Close</button>
+              <button class="close-button-pop-up transition" @click="closePopUp">Close</button>
               <button class="start-game-button-pop-up transition" @click="moveToLobby">Join Game</button>
             </slot>
           </div>
@@ -37,20 +38,34 @@ export default {
     playerCounts: Array,
   },
   inject:['usersService','gameService'],
+  data() {
+    return {
+      popUpErrorMessage: "",
+    }
+  },
   methods: {
     copyText() {
       // Copy id to clipboard
       let copyText = document.getElementById("lobbyGameId").textContent;
       navigator.clipboard.writeText(copyText)
     },
+    closePopUp(){
+      this.popUpErrorMessage = "";
+      this.$emit('close')
+    },
     async moveToLobby() {
       // Get current user
       const currentUser = await this.usersService.getCurrentUser;
-      // Add user to game as player
-      //TODO update: player number
-      await this.gameService.addNewPlayerToGame(this.selectedGame.id, currentUser, 2);
-      // Route to game settings
-      this.$router.replace({name: 'gameSettings', params: {id: this.selectedGame.id}});
+
+      // Check if a new player can be added
+        if (!(await this.gameService.canAddNewPlayerToGame(this.selectedGame.id))){
+          this.popUpErrorMessage = "Sorry, this game is full";
+        } else {
+          // Add user to game as player
+          await this.gameService.addNewPlayerToGame(this.selectedGame.id, currentUser);
+          // Route to game settings
+          this.$router.replace({name: 'gameSettings', params: {id: this.selectedGame.id}});
+        }
     }
   }
 };
@@ -200,5 +215,10 @@ export default {
   color: var(--red);
   border: 1px solid var(--red);
   background-color: var(--white);
+}
+
+/* pop-up error */
+#pop-up-lobby-error {
+  align-self: center;
 }
 </style>

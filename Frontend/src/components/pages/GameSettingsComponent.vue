@@ -87,36 +87,34 @@ export default {
     // Get current game id for lobby
     this.gameId = this.$route.params.id;
 
-    console.log(this.gameService.canAddNewPlayerToGame(this.gameId));
-
     // Get game
     this.currentGame = await this.fetchGameById(this.gameId);
-    console.log("the game: ", this.currentGame.host)
+    // console.log("the game: ", this.currentGame.host)
 
     console
     // Fetch all players from game
     this.players = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
-    console.log("players", this.players);
+    // console.log("players", this.players);
 
   },
-  beforeRouteLeave(to, from, next) {
-    this.removeCurrentUserFromGame().then(async () => {
-
-      const remainingPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
-      console.log("remaining players ", remainingPlayers);
-
-      if (this.isCurrentUserHost|| !remainingPlayers || remainingPlayers.length === 0 || remainingPlayers === "0") {
-        console.log(`No remaining players. Deleting game with ID: ${this.gameId}`);
-        await this.gameService.deleteGame(this.gameId);
-      } else {
-        console.log("no reason to delete the game" )
-      }
-      next();
-    }).catch(error => {
-      console.error("Error removing current user from game:", error);
-      next();
-    });
-  },
+  // beforeRouteLeave(to, from, next) {
+  //   this.removeCurrentUserFromGame().then(async () => {
+  //
+  //     const remainingPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+  //     console.log("remaining players ", remainingPlayers);
+  //
+  //     if (this.isCurrentUserHost|| !remainingPlayers || remainingPlayers.length === 0 || remainingPlayers === "0") {
+  //       console.log(`No remaining players. Deleting game with ID: ${this.gameId}`);
+  //       await this.gameService.deleteGame(this.gameId);
+  //     } else {
+  //       console.log("no reason to delete the game" )
+  //     }
+  //     next();
+  //   }).catch(error => {
+  //     console.error("Error removing current user from game:", error);
+  //     next();
+  //   });
+  // },
 
   computed: {
     totalPlayers() {
@@ -137,6 +135,8 @@ export default {
         const randomNames = ["Naruto", "Sasuke", "Goku", "Vegeta", "Luffy", "Ichigo", "Eren", "Levi", "Gon", "Killua", "Saitama", "Mikasa", "Kurama"];
         const randomIndex = Math.floor(Math.random() * randomNames.length);
         const botName = randomNames[randomIndex] + " (Bot)";
+
+        //TODO add bot to frontend only. Bot players shall be created on the Game page. New joining users can replace a bot.
 
         try {
           const newBot = await this.gameService.addNewPlayerToGame(this.gameId, null);
@@ -176,23 +176,9 @@ export default {
         }
 
     },
-    async addCurrentUserToPlayers(){
-      //!!! move to lobby select
-      const user =  this.usersService.getCurrentUser
-
-      if (user){
-        if (!(await this.gameService.canAddNewPlayerToGame(this.gameId))){
-          console.error("User cannot be added, sorry");
-        } else {
-          // Add user as player to game
-          await this.gameService.addNewPlayerToGame(this.gameId, user);
-        }
-      }
-    },
     async fetchGameById(gameId) {
       try {
-        const game = await this.gameService.asyncGetById(gameId);
-        return game;
+        return await this.gameService.asyncGetById(gameId);
       } catch (error) {
         console.error("Error fetching game by ID:", error);
       }

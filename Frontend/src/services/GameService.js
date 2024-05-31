@@ -102,10 +102,10 @@ export class GameService {
         }
     }
 
-    async createGame(user){
+    async createGame(hostUser){
         let newId = await this.generateUniqueGameId();
         // Create game instance with default settings
-        let newGame = await new Game(newId, 4, 60, 8,"open", user);
+        let newGame = await new Game(newId, 4, 60, 8,"open", hostUser);
         // Save created game
         return await this.saveGame(newGame);
     }
@@ -118,12 +118,7 @@ export class GameService {
      */
     async addNewPlayerToGame(gameId, user) {
 
-        //TODO error catching: check if user is already in game
-
-        if (!(await this.canAddNewPlayerToGame(gameId))) {
-            console.error("Game is full. Player not added.");
-            return null;
-        }
+        //TODO error catching: check if user is already in game, if so, do not create new player.
 
         let playerNumber = await this.getLastAvailablePlayerNumber(gameId);
 
@@ -161,15 +156,10 @@ export class GameService {
     }
 
     async getLastAvailablePlayerNumber(gameId) {
-        // Check if there are open slots
-        if (!(await this.canAddNewPlayerToGame(gameId))){
-            console.error("cannot add new player to ", gameId)
-            return;
-        }
-
         let players = await this.asyncFindAllPlayersForGameId(gameId);
-
-        return players.length;
+        if (players === null) {
+            return 0;
+        } else return players.length;
     }
 
     async deletePlayerFromGame(gameId, playerNumber){
@@ -239,7 +229,7 @@ export class GameService {
             if (players && players.length > 0) {
                 return players.map(Player.dbConstructor);
             } else {
-                return "0"; // Return "0" if no players are found
+                return null;
             }
         } catch (e) {
             console.error(e)
@@ -256,11 +246,7 @@ export class GameService {
             const players = await this.fetchJson(`${this.resourcesUrl}/${gameId}` +  "/players/simple", {
                 method: 'GET'
             })
-            if (players && players.length > 0) {
-                return players.map(Player.dbConstructor);
-            } else {
-                return "0"; // Return "0" if no players are found
-            }
+            return players;
         } catch (e) {
             console.error(e)
         }
@@ -276,12 +262,13 @@ export class GameService {
         let game;
 
         try {
-            players = await this.asyncFindAllPlayersForGameId(gameId);
+            players = await this.asyncFindAllSimplePlayersForGameId(gameId);
             game = await this.asyncGetById(gameId);
         } catch (e) {
             console.error(e);
         }
 
+        // Check if the game is full
         if (players.length >= game.numberOfPlayers){
             return false;
         } else return true;
