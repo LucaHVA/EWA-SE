@@ -79,7 +79,7 @@ export default {
       // Generate new game
       const game = await this.gameService.createGame(currentUser);
 
-      await this.gameService.addNewPlayerToGame(game.id, currentUser, 1);
+      await this.gameService.addNewPlayerToGame(game.id, currentUser);
 
       // Route to next page
       this.$router.replace({name: 'gameSettings', params: {id: game.id}});

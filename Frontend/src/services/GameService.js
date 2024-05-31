@@ -52,7 +52,7 @@ export class GameService {
             })
             return games?.map(Game.copyConstructor);
         } catch (e) {
-            console.log(e)
+            console.error(e)
         }
     }
     /**
@@ -62,20 +62,6 @@ export class GameService {
      * @returns {Promise<Game|null|any>}
      */
     async saveGame(game, queryParams) {
-
-        // Create new game instance if no game was given
-        // if (!game) {
-        //     game = {
-        //         numberOfPlayers: 4,
-        //         turnDuration: 60,
-        //         pointsToWin: 8,
-        //         id: await this.generateUniqueGameId(),
-        //         status:"open",
-        //
-        //     };
-        // }
-
-        console.log("savegame: ", game)
 
         try {
             if (game.id) {
@@ -116,10 +102,10 @@ export class GameService {
         }
     }
 
-    async createGame(user){
+    async createGame(hostUser){
         let newId = await this.generateUniqueGameId();
         // Create game instance with default settings
-        let newGame = await new Game(newId, 4, 60, 8,"open", user);
+        let newGame = await new Game(newId, 4, 60, 8,"open", hostUser);
         // Save created game
         return await this.saveGame(newGame);
     }
@@ -131,7 +117,12 @@ export class GameService {
      * @param {int} playerNumber
      * @returns {Promise<Player|null>}
      */
-    async addNewPlayerToGame(gameId, user, playerNumber) {
+    async addNewPlayerToGame(gameId, user) {
+
+        //TODO error catching: check if user is already in game, if so, do not create new player.
+
+        let playerNumber = await this.getLastAvailablePlayerNumber(gameId);
+
 
         let playerJson = {
             "gameId": gameId,
@@ -163,6 +154,13 @@ export class GameService {
             console.error("Error adding player to game:", error);
             throw error; // Throw the error to be handled by the caller
         }
+    }
+
+    async getLastAvailablePlayerNumber(gameId) {
+        let players = await this.asyncFindAllPlayersForGameId(gameId);
+        if (players === null) {
+            return 0;
+        } else return players.length;
     }
 
     async deletePlayerFromGame(gameId, playerNumber){
@@ -227,11 +225,30 @@ export class GameService {
         try {
             const players = await this.fetchJson(`${this.resourcesUrl}/${gameId}/players`, {
                 method: 'GET'
-            });
-            return players || []; // Return an empty array if no players are found
+            })
+            if (players && players.length > 0) {
+                return players.map(Player.dbConstructor);
+            } else {
+                return null;
+            }
         } catch (e) {
-            console.error(e);
-            throw e; // Rethrow the error to be caught by the caller
+            console.error(e)
+        }
+    }
+
+    /**
+     * Find all players for game with id <gameId> and return simplified JSON
+     * @param gameId
+     * @returns {Promise<string|*>} map of simplified players
+     */
+    async asyncFindAllSimplePlayersForGameId(gameId){
+        try {
+            const players = await this.fetchJson(`${this.resourcesUrl}/${gameId}` +  "/players/simple", {
+                method: 'GET'
+            })
+            return players;
+        } catch (e) {
+            console.log(e)
         }
     }
 
@@ -245,12 +262,13 @@ export class GameService {
         let game;
 
         try {
-            players = await this.asyncFindAllPlayersForGameId(gameId);
+            players = await this.asyncFindAllSimplePlayersForGameId(gameId);
             game = await this.asyncGetById(gameId);
         } catch (e) {
             console.error(e);
         }
 
+        // Check if the game is full
         if (players.length >= game.numberOfPlayers){
             return false;
         } else return true;
@@ -263,6 +281,31 @@ export class GameService {
         } catch (error) {
             console.error('Error finding player by user ID:', error);
             throw error;
+        }
+    }
+
+    async deleteGame(gameId) {
+        try {
+            const url = `${this.resourcesUrl}/${gameId}`;
+            const options = {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            const response = await this.fetchJson(url, options);
+
+            if (response) {
+                console.log(`Game with ID: ${gameId} deleted successfully.`);
+                return true;
+            } else {
+                console.error('Failed to delete game.');
+                return false;
+            }
+        } catch (error) {
+            console.error("Error deleting game:", error);
+            throw error; // Throw the error to be handled by the caller
         }
     }
 

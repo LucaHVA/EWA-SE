@@ -8,6 +8,7 @@ import lobbySelectComponent from "@/components/pages/LobbySelectComponent.vue";
 import gameSettingsComponent from "@/components/pages/GameSettingsComponent.vue";
 import profileComponent from "@/components/pages/ProfileComponent.vue";
 import gameComponent from "@/components/pages/Game.vue";
+import friendsListComponent from "@/components/pages/FriendsListComponent.vue";
 
 const routes = [
     { path: '/', redirect: '/home' },
@@ -19,7 +20,8 @@ const routes = [
     { path: '/gameSettings/:id', name: 'gameSettings', component: gameSettingsComponent },
     { path: '/profilePage', name: 'profilePage', component: profileComponent },
     { path: '/game/:id', name: 'game', component: gameComponent },
-    { path: '/:pathUnknown', name: 'unknownRoute', component: unknownRoute }
+    { path: '/friends', name: 'friendsList', component: friendsListComponent},
+    { path: '/:pathUnknown', name: 'unknownRoute', component: unknownRoute },
 ];
 
 export const router = createRouter({

@@ -7,11 +7,11 @@
         <h2 class="header-title">Players ({{ totalPlayers }})</h2>
       </div>
       <div class="left-column-players-in-lobby">
-        <div v-for="(player, index) in players" :key="index" class="player-pill transition">
-          <p class="player-name">{{ player.user ? player.user.username : 'bot' }} <span v-if="player.host">(Host)</span></p>
+        <div v-for="(player, index) in players" :key="index" @click="console.log(player.playerNumber)" class="player-pill transition">
+          <p class="player-name">{{ player.user ? player.user.username : 'bot' }} <span v-if="isHost(player)">(Host)</span></p>
           <div class="player-status">
-            <button class="ready-button transition">Ready</button>
-            <button v-if="!player.host" class="kick-button transition" @click="kickPlayer(index, player.playerNumber)">Kick</button>
+            <button v-if="isCurrentUser(player.user)" class="ready-button transition">Ready</button>
+            <button v-if="isCurrentUserHost" class="kick-button transition" @click="kickPlayer(index, player.playerNumber)">Kick</button>
           </div>
         </div>
         <div v-if="canAddBot" class="player-pill transition">
@@ -111,6 +111,11 @@ export default {
     },
     canAddBot() {
       return this.totalPlayers < this.numberOfPlayers;
+    },
+
+    isCurrentUserHost() {
+      return this.userDetails && this.currentGame && this.userDetails.id === this.currentGame.host.id
+
     }
   },
   methods: {
@@ -121,14 +126,20 @@ export default {
         const randomIndex = Math.floor(Math.random() * randomNames.length);
         const botName = randomNames[randomIndex] + " (Bot)";
 
+        //TODO add bot to frontend only. Bot players shall be created on the Game page. New joining users can replace a bot.
+
         try {
-          const newBot = await this.gameService.addNewPlayerToGame(this.gameId, null, 3);
+          const newBot = await this.gameService.addNewPlayerToGame(this.gameId, null);
           newBot.user = { username: botName };
           this.players.push(newBot);
         } catch (error) {
           console.error("Error adding new bot player to game:", error);
         }
       }
+    },
+
+    isHost(player){
+      return player.playerNumber===0;
     },
 
     async kickPlayer(index, playerNumber) {
@@ -144,10 +155,14 @@ export default {
         }
       }
     },
+
+    isCurrentUser(user) {
+      return user && user.id === this.userDetails.id;
+    },
     async removeCurrentUserFromGame() {
       this.currentPlayer= await this.gameService.findPlayerByUserId(this.gameId, this.userDetails.id)
 
-      console.log("this is you id: ", this.gameId)
+      console.log("this is the user: ", this.currentPlayer)
         try {
           await this.gameService.deletePlayerFromGame(this.gameId, this.currentPlayer.playerNumber);
         } catch (error) {
@@ -157,8 +172,7 @@ export default {
     },
     async fetchGameById(gameId) {
       try {
-        const game = await this.gameService.asyncGetById(gameId);
-        return game;
+        return await this.gameService.asyncGetById(gameId);
       } catch (error) {
         console.error("Error fetching game by ID:", error);
       }

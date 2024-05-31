@@ -1,6 +1,7 @@
 import {fetch} from "whatwg-fetch";
 import {User} from "@/models/user";
 import {GameHistory} from "@/models/gameHistory";
+import {Friend} from "@/models/friend";
 
 export class UsersAdaptor {
     resourcesUrl;
@@ -42,12 +43,20 @@ export class UsersAdaptor {
         }
     }
 
+    //The [] is used as a fallback value to handle cases where the expected data might be null or undefined remember noobs.
     async asyncFindAll() {
         try {
             const users = await this.fetchJson(this.resourcesUrl + "/all", {
-                method: 'GET'
+                method: "GET",
             });
-            return users ? users.map(User.copyConstructor) : [];  // Check for null and return an empty array if needed
+            if (users) {
+                for (let user of users) {
+                    user.points = await this.calculatePlayerPoints(user.id);
+                }
+                return users.map(User.copyConstructor);
+            } else {
+                return [];
+            }
         } catch (e) {
             console.log(e);
             return [];
@@ -59,10 +68,12 @@ export class UsersAdaptor {
         return await this.fetchJson(`${this.resourcesUrl}/${id}`);
     }
 
+
     async save(user, queryParams) {
         try {
             if (user.id === 0) {
                 const url = `${this.resourcesUrl}${queryParams ? `?${queryParams}` : ''}`;
+                user.roles = ["USER"];
                 const options = {
                     method: 'POST',
                     headers: {
@@ -177,25 +188,154 @@ export class UsersAdaptor {
         try {
             const url = `${this.resourcesUrl}/${userId}/games`;
             const options = {
-                method: 'GET',
+                method: "GET",
                 headers: {
-                    'Authorization': this.currentToken
-                }
+                    Authorization: this.currentToken,
+                },
             };
             const response = await this.fetchJson(url, options);
-            if (response) {
-                const matchHistory = await response.json();
-
-                return matchHistory.map(GameHistory.copyConstructor);
-            } else {
-                console.error('Failed to fetch match history.');
-                return null;
-            }
+            return response ? response.map(GameHistory.copyConstructor) : [];
         } catch (error) {
-            console.error('Error during fetch match history:', error);
+            console.error("Error during fetch match history:", error);
+            return [];
+        }
+    }
+
+    async calculatePlayerPoints(userId) {
+        const matchHistory = await this.fetchMatchHistory(userId);
+        let playerPoints = 0;
+        for (const match of matchHistory) {
+            switch (match.placement) {
+                case 1:
+                    playerPoints += 5;
+                    break;
+                case 2:
+                    playerPoints += 3;
+                    break;
+                case 3:
+                    playerPoints += 1;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return playerPoints;
+    }
+
+    async getFriends(userId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friends`;
+            const options = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            return await this.fetchJson(url, options);
+        } catch (error) {
+            console.error('Error fetching friends:', error);
             return null;
         }
     }
 
+    async sendFriendRequest(userId, friendId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friends/${friendId}`;
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            const response = await this.fetchJson(url, options);
+            if (!response) {
+                throw new Error('Failed to send friend request');
+            }
+            return Friend.copyConstructor(response);
+        } catch (error) {
+            console.error('Error sending friend request:', error);
+            return null;
+        }
+    }
 
+    async getFriendRequests(userId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friendRequests`;
+            const options = {
+                method: 'GET'
+            };
+            return await this.fetchJson(url, options);
+        } catch (error) {
+            console.error('Error fetching friend requests:', error);
+            return null;
+        }
+    }
+
+    async getSentFriendRequests(userId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/sentFriendRequests`;
+            const options = {
+                method: 'GET'
+            };
+            return await this.fetchJson(url, options);
+        } catch (error) {
+            console.error('Error fetching sent friend requests:', error);
+            return null;
+        }
+    }
+
+    async acceptFriendRequest(userId, requestId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friends/${requestId}/accept`;
+            const options = {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            return await this.fetchJson(url, options);
+        } catch (error) {
+            console.error('Error accepting friend request:', error);
+            return null;
+        }
+    }
+
+    async declineFriendRequest(userId, requestId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friends/${requestId}/decline`;
+            const options = {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            return await this.fetchJson(url, options);
+        } catch (error) {
+            console.error('Error declining friend request:', error);
+            return null;
+        }
+    }
+
+    async deleteUser(userId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}`;
+            const options = {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': this.currentToken
+                }
+            };
+            const response = await fetch(url, options);
+            if (response.ok) {
+                return response;
+            } else {
+                console.error('Failed to delete user:', response.statusText);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            return null;
+        }
+    }
 }

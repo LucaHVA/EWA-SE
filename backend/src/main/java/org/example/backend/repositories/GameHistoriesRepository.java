@@ -63,4 +63,12 @@ public class GameHistoriesRepository extends AbstractEntityRepositoryJpa<GameHis
         query.setParameter("userId", userId);
         return query.getResultList();
     }
+
+
+
+    public void deleteAllByUserId(Long userId) {
+        Query query = entityManager.createQuery("DELETE FROM GameHistory gh WHERE gh.user.id = :userId");
+        query.setParameter("userId", userId);
+        query.executeUpdate();
+    }
 }

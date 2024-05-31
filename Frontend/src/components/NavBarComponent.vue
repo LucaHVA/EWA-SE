@@ -11,9 +11,12 @@
         <li class="nav-item" v-if="isLoggedIn">
           <router-link to="/leaderboard" class="nav-link" active-class="active">Leaderboard</router-link>
         </li>
-<!--        <li class="nav-item" v-if="isLoggedIn">-->
-<!--          <router-link to="/friends" class="nav-link" active-class="active">Friends List</router-link>-->
-<!--        </li>-->
+        <li class="nav-item" v-if="isLoggedIn">
+          <router-link to="/friends" class="nav-link" active-class="active">Friends List</router-link>
+        </li>
+        <li class="nav-item" v-if="isAdmin">
+          <router-link to="#" class="nav-link" @click.prevent="openAdminModal">Admin Only</router-link>
+        </li>
       </ul>
       <ul class="user-logging">
         <li class="nav-item" v-if="isLoggedIn">
@@ -30,31 +33,82 @@
         </li>
       </ul>
     </div>
+
+    <transition name="modal">
+      <div v-if="isAdminModalOpen" class="modal-mask" @click="isAdminModalOpen = false">
+        <div class="modal-wrapper">
+          <div class="modal-container" @click.stop>
+            <h2>Admin Section</h2>
+            <ul class="user-list">
+              <li v-for="user in users" :key="user.id">
+                {{ user.name }} - {{ user.email }}
+                <button @click="removeUser(user.id)">Remove</button>
+              </li>
+            </ul>
+            <button class="close-button transition" @click="isAdminModalOpen = false">Close</button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </nav>
 </template>
+
+
+
 
 <script>
 export default {
   name: "NavbarComponent",
 
   inject: ["usersService"],
+  data(){
+    return{
+      isAdminModalOpen: false,
+      users: []
+    };
+  },
+
   computed: {
     isLoggedIn() {
       // Check if user information exists in local storage
       return sessionStorage.getItem('undefined_ACC') !== null;
-    }
+    },
+    isAdmin() {
+      const user = JSON.parse(sessionStorage.getItem('undefined_ACC'));
+      return user && user.roles && user.roles.includes('ADMIN');
+    },
   },
   methods: {
     async logout() {
       // Clear user info from local storage
       sessionStorage.removeItem('undefined_ACC');
-      await this.usersService.signOut()
+      await this.usersService.signOut();
       this.$router.push('/home');
       window.location.reload();
+    },
+    async fetchUsers() {
+      try {
+        this.users = await this.usersService.asyncFindAll();
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    },
+    async removeUser(userId) {
+      try {
+        await this.usersService.deleteUser(userId);
+        this.users = this.users.filter(user => user.id !== userId);
+      } catch (error) {
+        console.error('Error removing user:', error);
+      }
+    },
+    openAdminModal() {
+      this.isAdminModalOpen = true;
+      this.fetchUsers();
     }
   }
 }
 </script>
+
 
 <style scoped>
 /* Logo */
@@ -64,7 +118,7 @@ export default {
 }
 
 .logo-link {
-  width: 15%; /* Set the width of the router-link */
+  width: 15%;
   display: inline-block;
   margin: 20px;
 }
@@ -130,11 +184,103 @@ nav ul {
   border-bottom: 1px solid var(--coral);
 }
 
-
 /* User logging */
 .user-logging {
   display: flex;
   justify-content: flex-end;
   margin-right: 5rem;
 }
+
+/* Modal */
+.modal-mask {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.modal-container {
+  display: flex;
+  flex-direction: column;
+  background: #ebeef1;
+  padding: 20px 20px 0 20px;
+  border-radius: 5px;
+  width: 75%;
+  max-width: 700px;
+  max-height: 85%;
+}
+
+.modal-container h2 {
+  margin: 1rem;
+}
+
+.close-button {
+  font-family: 'Raleway', sans-serif;
+  background-color: var(--coral);
+  border: none;
+  color: var(--white);
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  width: max-content;
+  font-size: 20px;
+  margin: 2rem;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
+}
+
+.close-button:hover {
+  background-color: var(--white);
+  color: var(--coral);
+}
+
+.close-button-box {
+  display: flex;
+  justify-content: center;
+}
+
+/* User List in Modal */
+.user-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.user-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.user-list button {
+  background-color: var(--coral);
+  border: none;
+  color: var(--white);
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.user-list button:hover {
+  background-color: var(--white);
+  color: var(--coral);
+}
 </style>
+

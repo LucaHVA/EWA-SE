@@ -46,7 +46,7 @@ class Player {
         if (player==null) return null;
 
         const copy = new player(
-            player.playerColor,
+            player.playerNumber,
             player.gameId,
             player.user,
             player.playerColor,

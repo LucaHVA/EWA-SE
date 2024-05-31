@@ -252,5 +252,23 @@ public class Player implements Identifiable<PlayerKey> {
     public void setDevelopVictory(Integer developVictory) {
         this.developVictory = developVictory;
     }
+
+    public PlayerKey getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(PlayerKey playerId) {
+        this.playerId = playerId;
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "playerId=" + playerId +
+                ", game=" + game.getId() +
+                ", user=" + user.getId() +
+                ", playerColor='" + playerColor + '\'' +
+                '}';
+    }
 }
 

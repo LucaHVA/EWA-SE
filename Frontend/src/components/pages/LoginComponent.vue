@@ -40,6 +40,7 @@ data(){
     async login(){
       try {
         const response = await this.usersService.login(this.username, this.password);
+        console.log("AYO", response)
         if (response !== null) {
           // Login successful
           console.log('Logged in successfully:', response);

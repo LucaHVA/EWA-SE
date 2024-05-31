@@ -47,6 +47,6 @@ public class PlayerKey implements Serializable {
 
     @Override
     public String toString() {
-        return "game id: " + getGameId() + " / player number: " + getPlayerNumber();
+        return "game id: " + getGameId() + " | player number: " + getPlayerNumber();
     }
 }
