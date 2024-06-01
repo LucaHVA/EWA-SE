@@ -59,6 +59,8 @@ export default {
       const newGame=  new Game(this.gameSettings.id,this.numberOfPlayers,this.turnDuration,this.pointsToWin)
       await this.gameService.saveGame(newGame)
 
+      this.$emit("startGameForAll");
+
       // Go to game page
       this.$router.replace({ name: 'game', params: { id: this.gameSettings.id } });
     },
