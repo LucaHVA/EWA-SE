@@ -66,6 +66,8 @@
 </template>
 
 <script>
+import {nextTick} from "vue";
+
 export default {
   name: "LeaderboardComponent",
   inject: ['usersService'],
@@ -134,7 +136,10 @@ export default {
     },
     keepFocus() {
       if (this.searchQuery) {
-        this.$refs.searchInput.focus();
+        //ensures that the DOM updates are applied before running the code
+        nextTick(() => {
+          this.$refs.searchInput && this.$refs.searchInput.focus();
+        });
       }
     }
   },
