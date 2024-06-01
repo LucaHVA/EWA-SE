@@ -358,7 +358,7 @@ th {
 .input_box input:focus ~ span {
   color: var(--coral);
   transform: translateX(10px) translateY(-7px);
-  font-size: 0.65em;
+  font-size: 0.8em;
   padding: 0 10px;
   background: var(--white);
   border-left: 2px solid var(--coral);

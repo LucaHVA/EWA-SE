@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.sql.Time;
+import java.time.LocalTime;
 import java.util.List;
 
 @Component
@@ -144,8 +144,10 @@ public class DataLoader implements CommandLineRunner {
 
     private void createInitialGameHistories() {
         List<User> users = this.userRepository.findAll();
-        Time startTime = new Time(System.currentTimeMillis() - 3600 * 1000); // 1 hour ago
-        Time endTime = new Time(System.currentTimeMillis());
+        // Get time one hour ago
+        LocalTime startTime = LocalTime.now().minusHours(1);
+        // Get current time
+        LocalTime endTime = LocalTime.now();
 
         if (!users.isEmpty()) {
             // 18 points
