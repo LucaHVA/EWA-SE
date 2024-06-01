@@ -3,7 +3,6 @@ package org.example.backend;
 import jakarta.transaction.Transactional;
 import org.example.backend.models.*;
 import org.example.backend.repositories.EntityRepository;
-import org.example.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;

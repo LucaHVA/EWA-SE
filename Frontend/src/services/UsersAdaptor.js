@@ -134,8 +134,6 @@ export class UsersAdaptor {
         }
     }
 
-
-
     getTokenFromBrowserStorage() {
         this._currentToken = window.sessionStorage.getItem(this.BROWSER_STORAGE_ITEM_NAME);
         const jsonUser = window.sessionStorage.getItem(this.BROWSER_STORAGE_ITEM_NAME + "_ACC");
@@ -181,8 +179,6 @@ export class UsersAdaptor {
             window.sessionStorage.setItem(this.BROWSER_STORAGE_ITEM_NAME + "_ACC", JSON.stringify(user));
         }
     }
-
-
 
     async fetchMatchHistory(userId) {
         try {
@@ -238,26 +234,6 @@ export class UsersAdaptor {
         }
     }
 
-    async sendFriendRequest(userId, friendId) {
-        try {
-            const url = `${this.resourcesUrl}/${userId}/friends/${friendId}`;
-            const options = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            };
-            const response = await this.fetchJson(url, options);
-            if (!response) {
-                throw new Error('Failed to send friend request');
-            }
-            return Friend.copyConstructor(response);
-        } catch (error) {
-            console.error('Error sending friend request:', error);
-            return null;
-        }
-    }
-
     async getFriendRequests(userId) {
         try {
             const url = `${this.resourcesUrl}/${userId}/friendRequests`;
@@ -280,6 +256,26 @@ export class UsersAdaptor {
             return await this.fetchJson(url, options);
         } catch (error) {
             console.error('Error fetching sent friend requests:', error);
+            return null;
+        }
+    }
+
+    async sendFriendRequest(userId, friendId) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/friends/${friendId}`;
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            const response = await this.fetchJson(url, options);
+            if (!response) {
+                throw new Error('Failed to send friend request');
+            }
+            return Friend.copyConstructor(response);
+        } catch (error) {
+            console.error('Error sending friend request:', error);
             return null;
         }
     }

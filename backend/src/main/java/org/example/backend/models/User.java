@@ -115,7 +115,7 @@ public class User implements Identifiable<Long> {
     public Set<GameHistory> getGameHistories() {
         return gameHistories;
     }
-@JsonIgnore
+    @JsonIgnore
     public void setGameHistories(Set<GameHistory> gameHistories) {
         this.gameHistories = gameHistories;
     }

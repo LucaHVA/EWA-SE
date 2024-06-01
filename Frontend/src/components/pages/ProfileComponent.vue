@@ -36,6 +36,7 @@
             </div>
           </form>
           <div class="button-container">
+            <button type="submit" @click="userDelete" class="delete-button transition">Delete account</button>
             <button type="submit" @click="cancel" class="orange-button transition">Cancel</button>
             <button type="submit" @click="save" class="save-button transition">Save</button>
           </div>
@@ -216,6 +217,17 @@ export default {
     },
     removeSeconds(time) {
       return time ? time.split(':').slice(0, 2).join(':') : '';
+    },
+
+    async userDelete() {
+      if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+        const userId = JSON.parse(sessionStorage.getItem('undefined_ACC')).id
+        await this.usersService.deleteUser(userId);
+        sessionStorage.removeItem('undefined_ACC');
+        await this.usersService.signOut();
+        window.location.reload();
+        this.$router.push("/home");
+      }
     }
   }
 }
@@ -422,6 +434,28 @@ form {
   display: flex;
   flex-direction: row;
   justify-content: center;
+}
+
+.delete-button {
+  font-family: 'Raleway', sans-serif;
+  background-color: firebrick;
+  border: none;
+  color: var(--white);
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  width: 10rem;
+  font-size: 20px;
+  margin: 6px 2rem;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.1);
+}
+
+.delete-button:hover {
+  background-color: var(--white);
+  color: var(--coral);
 }
 
 .orange-button {
