@@ -119,11 +119,11 @@ export class UsersAdaptor {
                 credentials: "include"
             };
             const response = await fetch(url, options);
+            console.log(response)
             if (response.ok) {
                 const user = await response.json();
-                const token = response.headers.get('Authorization');
-                this.saveTokenIntoBrowserStorage(token, user);
-                return user; // Return the logged-in user
+                this.saveTokenIntoBrowserStorage(response.headers.get('Authorization'), user);
+                return response;
             } else {
                 console.error('Login failed: Invalid username or password.');
                 return null;
