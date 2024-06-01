@@ -48,7 +48,7 @@
         <ul>
           <li v-for="(game, index) in matchHistory.slice(0, 4)" :key="index" class="pill transition"
               @click="showGameDetails(game)">
-            {{ game.startTime }} - {{ formatPlacement(game.placement) }}
+            {{ removeSeconds(game.startTime) }} - {{ formatPlacement(game.placement) }}
           </li>
         </ul>
         <button class="orange-button transition" @click="showMoreHistory">See More</button>
@@ -64,14 +64,15 @@
             <h1 class="match-history-title" v-else>Match History</h1>
             <div v-if="selectedGameHistory">
               <p><strong>Placement:</strong> {{ formatPlacement(selectedGameHistory.placement) }}</p>
-              <p><strong>Start Time:</strong> {{ selectedGameHistory.startTime }}</p>
-              <p><strong>End Time:</strong> {{ selectedGameHistory.endTime }}</p>
+              <p><strong>Start Time:</strong> {{ removeMilliseconds(selectedGameHistory.startTime) }}</p>
+              <p><strong>End Time:</strong> {{ removeMilliseconds(selectedGameHistory.endTime) }}</p>
+
             </div>
             <div class="modal-match-history-list" v-else>
               <ul>
                 <li v-for="(game, index) in matchHistory" :key="index" class="pill transition"
                     @click="showGameDetails(game)">
-                  {{ game.startTime }} - {{ formatPlacement(game.placement) }}
+                  {{ removeSeconds(game.startTime) }} - {{ formatPlacement(game.placement) }}
                 </li>
               </ul>
             </div>
@@ -84,12 +85,17 @@
 </template>
 
 
-
 <script>
 import defaultImage from '@/assets/images/defaultpfp.png';
+import game from "./Game.vue";
 
 export default {
   name: "ProfileComponent",
+  computed: {
+    game() {
+      return game
+    }
+  },
   inject: ['usersService'],
 
   data() {
@@ -204,6 +210,12 @@ export default {
         addBehindPlacement = "rd";
       }
       return placement + addBehindPlacement;
+    },
+    removeMilliseconds(time) {
+      return time ? time.split('.')[0] : '';
+    },
+    removeSeconds(time) {
+      return time ? time.split(':').slice(0, 2).join(':') : '';
     }
   }
 }

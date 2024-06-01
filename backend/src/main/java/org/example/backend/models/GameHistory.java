@@ -3,7 +3,7 @@ package org.example.backend.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
-import java.sql.Time;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "\"gameHistory\"")
@@ -18,13 +18,13 @@ public class GameHistory implements Identifiable<Long> {
     @ManyToOne(cascade = CascadeType.ALL)
     private User user;
     private int placement;
-    private Time startTime;
-    private Time endTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
     public GameHistory() {
     }
 
-    public GameHistory(Long gameHistoryId, User user, int placement, Time startTime, Time endTime) {
+    public GameHistory(Long gameHistoryId, User user, int placement, LocalTime startTime, LocalTime endTime) {
         this.gameHistoryId = gameHistoryId;
         this.user = user;
         this.placement = placement;
@@ -65,19 +65,19 @@ public class GameHistory implements Identifiable<Long> {
         this.placement = placement;
     }
 
-    public Time getStartTime() {
+    public LocalTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Time startTime) {
+    public void setStartTime(LocalTime startTime) {
         this.startTime = startTime;
     }
 
-    public Time getEndTime() {
+    public LocalTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Time endTime) {
+    public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
     }
 }
