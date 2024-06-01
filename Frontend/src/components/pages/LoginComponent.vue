@@ -1,50 +1,48 @@
 <template>
-    <div class="title">
-      <h1>Log in</h1>
-    </div>
-    <div class="form-container">
-      <form>
-        <label for="username">Username</label>
-        <input v-model="username" type="text" id="username" name="username" placeholder="Username" required>
+  <div class="title">
+    <h1>Log in</h1>
+  </div>
+  <div class="form-container">
+    <form>
+      <label for="username">Username</label>
+      <input v-model="username" type="text" id="username" name="username" placeholder="Username" required>
 
-        <label for="password">Password</label>
-        <input v-model="password" type="password" id="password" name="password" placeholder="Password" required>
+      <label for="password">Password</label>
+      <input v-model="password" type="password" id="password" name="password" placeholder="Password" required>
 
-        <div class="other-logging-options">
-          <p>Forgot password</p>
-          <p>
-            <router-link to="register">Create account</router-link></p>
-        </div>
-        <div class="alertMessage" role="alert" v-if="alert">
-          Username and/or password is invalid
-        </div>
-        <div v-else>
-        </div>
-        <button type="submit" class="pos-button" @click.prevent="login">Log in</button>
-      </form>
-    </div>
+      <div class="other-logging-options">
+        <p>Forgot password</p>
+        <p>
+          <router-link to="register">Create account</router-link>
+        </p>
+      </div>
+      <div class="alertMessage" role="alert" v-if="alert">
+        Username and/or password is invalid
+      </div>
+      <div v-else>
+      </div>
+      <button type="submit" class="pos-button" @click.prevent="login">Log in</button>
+    </form>
+  </div>
 </template>
 
 <script>
 export default {
   name: "LoginComponent",
-  inject:['usersService'],
-data(){
-    return{
-      username:'',
-      password:'',
-      alert:false
+  inject: ['usersService'],
+  data() {
+    return {
+      username: '',
+      password: '',
+      alert: false
     }
-},
-  methods:{
-    async login(){
+  },
+  methods: {
+    async login() {
       try {
         const response = await this.usersService.login(this.username, this.password);
-        console.log("AYO", response)
-        if (response !== null) {
+        if (response && response.ok) {
           // Login successful
-          console.log('Logged in successfully:', response);
-          console.log(this.usersService.currentToken)
           localStorage.setItem('userInfo', JSON.stringify(response));
           this.$router.push({name: 'home'}).then(() => {
             window.location.reload();
@@ -54,10 +52,9 @@ data(){
           console.error('Login failed: Invalid username or password.');
           this.alert = true;
         }
-      }
-      catch (error){
+      } catch (error) {
         console.log('login failed', error);
-        this.alert=true;
+        this.alert = true;
       }
     }
   }
@@ -87,7 +84,7 @@ form {
   flex-direction: column;
 }
 
-.alertMessage{
+.alertMessage {
   color: maroon;
   text-align: center;
 }

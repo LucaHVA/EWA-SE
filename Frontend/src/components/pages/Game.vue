@@ -567,14 +567,16 @@ export default {
       hasPlayedDevelopmentCard: false,
       announcements: [],
       gameState: null,
-      currentUser: null,
+      userDetails: null,
+      loggedinPlayerIndex: null,
+      botPlayerIndices: [],
     };
   },
   inject: ['gameService', 'usersService'],
   async created() {
     // Ensure currentUser is defined before proceeding
     this.userDetails = await this.usersService._currentUser;
-    console.log(this.userDetails)
+    console.log("User details:", this.userDetails);
 
     this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement);
     await this.fetchGameDetails();
@@ -585,6 +587,16 @@ export default {
     }
 
     await this.initializePlayers();
+
+    // Log the player index of the logged-in user
+    if (this.userDetails && this.players.length > 0) {
+      const currentUserEmail = this.userDetails.email; // Assuming each user has an 'email' property to identify them
+      const loggedinPlayerIndex = this.players.findIndex(player => player.user.email === currentUserEmail);
+      console.log("Player index of the logged-in user:", loggedinPlayerIndex);
+      this.loggedinPlayerIndex = loggedinPlayerIndex;
+    } else {
+      console.warn("User details or players not available.");
+    }
   },
 
   mounted() {
@@ -635,6 +647,9 @@ export default {
       } else if (action.action === 'buildroad') {
         message.fromIndex = action.fromIndex;
         message.toIndex = action.toIndex;
+      } else if (action.action === 'rollDice') {
+        message.leftDiceOutcome = action.leftDiceOutcome;
+        message.rightDiceOutcome = action.rightDiceOutcome;
       }
 
       this.announcementsService.sendMessage(JSON.stringify(message));
@@ -644,10 +659,39 @@ export default {
       return {
         settlements: this.settlements,
         playersSettlements: this.playersSettlements,
-        playerPoints: this.playerPoints,
         currentPlayerIndex: this.currentPlayerIndex,
+        players: this.players,
+        robberHexIndex: this.robberHexIndex,
+        hasRolledDice: this.hasRolledDice,
+        timeRemaining: this.timeRemaining,
+        turn: this.turn,
+        initialResources: this.initialResources,
+        roads: this.roads,
+        leftDiceOutcome: this.leftDiceOutcome,
+        rightDiceOutcome: this.rightDiceOutcome,
       };
     },
+
+    updateBoard(gameState) {
+      if (gameState) {
+        this.settlements = [...gameState.settlements];
+        this.playersSettlements = gameState.playersSettlements.map(settlements => [...settlements]);
+        this.currentPlayerIndex = gameState.currentPlayerIndex;
+        this.players = gameState.players.map(player => ({ ...player }));
+        this.robberHexIndex = gameState.robberHexIndex;
+        this.hasRolledDice = gameState.hasRolledDice;
+        this.timeRemaining = gameState.timeRemaining;
+        this.turn = gameState.turn;
+        this.initialResources = { ...gameState.initialResources };
+        this.roads = [...gameState.roads];
+        this.leftDiceOutcome = gameState.leftDiceOutcome;
+        this.rightDiceOutcome = gameState.rightDiceOutcome;
+      } else {
+        console.error('Malformed game state:', gameState);
+      }
+    },
+
+
 
     onReceiveAnnouncement(message) {
       console.log("Received announcement:", message);
@@ -658,33 +702,112 @@ export default {
       } else if (parsedMessage.action === 'build') {
         this.updateBoard(parsedMessage.game);
         this.updateSettlementUI(parsedMessage.index, parsedMessage.currentPlayerIndex);
-      }else if (parsedMessage.action === 'buildroad') {
+      } else if (parsedMessage.action === 'buildroad') {
         this.updateBoard(parsedMessage.game);
-        this.updateroadUI(parsedMessage.fromindex,parsedMessage.toindex, parsedMessage.currentPlayerIndex);
+        this.updateroadUI(parsedMessage.fromIndex, parsedMessage.toIndex, parsedMessage.currentPlayerIndex);
+      } else if (parsedMessage.action === 'rollDice') {
+        // Update the game board
+        this.updateBoard(parsedMessage.game);
+        // Update the dice outcome UI
+        this.updateDiceOutcomeUI(parsedMessage.leftDiceOutcome,parsedMessage.rightDiceOutcome);
       }
 
       this.announcements.push(parsedMessage);
     },
 
-    updateBoard(gameState) {
-      if (gameState && gameState.settlements && gameState.playersSettlements && gameState.playerPoints) {
-        this.settlements = gameState.settlements || [];
-        this.playersSettlements = gameState.playersSettlements || [[], [], [], []];
-        this.playerPoints = gameState.playerPoints || [0, 0, 0, 0];
-        this.currentPlayerIndex = gameState.currentPlayerIndex; // Update currentPlayerIndex from gameState
-      } else {
-        console.error('Malformed game state:', gameState);
-      }
-    },
+
+
 
     updateSettlementUI(index, playerIndex) {
       console.log(`Updating settlement UI: index=${index}, player=${playerIndex}`);
       // Find the settlement element in the DOM
-      this.build(index)
+      const settlementElement = document.getElementById('s' + index);
+      if (settlementElement) {
+        settlementElement.classList.add(`has-settlement-${playerIndex}`);
+      }
     },
-    updateroadUI(fromindex, toindex,) {
+    updateroadUI(fromIndex, toIndex, playerIndex) {
       // Find the settlement element in the DOM
-      this.buildRoad(fromindex, toindex)
+      // Add a CSS class to the road position
+      const roadElement = document.querySelector(`.road.r${fromIndex}.r${toIndex}`);
+      if (roadElement) {
+        roadElement.classList.add(`build-${playerIndex}`);
+      }
+    },
+
+    rollDice() {
+      // Generate random number between 1 and 6
+      function roll() {
+        return 1 + Math.floor(6 * Math.random());
+      }
+
+      // Assign dice outcome
+      const rightDiceOutcome = roll();
+      const leftDiceOutcome = roll();
+
+      // Update game state for other players
+      this.updateGameState({ action: 'rollDice', leftDiceOutcome: leftDiceOutcome, rightDiceOutcome: rightDiceOutcome });
+
+      // Update dice outcome UI
+      this.updateDiceOutcomeUI(leftDiceOutcome, rightDiceOutcome);
+    },
+
+    updateDiceOutcomeUI(leftDiceOutcome, rightDiceOutcome) {
+      // Assign dice outcome
+      this.dicesOutcome = rightDiceOutcome + leftDiceOutcome;
+
+      // Update dice outcome images
+      this.leftDiceImg = this.clearWhiteDiceImg[leftDiceOutcome];
+      this.rightDiceImg = this.clearWhiteDiceImg[rightDiceOutcome];
+
+      // Log the hex ID with the rolled number
+      const rolledNumber = rightDiceOutcome + leftDiceOutcome;
+      const hexIdList = [];
+      const hexes = document.querySelectorAll('.hex');
+      hexes.forEach(hex => {
+        const numberElement = hex.querySelector('.number');
+        if (numberElement) {
+          const number = parseInt(numberElement.textContent);
+          if (number === rolledNumber) {
+            hexIdList.push(hex.id);
+          }
+        }
+      });
+      console.log(`Rolled: ${rolledNumber}, Hex IDs: ${hexIdList.join(', ')}`);
+
+      // Assign resources to players based on the rolled number
+      this.assignResourcesToPlayers(rolledNumber);
+
+      // Activate robber and handle resource discarding if outcome is 7
+      if (rolledNumber === 7) {
+        this.activateRobber();
+
+        // Loop through all players except the human player (index 0)
+        for (let i = 1; i < this.players.length; i++) {
+          const player = this.players[i];
+          if (player.resources.length >= 7) {
+            // Calculate the number of cards to discard (half rounded up)
+            const cardsToDiscard = Math.ceil(player.resources.length / 2);
+            console.log(`Player ${i} must discard ${cardsToDiscard} cards.`);
+
+            // Randomly remove the calculated number of cards from the player's resources
+            for (let j = 0; j < cardsToDiscard; j++) {
+              const randomIndex = Math.floor(Math.random() * player.resources.length);
+              player.resources.splice(randomIndex, 1);
+            }
+            console.log(`Player ${i} discarded ${cardsToDiscard} cards. Remaining resources:`, player.resources);
+          }
+        }
+
+        // Check if the human player needs to discard cards
+        if (this.players[0].resources.length >= 7) {
+          this.cardsToDiscard = Math.ceil(this.players[0].resources.length / 2);
+          this.showDiscardModal = true;
+        }
+      }
+
+      // User can end their turn after rolling the dice
+      this.hasRolledDice = true;
     },
 
     build(index) {
@@ -808,7 +931,19 @@ export default {
       }
     },
 
+    isBot(playerIndex) {
+      return this.botPlayerIndices.includes(playerIndex);
+    },
 
+    createBotPlayer(index) {
+      return {
+        type: 'bot',  // Added type attribute
+        playerColor: this.playerColors[index],
+        user: { id: `bot-${index}`, name: `Bot ${index + 1}` },
+        resources: [],
+        developmentCards: [],
+      };
+    },
 
     async initializePlayers() {
       console.log("Initializing players");
@@ -831,6 +966,11 @@ export default {
         player.playerColor = this.playerColors[index];
         player.resources = [];
         player.developmentCards = [];
+        if (player.type === 'bot') {
+          this.botPlayerIndices.push(index);  // Store bot player indices
+        } else {
+          player.type = 'human';  // Assign type attribute to human players if not already set
+        }
       });
 
       console.log("Players initialized:", this.players);
@@ -839,20 +979,10 @@ export default {
       this.startCountdown();
     },
 
-    createBotPlayer(index) {
-      const botPlayer = {
-        playerColor: this.playerColors[index],
-        user: { id: `bot-${index}`, name: `Bot ${index + 1}` },
-        resources: [],
-        developmentCards: [],
-      };
-      return botPlayer;
-    },
-
 
     botLogic() {
       // Check if the current player index is not human (i.e., index is not 0)
-      if (this.currentPlayerIndex !== 0) {
+      if (this.isBot(this.currentPlayerIndex)) {
 
         this.rollDice();
 
@@ -1416,7 +1546,7 @@ export default {
           }
 
           // Update the game state and broadcast the build action
-          this.updateGameState({ action: 'buildroad', fromindex: fromIndex, toindex: toIndex });
+          this.updateGameState({ action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex });
 
         } else {
           // Display a warning message if the road is not adjacent to the player's settlement or road
@@ -1873,70 +2003,9 @@ export default {
 
       this.startCountdown();
     },
-    rollDice() {
-      // Generate random number between 1 and 6
-      function roll() {
-        return 1 + Math.floor(6 * Math.random());
-      }
 
-      // Assign dice outcome
-      let rightDiceOutcome = roll();
-      let leftDiceOutcome = roll();
-      this.dicesOutcome = rightDiceOutcome + leftDiceOutcome;
 
-      // Update dice outcome images
-      this.leftDiceImg = this.clearWhiteDiceImg[leftDiceOutcome];
-      this.rightDiceImg = this.clearWhiteDiceImg[rightDiceOutcome];
 
-      // Log the hex ID with the rolled number
-      let rolledNumber = rightDiceOutcome + leftDiceOutcome;
-      let hexIdList = [];
-      let hexes = document.querySelectorAll('.hex');
-      hexes.forEach(hex => {
-        let numberElement = hex.querySelector('.number');
-        if (numberElement) {
-          let number = parseInt(numberElement.textContent);
-          if (number === rolledNumber) {
-            hexIdList.push(hex.id);
-          }
-        }
-      });
-      console.log(`Rolled: ${rolledNumber}, Hex IDs: ${hexIdList.join(', ')}`);
-
-      // Assign resources to players based on the rolled number
-      this.assignResourcesToPlayers(rolledNumber);
-
-      // Activate robber and handle resource discarding if outcome is 7
-      if (rolledNumber === 7) {
-        this.activateRobber();
-
-        // Loop through all players except the human player (index 0)
-        for (let i = 1; i < this.players.length; i++) {
-          const player = this.players[i];
-          if (player.resources.length >= 7) {
-            // Calculate the number of cards to discard (half rounded up)
-            const cardsToDiscard = Math.ceil(player.resources.length / 2);
-            console.log(`Player ${i} must discard ${cardsToDiscard} cards.`);
-
-            // Randomly remove the calculated number of cards from the player's resources
-            for (let j = 0; j < cardsToDiscard; j++) {
-              const randomIndex = Math.floor(Math.random() * player.resources.length);
-              player.resources.splice(randomIndex, 1);
-            }
-            console.log(`Player ${i} discarded ${cardsToDiscard} cards. Remaining resources:`, player.resources);
-          }
-        }
-
-        // Check if the human player needs to discard cards
-        if (this.players[0].resources.length >= 7) {
-          this.cardsToDiscard = Math.ceil(this.players[0].resources.length / 2);
-          this.showDiscardModal = true;
-        }
-      }
-
-      // User can end their turn after rolling the dice
-      this.hasRolledDice = true;
-    },
     toggleCardSelection(index) {
       const selectedIndex = this.selectedCards.indexOf(index);
       if (selectedIndex === -1) {
