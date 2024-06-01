@@ -438,7 +438,7 @@
     </div>
     <div class="player-inventory-container">
       <div class="player-inventory-resources">
-        <div v-for="resource in currentPlayerResourcesInventory"  :key="resource.id">
+        <div v-for="resource in userPlayerResourcesInventory"  :key="resource.id">
           <div class="inventory-resource-card"><img :src=this.resourceCardImg[resource] alt="resource card"></div>
         </div>
         <div class="game-buttons-container">
@@ -594,6 +594,7 @@ export default {
       const loggedinPlayerIndex = this.players.findIndex(player => player.user.email === currentUserEmail);
       console.log("Player index of the logged-in user:", loggedinPlayerIndex);
       this.loggedinPlayerIndex = loggedinPlayerIndex;
+
     } else {
       console.warn("User details or players not available.");
     }
@@ -615,9 +616,18 @@ export default {
     currentPlayerColor() {
       return this.currentPlayer;
     },
+
     currentPlayerResourcesInventory() {
       return this.players[this.currentPlayerIndex].resources;
     },
+
+    userPlayerResourcesInventory() {
+      if (this.loggedinPlayerIndex !== null && this.players[this.loggedinPlayerIndex]) {
+        return this.players[this.loggedinPlayerIndex].resources;
+      }
+      return [];
+    },
+
     simplifiedInventory() {
       const simplified = {};
       // Iterate through each resource type
@@ -635,6 +645,7 @@ export default {
   },
   methods: {
 
+
     updateGameState(action) {
       const message = {
         action: action.action,
@@ -642,8 +653,9 @@ export default {
         game: this.serializeGameState(),
       };
 
-      if (action.action === 'build') {
+      if (action.action === 'build' || action.action === 'upgrade' || action.action === 'placeRobber') {
         message.index = action.index;
+        message.hexIndex = action.hexIndex;
       } else if (action.action === 'buildroad') {
         message.fromIndex = action.fromIndex;
         message.toIndex = action.toIndex;
@@ -702,6 +714,9 @@ export default {
       } else if (parsedMessage.action === 'build') {
         this.updateBoard(parsedMessage.game);
         this.updateSettlementUI(parsedMessage.index, parsedMessage.currentPlayerIndex);
+      } else if (parsedMessage.action === 'upgrade') {
+        this.updateBoard(parsedMessage.game);
+        this.updateCityUI(parsedMessage.index, parsedMessage.currentPlayerIndex);
       } else if (parsedMessage.action === 'buildroad') {
         this.updateBoard(parsedMessage.game);
         this.updateroadUI(parsedMessage.fromIndex, parsedMessage.toIndex, parsedMessage.currentPlayerIndex);
@@ -709,13 +724,40 @@ export default {
         // Update the game board
         this.updateBoard(parsedMessage.game);
         // Update the dice outcome UI
-        this.updateDiceOutcomeUI(parsedMessage.leftDiceOutcome,parsedMessage.rightDiceOutcome);
+        this.updateDiceOutcomeUI(parsedMessage.leftDiceOutcome, parsedMessage.rightDiceOutcome);
+      } else if (parsedMessage.action === 'nextTurn') {
+        this.updateBoard(parsedMessage.game);
+      } else if (parsedMessage.action === 'placeRobber') {
+        this.updateBoard(parsedMessage.game);
+        this.updateRobberUI(parsedMessage.hexIndex);
       }
 
       this.announcements.push(parsedMessage);
     },
 
+    updateRobberUI(hexIndex) {
+      console.log(`Updating robber UI: hexIndex=${hexIndex}`);
+      if (this.robberHexIndex !== null) {
+        this.deactivateRobber(this.robberHexIndex);
+      }
+      this.activateRobber(hexIndex);
 
+      const hexId = `h${hexIndex}`;
+      const numberElement = document.getElementById(hexId)?.querySelector('.number');
+      if (numberElement) {
+        numberElement.classList.add('red-number');
+      }
+    },
+
+    updateCityUI(index, playerIndex) {
+      console.log(`Updating city UI: index=${index}, player=${playerIndex}`);
+      // Find the settlement element in the DOM
+      const settlementElement = document.getElementById('s' + index);
+      if (settlementElement) {
+        settlementElement.classList.remove(`has-settlement-${playerIndex}`);
+        settlementElement.classList.add(`city-${playerIndex}`);
+      }
+    },
 
 
     updateSettlementUI(index, playerIndex) {
@@ -779,7 +821,7 @@ export default {
       this.assignResourcesToPlayers(rolledNumber);
 
       // Activate robber and handle resource discarding if outcome is 7
-      if (rolledNumber === 7) {
+      if (rolledNumber === 13) {
         this.activateRobber();
 
         // Loop through all players except the human player (index 0)
@@ -1290,12 +1332,20 @@ export default {
       // Get the clicked settlement element
       const clickedSettlement = event.currentTarget;
 
-
-
       // Add the 'city' class along with the player's ID to the clicked settlement element
       clickedSettlement.classList.add(`city-${this.currentPlayerIndex}`);
 
+      // Increment player points for upgrading to a city
       this.playerPoints[this.currentPlayerIndex] += 1;
+
+      // Find the index of the settlement
+      const settlementIndex = parseInt(clickedSettlement.id.substring(1));
+
+      // Update the game state
+      this.updateGameState({
+        action: 'upgrade',
+        index: settlementIndex
+      });
 
       // Reset the flag to indicate that the upgrade process is complete
       this.isUpgradingToCity = false;
@@ -1563,6 +1613,7 @@ export default {
       if (roadElement) {
         roadElement.classList.add(`build-${this.currentPlayerIndex}`);
       }
+      this.updateGameState({ action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex });
     },
 
     isAdjacentToOwnRoad(fromIndex, toIndex) {
@@ -1820,6 +1871,13 @@ export default {
 
             // Call the method to steal a resource from adjacent settlements
             this.stealResourceFromAdjacentSettlement();
+
+            // Update game state to notify other players
+            this.updateGameState({
+              action: 'placeRobber',
+              hexIndex: adjustedHexIndex
+            });
+
           } else {
             console.error(`Same hexIndex as current robber position: ${adjustedHexIndex}`);
           }
@@ -1998,10 +2056,17 @@ export default {
 
       // Reset roadsLeftToBuild to 0
       this.roadsLeftToBuild = 0;
+
       this.checkForWinner();
       this.botLogic();
 
       this.startCountdown();
+
+      // Update the game state for other players
+      this.updateGameState({
+        action: 'nextTurn'
+      });
+
     },
 
 
