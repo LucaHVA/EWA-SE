@@ -10,13 +10,13 @@
         <div v-for="(player, index) in players" :key="index" @click="console.log(player.playerNumber)" class="player-pill transition">
           <p class="player-name">{{ player.user ? player.user.username : 'bot' }} <span v-if="isHost(player)">(Host)</span></p>
           <div class="player-status">
-            <button v-if="isCurrentUser(player.user)" class="ready-button transition">Ready</button>
+<!--            <button v-if="isCurrentUser(player.user)" class="ready-button transition">Ready</button>-->
             <button v-if="isCurrentUserHost" class="kick-button transition" @click="kickPlayer(index, player.playerNumber)">Kick</button>
           </div>
         </div>
-        <div v-if="canAddBot" class="player-pill transition">
-          <button class="add-bot-button transition" @click="addBot">Add Bot</button>
-        </div>
+<!--        <div v-if="canAddBot" class="player-pill transition">-->
+<!--          <button class="add-bot-button transition" @click="addBot">Add Bot</button>-->
+<!--        </div>-->
       </div>
     </div>
     <div class="center-column-gamesettings-page">
@@ -87,14 +87,11 @@ export default {
     // Get current game id for lobby
     this.gameId = this.$route.params.id;
 
-    console.log(this.gameService.canAddNewPlayerToGame(this.gameId));
-
     // Get game
     this.currentGame = await this.fetchGameById(this.gameId);
 
     // Fetch all players from game
     this.players = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
-    console.log("players", this.players);
 
   },
   // beforeRouteLeave(to, from, next) {
@@ -109,35 +106,12 @@ export default {
     totalPlayers() {
       return this.players.length;
     },
-    canAddBot() {
-      return this.totalPlayers < this.numberOfPlayers;
-    },
-
     isCurrentUserHost() {
       return this.userDetails && this.currentGame && this.userDetails.id === this.currentGame.host.id
 
     }
   },
   methods: {
-    async addBot() {
-      if (this.botCount < this.numberOfPlayers - 1) {
-        this.botCount++;
-        const randomNames = ["Naruto", "Sasuke", "Goku", "Vegeta", "Luffy", "Ichigo", "Eren", "Levi", "Gon", "Killua", "Saitama", "Mikasa", "Kurama"];
-        const randomIndex = Math.floor(Math.random() * randomNames.length);
-        const botName = randomNames[randomIndex] + " (Bot)";
-
-        //TODO add bot to frontend only. Bot players shall be created on the Game page. New joining users can replace a bot.
-
-        try {
-          const newBot = await this.gameService.addNewPlayerToGame(this.gameId, null);
-          newBot.user = { username: botName };
-          this.players.push(newBot);
-        } catch (error) {
-          console.error("Error adding new bot player to game:", error);
-        }
-      }
-    },
-
     isHost(player){
       return player.playerNumber===0;
     },

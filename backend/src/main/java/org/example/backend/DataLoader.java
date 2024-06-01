@@ -50,14 +50,11 @@ public class DataLoader implements CommandLineRunner {
             User user3 = userRepository.findById(30003L);
             playerRepository.save(new Player(0, game1, user3));
             game1.setHost(user3);
-            // Create new Player instance (bot)
-            playerRepository.save(new Player(1, game1));
 
             // Fill games with players
             Game game2 = this.gameRepository.findById("SUS420");
             playerRepository.save(new Player(0, game2, user3));
             game2.setHost(user3);
-            playerRepository.save(new Player(1, game2));
 
             Game game3 = this.gameRepository.findById("BACK05");
             Player filledPlayer = new Player(0, game3, user3);
@@ -134,15 +131,15 @@ public class DataLoader implements CommandLineRunner {
 
 
         List<Game> games = this.gameRepository.findAll();
-        games.add(this.gameRepository.save(new Game("BACK03", 3, 33, 3, Game.Status.open, host)));
-        games.add(this.gameRepository.save(new Game("BACK04", 4, 40, 4, Game.Status.open, host)));
+        games.add(this.gameRepository.save(new Game("BACK03", 3, 30, 8, Game.Status.open, host)));
+        games.add(this.gameRepository.save(new Game("BACK04", 4, 40, 5, Game.Status.open, host)));
         games.add(this.gameRepository.save(new Game("BACK05", 4, 50, 5, Game.Status.open, host)));
         games.add(this.gameRepository.save(new Game("SUS420", 4, 60, 10, Game.Status.closed, host)));
         games.add(this.gameRepository.save(new Game("FULL01", 4, 60, 10, Game.Status.ongoing, null)));
         games.add(this.gameRepository.save(new Game("FULL02", 4, 60, 10, Game.Status.ongoing, null)));
-        games.add(this.gameRepository.save(new Game("BACK11", 4, 60, 8, Game.Status.open, null)));
-        games.add(this.gameRepository.save(new Game("BACK12", 4, 60, 8, Game.Status.open, null)));
-        games.add(this.gameRepository.save(new Game("BACK13", 4, 60, 8, Game.Status.open, null)));
+        games.add(this.gameRepository.save(new Game("BACK11", 2, 60, 8, Game.Status.open, null)));
+        games.add(this.gameRepository.save(new Game("BACK12", 4, 60, 8, Game.Status.ongoing, null)));
+        games.add(this.gameRepository.save(new Game("BACK13", 4, 60, 8, Game.Status.closed, null)));
     }
 
     private void createInitialGameHistories() {

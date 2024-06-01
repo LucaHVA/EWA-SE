@@ -13,10 +13,10 @@
               <li>Turn Duration: {{ turnDuration }} seconds</li>
               <li>Points to Win: {{ pointsToWin }}</li>
             </ul>
-            <p v-if="missingBotsCount > 0" class="error-message">
-              Current number of players chosen: {{ numberOfPlayers }}, but there
-              {{ missingBotsCount === 1 ? 'is' : 'are' }}
-              still {{ missingBotsCount }} {{ missingBotsCount === 1 ? 'bot' : 'bots' }} needed to fill the lobby.
+            <p v-if="isCorrectPlayerCount !== 0" class="error-message">
+              There {{ Math.abs(isCorrectPlayerCount) === 1 ? 'is' : 'are' }}
+              {{ Math.abs(isCorrectPlayerCount) }} {{ Math.abs(isCorrectPlayerCount) === 1 ? 'player' : 'players' }}
+              {{ isCorrectPlayerCount > 0 ? 'needed to fill' : 'too many in' }} the lobby.
             </p>
           </div>
           <div class="modal-footer">
@@ -49,27 +49,25 @@ export default {
   inject:['gameService'],
   methods: {
     async initializeGame() {
-      if (this.totalPlayers !== this.numberOfPlayers){
+      // Check if the player count is valid
+      if (this.isCorrectPlayerCount !== 0) {
+        console.error('Incorrect number of players.')
         return;
       }
-
-      // Create a game
-      // this.game = GameService.generateNewGame(this.numberOfPlayers, this.turnDuration, this.pointsToWin);
 
       // Save the game instance to a service
       const newGame=  new Game(this.gameSettings.id,this.numberOfPlayers,this.turnDuration,this.pointsToWin)
       await this.gameService.saveGame(newGame)
-      console.log("check this,",newGame)
 
       // Go to game page
       this.$router.replace({ name: 'game', params: { id: this.gameSettings.id } });
     },
   },
   computed: {
-    missingBotsCount() {
-      // Calculate the number of bots needed to fill the lobby
-      return Math.max(this.numberOfPlayers - this.totalPlayers, 0);
-    },
+    isCorrectPlayerCount(){
+      const difference = this.numberOfPlayers - this.totalPlayers;
+      return difference !== 0 ? difference : 0;
+    }
   },
 };
 </script>
