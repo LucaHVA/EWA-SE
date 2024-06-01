@@ -38,6 +38,7 @@
         <span>{{ this.currentGame.pointsToWin }}</span>
         <input type="range" min="8" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
       </div>
+<!--      <button @click="onNewAnnouncement">hello world</button>-->
       <div class="start-game-div">
         <button class="start-game-button transition" @click="showModal = true">Start Game</button>
       </div>
@@ -45,6 +46,7 @@
     <div class="right-column-gamesettings-page"></div>
     <popUpGameSettingsComponent :show="showModal"
                                 @close="showModal = false"
+                                @startGameForAll="onNewAnnouncement"
                                 :botCount="botCount"
                                 :totalPlayers="totalPlayers"
 
@@ -58,6 +60,8 @@
 
 <script>
 import popUpGameSettingsComponent from "@/components/pages/popUpGameSettingsComponent.vue";
+import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
+import CONFIG from '@/app-config.js';
 
 export default {
   name: "GameSettingsComponent",
@@ -68,6 +72,11 @@ export default {
   props: {
     selectedGame: Object,
   },
+  // provide() {
+  //   return {
+  //     announcementsService: this.announcementsService
+  //   };
+  // },
   data() {
     return {
       gameId: null,
@@ -78,10 +87,15 @@ export default {
       pointsToWin: 8,
       botCount: 0,
       showModal: false,
-      currentGame: Object
+      currentGame: Object,
+      announcements: []
+
     };
   },
   async created() {
+    this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement);
+    // await this.announcementsService.sendMessage("hello world!");
+
     this.userDetails = await this.usersService._currentUser;
 
     // Get current game id for lobby
@@ -102,6 +116,10 @@ export default {
   //     next();
   //   });
   // },
+  beforeUnmount() {
+    // close down the service with the web socket
+    this.announcementsService.close();
+  },
   computed: {
     totalPlayers() {
       return this.players.length;
@@ -112,6 +130,18 @@ export default {
     }
   },
   methods: {
+    onReceiveAnnouncement(message) {
+      const parsedMessage = JSON.parse(message);
+
+      if (parsedMessage.action === 'sendPlayersToGame') {
+        this.$router.replace({ name: 'game', params: { id: this.gameId } });
+      }
+    },
+
+    onNewAnnouncement() {
+      this.announcementsService.sendMessage(JSON.stringify({action: "sendPlayersToGame"}));
+    },
+
     isHost(player){
       return player.playerNumber===0;
     },

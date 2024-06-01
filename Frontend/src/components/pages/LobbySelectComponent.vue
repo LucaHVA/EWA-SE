@@ -11,7 +11,7 @@
       <div :class="{'scrollable': filteredGames.length > 4}">
         <table>
           <tbody>
-          <tr v-for="(game) in filteredGames" :key="game" class="player-pill transition"
+          <tr v-for="(game) in filteredGames" :key="game" class="user-pill transition"
               @click="selectGame(game)">
             <td>
               <div>{{ game.id }}</div>
@@ -30,13 +30,15 @@
   </div>
   <popUpLobbySelectComponent :show="showModal"
                              @close="showModal = false"
-                              :selectedGame="selectedGame"
-                              :playerCounts="playerCounts">
+                             :selectedGame="selectedGame"
+                             :playerCounts="playerCounts">
   </popUpLobbySelectComponent>
 </template>
 
 <script>
 import popUpLobbySelectComponent from "@/components/pages/popUpLobbySelectComponent.vue";
+import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
+import CONFIG from '@/app-config';
 
 
 export default {
@@ -51,6 +53,7 @@ export default {
       playerCounts: {},
       selectedGame: null,
       showModal: false,
+      announcements: []
     }
   },
 
@@ -60,6 +63,13 @@ export default {
     this.games.forEach(game => {
       this.getCurrentAmountOfPlayers(game.id);
     });
+    // Initialize WebSocket service
+    this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement)
+  },
+
+  beforeUnmount() {
+    // Close WebSocket connection
+    this.announcementsService.close();
   },
 
   computed: {
@@ -73,6 +83,7 @@ export default {
       this.selectedGame = game;
       this.showModal = true;
     },
+
     async createGame() {
       // Get current user (host)
       const currentUser = await this.usersService.getCurrentUser;
@@ -81,9 +92,13 @@ export default {
 
       await this.gameService.addNewPlayerToGame(game.id, currentUser);
 
+      //Notify the other giga chads 'onNewAnnouncement'
+      this.announcementsService.sendMessage(JSON.stringify({type: 'NEW_GAME', game}))
+
       // Route to next page
       this.$router.replace({name: 'gameSettings', params: {id: game.id}});
     },
+
     async getCurrentAmountOfPlayers(gameId) {
       try {
         // Find players of a game
@@ -93,6 +108,15 @@ export default {
       } catch (e) {
         console.error(e);
       }
+    },
+
+    onReceiveAnnouncement(message) {
+      const announcement = JSON.parse(message)
+      if (announcement.type === 'NEW_GAME') {
+        this.games.push(announcement.game);
+        this.getCurrentAmountOfPlayers(announcement.game.id);
+      }
+      console.log("Received announcement", message)
     }
   }
 }
@@ -172,7 +196,7 @@ export default {
   background-color: var(--white);
 }
 
-.player-pill {
+.user-pill {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -186,7 +210,7 @@ export default {
   font-weight: bold;
 }
 
-.player-pill:hover {
+.user-pill:hover {
   background-color: var(--black);
   color: white;
   cursor: pointer;
