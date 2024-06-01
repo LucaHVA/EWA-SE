@@ -55,14 +55,14 @@ export default {
     },
     async moveToLobby() {
       // Get current user
-      const currentUser = await this.usersService.getCurrentUser;
+      // const currentUser = await this.usersService.getCurrentUser;
 
       // Check if a new player can be added
         if (!(await this.gameService.canAddNewPlayerToGame(this.selectedGame.id))){
           this.popUpErrorMessage = "Sorry, this game is full";
         } else {
           // Add user to game as player
-          await this.gameService.addNewPlayerToGame(this.selectedGame.id, currentUser);
+          // await this.gameService.addNewPlayerToGame(this.selectedGame.id, currentUser);
           // Route to game settings
           this.$router.replace({name: 'gameSettings', params: {id: this.selectedGame.id}});
         }

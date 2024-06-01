@@ -38,7 +38,8 @@
         <span>{{ this.currentGame.pointsToWin }}</span>
         <input type="range" min="8" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
       </div>
-<!--      <button @click="onNewAnnouncement">hello world</button>-->
+<!--      <button @click="onUpdatePlayersAnnouncement">hello world</button>-->
+      <button @click="isCurrentUserAlreadyPlayer">hello world</button>
       <div class="start-game-div">
         <button class="start-game-button transition" @click="showModal = true">Start Game</button>
       </div>
@@ -46,7 +47,7 @@
     <div class="right-column-gamesettings-page"></div>
     <popUpGameSettingsComponent :show="showModal"
                                 @close="showModal = false"
-                                @startGameForAll="onNewAnnouncement"
+                                @startGameForAll="onStartGameAnnouncement"
                                 :botCount="botCount"
                                 :totalPlayers="totalPlayers"
 
@@ -72,11 +73,6 @@ export default {
   props: {
     selectedGame: Object,
   },
-  // provide() {
-  //   return {
-  //     announcementsService: this.announcementsService
-  //   };
-  // },
   data() {
     return {
       gameId: null,
@@ -94,7 +90,6 @@ export default {
   },
   async created() {
     this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement);
-    // await this.announcementsService.sendMessage("hello world!");
 
     this.userDetails = await this.usersService._currentUser;
 
@@ -104,18 +99,13 @@ export default {
     // Get game
     this.currentGame = await this.fetchGameById(this.gameId);
 
+    // Add current user to players
+    await this.addCurrentUserToGame();
+
     // Fetch all players from game
-    this.players = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+    await this.updateCurrentPlayers();
 
   },
-  // beforeRouteLeave(to, from, next) {
-  //   this.removeCurrentUserFromGame().then(() => {
-  //     next();
-  //   }).catch(error => {
-  //     console.error("Error removing current user from game:", error);
-  //     next();
-  //   });
-  // },
   beforeUnmount() {
     // close down the service with the web socket
     this.announcementsService.close();
@@ -130,30 +120,68 @@ export default {
     }
   },
   methods: {
-    onReceiveAnnouncement(message) {
+    async onReceiveAnnouncement(message) {
       const parsedMessage = JSON.parse(message);
 
       if (parsedMessage.action === 'sendPlayersToGame') {
         this.$router.replace({ name: 'game', params: { id: this.gameId } });
+      } else if (parsedMessage.action === 'updatePlayersList'){
+        await this.updateCurrentPlayers();
+      } else if (parsedMessage.action === 'playerLeft'){
+        if (this.userDetails.id === parsedMessage.kickedId){
+          this.$router.push("/lobbySelect");
+        }
+        await this.updateCurrentPlayers();
       }
     },
 
-    onNewAnnouncement() {
+    onStartGameAnnouncement() {
       this.announcementsService.sendMessage(JSON.stringify({action: "sendPlayersToGame"}));
     },
+    onUpdatePlayersAnnouncement() {
+      this.announcementsService.sendMessage(JSON.stringify({action: "updatePlayersList"}));
+    },
+    async isCurrentUserAlreadyPlayer(){
+      // Save current player id's
+      let players = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+      let playerUserIds = [];
+      players.forEach(player => {
+        playerUserIds.push(player.user.id);
+      })
 
+      // Check if current user is already a player
+      return playerUserIds.includes(this.userDetails.id);
+    },
+    async updateCurrentPlayers(){
+      this.players = await this.gameService.asyncFindAllSimplePlayersForGameId(this.gameId);
+    },
+    async addCurrentUserToGame(){
+      // Check if user is already in this game
+      if (!await this.isCurrentUserAlreadyPlayer()){
+        // Add new player
+        await this.gameService.addNewPlayerToGame(this.currentGame.id, this.userDetails);
+        // Send websocket update
+        this.onUpdatePlayersAnnouncement();
+      } else console.warn("User is already a player. No new player was added.");
+    },
     isHost(player){
       return player.playerNumber===0;
     },
-
     async kickPlayer(index, playerNumber) {
+      console.log("kicking player")
       if (!this.players[index].host) {
         try {
-          console.log(`Attempting to delete player number: ${playerNumber}`);
+
+          const kickedPlayerUserId = this.players[index].user.id;
+          // if (this.userDetails.id === kickedPlayerUserId){
+          //   this.$router.push("/lobbySelect");
+          // }
+
+          // console.log("player: ", kickedPlayer.user.id);
+          console.log("num: ", playerNumber);
           await this.gameService.deletePlayerFromGame(this.gameId, playerNumber);
 
-          this.players.splice(index, 1);
-          this.botCount = this.players.filter(player => player.user.username.includes("(Bot)")).length;
+          this.announcementsService.sendMessage(JSON.stringify({action: 'playerLeft', kickedId: kickedPlayerUserId}));
         } catch (error) {
           console.error("Error deleting player from game:", error);
         }

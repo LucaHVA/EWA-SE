@@ -119,7 +119,6 @@ export class GameService {
      */
     async addNewPlayerToGame(gameId, user) {
 
-        //TODO error catching: check if user is already in game, if so, do not create new player.
 
         let playerNumber = await this.getLastAvailablePlayerNumber(gameId);
 
