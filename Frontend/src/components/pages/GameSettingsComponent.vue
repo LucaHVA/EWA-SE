@@ -36,7 +36,7 @@
       <div>
         <h3>Points to win</h3>
         <span>{{ this.currentGame.pointsToWin }}</span>
-        <input type="range" min="8" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
+        <input type="range" min="5" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
       </div>
 <!--      <button @click="onUpdatePlayersAnnouncement">hello world</button>-->
       <button @click="isCurrentUserAlreadyPlayer">hello world</button>
