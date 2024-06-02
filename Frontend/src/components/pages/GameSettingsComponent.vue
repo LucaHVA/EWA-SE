@@ -14,9 +14,6 @@
             <button v-if="isCurrentUserHost" class="kick-button transition" @click="kickPlayer(index, player.playerNumber)">Kick</button>
           </div>
         </div>
-<!--        <div v-if="canAddBot" class="player-pill transition">-->
-<!--          <button class="add-bot-button transition" @click="addBot">Add Bot</button>-->
-<!--        </div>-->
       </div>
     </div>
     <div class="center-column-gamesettings-page">
@@ -38,8 +35,7 @@
         <span>{{ this.currentGame.pointsToWin }}</span>
         <input type="range" min="8" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
       </div>
-<!--      <button @click="onUpdatePlayersAnnouncement">hello world</button>-->
-      <button @click="isCurrentUserAlreadyPlayer">hello world</button>
+
       <div class="start-game-div">
         <button class="start-game-button transition" @click="showModal = true">Start Game</button>
       </div>
@@ -119,6 +115,35 @@ export default {
 
     }
   },
+
+  beforeRouteLeave(to, from, next) {
+    // Check if the player is leaving the page by clicking on the "Start Game" button
+    const isLeavingByStartGame = to.name === 'game';
+
+    if (!isLeavingByStartGame) {
+      // Player is leaving the page for another reason (not starting the game)
+      this.removeCurrentUserFromGame().then(async () => {
+        const remainingPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+        console.log("remaining players ", remainingPlayers);
+
+        this.announcementsService.sendMessage(JSON.stringify({action: 'playerLeft'}));
+        if (this.isCurrentUserHost || !remainingPlayers || remainingPlayers.length === 0 || remainingPlayers === "0") {
+          console.log(`No remaining players. Deleting game with ID: ${this.gameId}`);
+          await this.gameService.deleteGame(this.gameId);
+
+        } else {
+          console.log("no reason to delete the game")
+        }
+        next();
+      }).catch(error => {
+        console.error("Error removing current user from game:", error);
+        next();
+      });
+    } else {
+      next();
+    }
+  },
+
   methods: {
     async onReceiveAnnouncement(message) {
       const parsedMessage = JSON.parse(message);
