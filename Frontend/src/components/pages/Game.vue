@@ -538,9 +538,8 @@ export default {
       ],
       roads: [],
       resourceCounts: {
-        desert: 1,
         ore: 3,
-        brick: 3,
+        brick: 4,
         wheat: 4,
         wood: 4,
         sheep: 4
@@ -869,7 +868,7 @@ export default {
 
         // Check if the human player needs to discard cards
         if (this.players[this.loggedinPlayerIndex].resources.length >= 7) {
-          this.cardsToDiscard = Math.ceil(this.players[0].resources.length / 2);
+          this.cardsToDiscard = Math.ceil(this.players[this.loggedinPlayerIndex].resources.length / 2);
           this.showDiscardModal = true;
         }
       }
@@ -2148,7 +2147,7 @@ export default {
       // Remove the selected cards from the player's resources
       this.selectedCards.sort((a, b) => b - a); // Sort in descending order to remove correctly
       for (const index of this.selectedCards) {
-        this.players[0].resources.splice(index, 1);
+        this.players[this.loggedinPlayerIndex].resources.splice(index, 1);
       }
       this.updateGameState({
         action: 'discardedcards',
