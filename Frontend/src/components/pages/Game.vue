@@ -38,7 +38,7 @@
       <h3>Select Cards to Discard</h3>
       <div class="card-selection">
         <div
-            v-for="(card, index) in players[0].resources"
+            v-for="(card, index) in players[this.loggedinPlayerIndex].resources"
             :key="index"
             class="resource-cards"
             @click="toggleCardSelection(index)"
@@ -392,7 +392,7 @@
 
 
         <div class="dice-container">
-          <button class="pos-button" id="roll-dice-button" @click="rollDice" :disabled="hasRolledDice">Roll the dices!
+          <button class="pos-button" id="roll-dice-button" @click="rollDice"  :disabled="!isCurrentPlayerTurn || hasRolledDice">Roll the dices!
             <img alt="roll dice" src="../../assets/images/game/dices/clear_rolling-dices.png">
           </button>
           <div class="dice-outcome-container">
@@ -408,7 +408,7 @@
               <p>Click one of the numbers to place the robber.</p>
             </div>
           </div>
-          <button class="pos-button" id="next-turn-button" @click="nextTurn">Next turn</button>
+          <button class="pos-button" id="next-turn-button" @click="nextTurn" :disabled="!isCurrentPlayerTurn">Next turn</button>
           <div>Time remaining: {{ this.timeRemaining }}</div>
           <div>Points to win: {{this.game.pointsToWin}} </div>
           <div v-if="!hasRolledDice">Turn: {{ turn }}</div>
@@ -455,8 +455,8 @@
           <button class="pos-button" v-if="canPlayRoad_BuildingCard" @click="playDevelopmentCard('Road_Building')">
             Play Road_Building Card
           </button>
-          <button class="pos-button" @click="openTradeModal">Trade Resources</button>
-          <button class="pos-button" @click="upgradeSettlementToCity">Upgrade Settlement to City</button>
+          <button class="pos-button" @click="openTradeModal" :disabled="!isCurrentPlayerTurn">Trade Resources</button>
+          <button class="pos-button" @click="upgradeSettlementToCity" :disabled="!isCurrentPlayerTurn">Upgrade Settlement to City</button>
 
         </div>
       </div>
@@ -570,6 +570,10 @@ export default {
       userDetails: null,
       loggedinPlayerIndex: null,
       botPlayerIndices: [],
+      robberPlacements: [0, 0, 0, 0],
+      mostRobbersPlaced: { playerIndex: null, count: 0 },
+      longestRoadPlayer: null,
+      longestRoadLength: 0,
     };
   },
   inject: ['gameService', 'usersService'],
@@ -628,6 +632,10 @@ export default {
       return [];
     },
 
+    isCurrentPlayerTurn() {
+      return this.currentPlayerIndex === this.loggedinPlayerIndex;
+    },
+
     simplifiedInventory() {
       const simplified = {};
       // Iterate through each resource type
@@ -662,6 +670,8 @@ export default {
       } else if (action.action === 'rollDice') {
         message.leftDiceOutcome = action.leftDiceOutcome;
         message.rightDiceOutcome = action.rightDiceOutcome;
+      } else if (action.action === 'winner') {
+        message.winner = action.winner;
       }
 
       this.announcementsService.sendMessage(JSON.stringify(message));
@@ -681,6 +691,11 @@ export default {
         roads: this.roads,
         leftDiceOutcome: this.leftDiceOutcome,
         rightDiceOutcome: this.rightDiceOutcome,
+        robberPlacements: this.robberPlacements,
+        mostRobbersPlaced: this.mostRobbersPlaced,
+        longestRoadPlayer: this.longestRoadPlayer,
+        longestRoadLength: this.longestRoadLength,
+        playerPoints: this.playerPoints,
       };
     },
 
@@ -698,6 +713,10 @@ export default {
         this.roads = [...gameState.roads];
         this.leftDiceOutcome = gameState.leftDiceOutcome;
         this.rightDiceOutcome = gameState.rightDiceOutcome;
+        this.robberPlacements = [...gameState.robberPlacements];
+        this.mostRobbersPlaced = { ...gameState.mostRobbersPlaced };
+        this.longestRoadPlayer = gameState.longestRoadPlayer;
+        this.longestRoadLength = gameState.longestRoadLength;
       } else {
         console.error('Malformed game state:', gameState);
       }
@@ -706,7 +725,6 @@ export default {
 
 
     onReceiveAnnouncement(message) {
-      console.log("Received announcement:", message);
       const parsedMessage = JSON.parse(message);
 
       if (parsedMessage.action === 'initializeBoard' && parsedMessage.boardState) {
@@ -730,6 +748,11 @@ export default {
       } else if (parsedMessage.action === 'placeRobber') {
         this.updateBoard(parsedMessage.game);
         this.updateRobberUI(parsedMessage.hexIndex);
+      }else if (parsedMessage.action === 'discardedcards') {
+        this.updateBoard(parsedMessage.game);
+      }else if (parsedMessage.action === 'winner') {
+        // Display the winner modal
+        this.showWinnerModal = true;
       }
 
       this.announcements.push(parsedMessage);
@@ -821,28 +844,31 @@ export default {
       this.assignResourcesToPlayers(rolledNumber);
 
       // Activate robber and handle resource discarding if outcome is 7
-      if (rolledNumber === 13) {
+      if (rolledNumber === 7) {
         this.activateRobber();
 
-        // Loop through all players except the human player (index 0)
-        for (let i = 1; i < this.players.length; i++) {
-          const player = this.players[i];
+        // Loop through all bot players
+        for (let i = 0; i < this.botPlayerIndices.length; i++) {
+          const botPlayerIndex = this.botPlayerIndices[i];
+          const player = this.players[botPlayerIndex];
+
+          // Rest of the logic remains the same
           if (player.resources.length >= 7) {
             // Calculate the number of cards to discard (half rounded up)
             const cardsToDiscard = Math.ceil(player.resources.length / 2);
-            console.log(`Player ${i} must discard ${cardsToDiscard} cards.`);
+            console.log(`Player ${botPlayerIndex} must discard ${cardsToDiscard} cards.`);
 
             // Randomly remove the calculated number of cards from the player's resources
             for (let j = 0; j < cardsToDiscard; j++) {
               const randomIndex = Math.floor(Math.random() * player.resources.length);
               player.resources.splice(randomIndex, 1);
             }
-            console.log(`Player ${i} discarded ${cardsToDiscard} cards. Remaining resources:`, player.resources);
+            console.log(`Player ${botPlayerIndex} discarded ${cardsToDiscard} cards. Remaining resources:`, player.resources);
           }
         }
 
         // Check if the human player needs to discard cards
-        if (this.players[0].resources.length >= 7) {
+        if (this.players[this.loggedinPlayerIndex].resources.length >= 7) {
           this.cardsToDiscard = Math.ceil(this.players[0].resources.length / 2);
           this.showDiscardModal = true;
         }
@@ -853,6 +879,12 @@ export default {
     },
 
     build(index) {
+      // Check if it's the logged-in player's turn
+      if (this.currentPlayerIndex !== this.loggedinPlayerIndex && !this.botPlayerIndices.includes(this.currentPlayerIndex)) {
+        this.displayError("It's not your turn.");
+        return;
+      }
+
       // Check if the current player is defined
       if (this.currentPlayerIndex === null || this.players[this.currentPlayerIndex] === undefined) {
         console.error("Current player is undefined.");
@@ -1196,6 +1228,7 @@ export default {
       // If a winner is found, show the modal
       if (winner) {
         this.showWinnerModal = true;
+        this.updateGameState({ action: 'winner', winner: winner, game: this.serializeGameState() });
       }
     },
 
@@ -1275,16 +1308,17 @@ export default {
 
         // Award points to the new longest road owner
         if (newLongestRoadPlayer !== null) {
-          this.playerPoints[newLongestRoadPlayer] += 8;
+          this.playerPoints[newLongestRoadPlayer] += 2;
         }
 
         // Update the current longest road player
         this.longestRoadPlayer = newLongestRoadPlayer;
+        this.longestRoadLength = longestRoadLength;
       }
 
       // Log the player with the longest road
       if (this.longestRoadPlayer !== null) {
-        console.log(`Player ${this.longestRoadPlayer} has the longest road with a length of ${longestRoadLength}.`);
+        console.log(`Player ${this.longestRoadPlayer} has the longest road with a length of ${this.longestRoadLength}.`);
       } else {
         console.log(`No player currently has the longest road.`);
       }
@@ -1498,6 +1532,12 @@ export default {
 
 
     buildRoad(fromIndex, toIndex) {
+      // Check if it's the logged-in player's turn
+      if (this.currentPlayerIndex !== this.loggedinPlayerIndex && !this.botPlayerIndices.includes(this.currentPlayerIndex)) {
+        this.displayError("It's not your turn.");
+        return;
+      }
+
       // Check if the player can play the Road Building card and has roads left to build with the card
       if (this.canPlayRoad_BuildingCard && this.roadsLeftToBuild > 0) {
         // Check if the road is adjacent to a settlement or an owned road
@@ -1531,7 +1571,6 @@ export default {
         const isFirstTurn = this.turn === 1;
         const isSecondTurn = this.turn === 2;
 
-
         if (isFirstTurn) {
           // Check if the player has already built on their first turn
           const hasBuiltFirstTurn2 = this.players[this.currentPlayerIndex].hasBuiltFirstTurn2 || false;
@@ -1558,7 +1597,6 @@ export default {
             this.displayError("You don't have enough resources to build a road.");
             return;
           }
-
         }
 
         // Build the road only if it's adjacent to the player's settlement or road
@@ -1577,9 +1615,6 @@ export default {
 
           this.checkConnectedRoads();
 
-
-
-
           // Set the flag to indicate that the player has built on their first or second turn
           const isFirstTurn = this.turn === 1;
           const isSecondTurn = this.turn === 2;
@@ -1588,7 +1623,7 @@ export default {
             this.players[this.currentPlayerIndex].hasBuiltFirstTurn2 = true;
           } else if (isSecondTurn) {
             this.players[this.currentPlayerIndex].hasBuiltSecondTurn2 = true;
-          }else {
+          } else {
             const currentPlayer = this.players[this.currentPlayerIndex];
             // Deduct the required resources from the player's inventory
             currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
@@ -1597,7 +1632,6 @@ export default {
 
           // Update the game state and broadcast the build action
           this.updateGameState({ action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex });
-
         } else {
           // Display a warning message if the road is not adjacent to the player's settlement or road
           this.displayError("Road must be adjacent to your own settlement or road.");
@@ -1878,6 +1912,13 @@ export default {
               hexIndex: adjustedHexIndex
             });
 
+            // Increment the count for the current player
+            const currentPlayerIndex = this.currentPlayerIndex;
+            this.robberPlacements[currentPlayerIndex] += 1;
+
+            // Check for points based on robber placements
+            this.checkRobberPoints(currentPlayerIndex);
+
           } else {
             console.error(`Same hexIndex as current robber position: ${adjustedHexIndex}`);
           }
@@ -1892,6 +1933,23 @@ export default {
       this.showRobberPlacementModal = false;
     },
 
+    checkRobberPoints(playerIndex) {
+      const playerRobberCount = this.robberPlacements[playerIndex];
+
+      if (playerRobberCount >= 3) {
+        // Check if the player is the one who placed the most robbers
+        if (this.mostRobbersPlaced.playerIndex === null || playerRobberCount > this.mostRobbersPlaced.count) {
+          // If another player had the most robbers placed, deduct their points
+          if (this.mostRobbersPlaced.playerIndex !== null) {
+            this.playerPoints[this.mostRobbersPlaced.playerIndex] -= 2;
+          }
+
+          // Award the current player 2 points
+          this.playerPoints[playerIndex] += 2;
+          this.mostRobbersPlaced = { playerIndex, count: playerRobberCount };
+        }
+      }
+    },
     stealResourceFromAdjacentSettlement() {
       // Check if there is a robber placed on any tile
       if (this.robberHexIndex !== null) {
@@ -1921,7 +1979,7 @@ export default {
               const stolenResource = player.resources.splice(randomResourceIndex, 1)[0];
 
               // Add the stolen resource to the player who placed the robber
-              const robberPlayer = this.players.find(player => player.id === this.currentPlayerId);
+              const robberPlayer = this.players.find(player => player.id === this.currentPlayerIndex);
               if (robberPlayer) {
                 robberPlayer.resources.push(stolenResource);
 
@@ -2092,6 +2150,9 @@ export default {
       for (const index of this.selectedCards) {
         this.players[0].resources.splice(index, 1);
       }
+      this.updateGameState({
+        action: 'discardedcards',
+      });
 
       // Reset modal state
       this.selectedCards = [];
