@@ -40,7 +40,24 @@
         <button class="start-game-button transition" @click="showModal = true">Start Game</button>
       </div>
     </div>
-    <div class="right-column-gamesettings-page"></div>
+    <div class="right-column-gamesettings-page">
+      <div>
+        <h2 class="header-title">Chat</h2>
+      </div>
+      <div class="chat-container">
+        <div class="scrollable" ref="chatContainer">
+          <div v-if="chatMessages.length === 0" class="noMessageText">
+            Here you can talk to other players!
+          </div>
+          <div v-else class="chat-messages" v-for="msg in chatMessages" :key="msg.id">
+            <div :class="['message', { 'current-user-message': isCurrentUserMessage(msg.sender) }]">
+              {{ msg.sender }}: {{ msg.text }}
+            </div>
+          </div>
+        </div>
+        <input type="text" v-model="chatInput" @keyup.enter="sendChatMessage" placeholder="Type a message..." class="chat-input">
+      </div>
+    </div>
     <popUpGameSettingsComponent :show="showModal"
                                 @close="showModal = false"
                                 @startGameForAll="onStartGameAnnouncement"
@@ -80,8 +97,9 @@ export default {
       botCount: 0,
       showModal: false,
       currentGame: Object,
-      announcements: []
-
+      announcements: [],
+      chatMessages: [],
+      chatInput: '',
     };
   },
   async created() {
@@ -108,11 +126,10 @@ export default {
   },
   computed: {
     totalPlayers() {
-      return this.players.length;
+      return this.players ? this.players.length : 0;
     },
     isCurrentUserHost() {
       return this.userDetails && this.currentGame && this.userDetails.id === this.currentGame.host.id
-
     }
   },
 
@@ -145,6 +162,13 @@ export default {
   },
 
   methods: {
+    sendChatMessage() {
+      if (this.chatInput.trim() !== '') {
+        const message = { sender: this.userDetails.username, text: this.chatInput };
+        this.announcementsService.sendMessage(JSON.stringify({ action: 'chatMessage', content: message }));
+        this.chatInput = '';
+      }
+    },
     async onReceiveAnnouncement(message) {
       const parsedMessage = JSON.parse(message);
 
@@ -159,6 +183,9 @@ export default {
         }
       } else if (parsedMessage.action === 'playerLeft'){
         await this.updateCurrentPlayers();
+      } else if (parsedMessage.action === 'chatMessage') {
+        this.chatMessages.push(parsedMessage.content);
+        this.scrollToBottom();
       }
     },
 
@@ -227,6 +254,15 @@ export default {
       } catch (error) {
         console.error("Error fetching game by ID:", error);
       }
+    },
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const chatContainer = this.$refs.chatContainer;
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      });
+    },
+    isCurrentUserMessage(sender) {
+      return sender === this.userDetails.username;
     },
   }
 };
@@ -410,4 +446,66 @@ export default {
   overflow-y: auto;
 }
 
+.chat-container {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 10px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 10px;
+}
+
+.scrollable {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.chat-messages {
+  max-height: 240px;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  word-break: break-all;
+  padding: 5px;
+}
+
+.chat-input {
+  border: 1px solid #ddd;
+  padding: 8px;
+  width: calc(100% - 20px);
+  border-radius: 5px;
+}
+
+.noMessageText {
+  display: flex;
+  justify-content: center;
+  font-size: 20px;
+  margin-top: 9rem;
+}
+
+.current-user-message {
+  background-color: #d3d3d3;
+}
+
+/* css voor scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 </style>
