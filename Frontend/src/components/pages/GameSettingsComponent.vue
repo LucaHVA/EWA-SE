@@ -14,9 +14,6 @@
             <button v-if="isCurrentUserHost" class="kick-button transition" @click="kickPlayer(index, player.playerNumber)">Kick</button>
           </div>
         </div>
-<!--        <div v-if="canAddBot" class="player-pill transition">-->
-<!--          <button class="add-bot-button transition" @click="addBot">Add Bot</button>-->
-<!--        </div>-->
       </div>
     </div>
     <div class="center-column-gamesettings-page">
@@ -38,8 +35,7 @@
         <span>{{ this.currentGame.pointsToWin }}</span>
         <input type="range" min="5" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
       </div>
-<!--      <button @click="onUpdatePlayersAnnouncement">hello world</button>-->
-      <button @click="isCurrentUserAlreadyPlayer">hello world</button>
+
       <div class="start-game-div">
         <button class="start-game-button transition" @click="showModal = true">Start Game</button>
       </div>
@@ -119,6 +115,35 @@ export default {
 
     }
   },
+
+  beforeRouteLeave(to, from, next) {
+    // Check if the player is leaving the page by clicking on the "Start Game" button
+    const isLeavingByStartGame = to.name === 'game';
+
+    if (!isLeavingByStartGame) {
+      // Player is leaving the page for another reason (not starting the game)
+      this.removeCurrentUserFromGame().then(async () => {
+        const remainingPlayers = await this.gameService.asyncFindAllPlayersForGameId(this.gameId);
+        console.log("remaining players ", remainingPlayers);
+
+        this.announcementsService.sendMessage(JSON.stringify({action: 'playerLeft'}));
+        if (this.isCurrentUserHost || !remainingPlayers || remainingPlayers.length === 0 || remainingPlayers === "0") {
+          console.log(`No remaining players. Deleting game with ID: ${this.gameId}`);
+          await this.gameService.deleteGame(this.gameId);
+
+        } else {
+          console.log("no reason to delete the game")
+        }
+        next();
+      }).catch(error => {
+        console.error("Error removing current user from game:", error);
+        next();
+      });
+    } else {
+      next();
+    }
+  },
+
   methods: {
     async onReceiveAnnouncement(message) {
       const parsedMessage = JSON.parse(message);
@@ -127,10 +152,12 @@ export default {
         this.$router.replace({ name: 'game', params: { id: this.gameId } });
       } else if (parsedMessage.action === 'updatePlayersList'){
         await this.updateCurrentPlayers();
-      } else if (parsedMessage.action === 'playerLeft'){
+      } else if (parsedMessage.action === 'playerKicked'){
         if (this.userDetails.id === parsedMessage.kickedId){
           this.$router.push("/lobbySelect");
+        await this.updateCurrentPlayers();
         }
+      } else if (parsedMessage.action === 'playerLeft'){
         await this.updateCurrentPlayers();
       }
     },
@@ -168,20 +195,12 @@ export default {
       return player.playerNumber===0;
     },
     async kickPlayer(index, playerNumber) {
-      console.log("kicking player")
       if (!this.players[index].host) {
         try {
-
           const kickedPlayerUserId = this.players[index].user.id;
-          // if (this.userDetails.id === kickedPlayerUserId){
-          //   this.$router.push("/lobbySelect");
-          // }
-
-          // console.log("player: ", kickedPlayer.user.id);
-          console.log("num: ", playerNumber);
           await this.gameService.deletePlayerFromGame(this.gameId, playerNumber);
 
-          this.announcementsService.sendMessage(JSON.stringify({action: 'playerLeft', kickedId: kickedPlayerUserId}));
+          this.announcementsService.sendMessage(JSON.stringify({action: 'playerKicked', kickedId: kickedPlayerUserId}));
         } catch (error) {
           console.error("Error deleting player from game:", error);
         }

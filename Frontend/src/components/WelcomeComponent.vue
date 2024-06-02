@@ -12,7 +12,7 @@
           <button class="multiplayer-button buttons-welcome-page transition">Play Multiplayer</button>
         </router-link>
       </div>
-      <textarea v-on:keyup.enter="onNewAnnouncement($event)"></textarea>
+<!--      <textarea v-on:keyup.enter="onNewAnnouncement($event)"></textarea>-->
     </div>
   </div>
 </template>
