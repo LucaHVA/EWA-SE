@@ -116,24 +116,18 @@
           <li class='hex spacer'></li>
           <li class='hex water'></li>
           <li class='hex water'>
-            <div class='harbor three-one any'>
-              <div class='harbor-piece br'></div>
-            </div>
+
           </li>
           <li class='hex water'></li>
           <li class='hex water'>
-            <div class='harbor three-one any'>
-              <div class='harbor-piece bl'></div>
-            </div>
+
           </li>
         </ol>
         <!-- two -->
         <ol class="odd">
           <li class='hex spacer'></li>
           <li class='hex water'>
-            <div class='harbor two-one sheep'>
-              <div class='harbor-piece br'></div>
-            </div>
+
           </li>
           <li :class="'hex ' + row1[0].resource" id="h1">
             <div class="settlement target tl" @click="build(3)" id="s3"></div>
@@ -206,18 +200,12 @@
             <div class="settlement target tl" @click="build(15)" id="s15"></div>
             <div class="road target l r15 r20" @click="buildRoad(15,20)"></div>
 
-            <div class="harbor two-one brick">
-              <div class="harbor-piece l"></div>
-            </div>
           </li>
         </ol>
 
         <!-- four -->
         <ol class="odd">
           <li class="hex water">
-            <div class="harbor three-one any">
-              <div class="harbor-piece r"></div>
-            </div>
           </li>
           <li :class="'hex '+ row3[0].resource" id="h8">
             <div class="settlement target tl" @click="build(21)" id="s21"></div>
@@ -308,9 +296,6 @@
             <div class="road target tl r37 r32" @click="buildRoad(37,32)"></div>
             <div class="road target l r37 r42" @click="buildRoad(37,42)"></div>
             <div class="settlement target t"></div>
-            <div class="harbor two-one wood">
-              <div class="harbor-piece l"></div>
-            </div>
           </li>
         </ol>
 
@@ -320,9 +305,6 @@
           <li class="hex water">
             <div class="road target tr r38 r43" @click="buildRoad(38,43)"></div>
             <div class="settlement target t" @click="build(38)" id="s38"></div>
-            <div class="harbor two-one ore">
-              <div class="harbor-piece tr"></div>
-            </div>
           </li>
           <li :class="'hex '+ row5[0].resource" id="h17">
             <div class="settlement target tl" @click="build(43)" id="s43"></div>
@@ -368,9 +350,6 @@
             <div class="settlement target t" @click="build(48)" id="s48"></div>
             <div class="road target tl r51 r48" @click="buildRoad(51,48)"></div>
             <div class="road target tr r48 r52" @click="buildRoad(48,52)"></div>
-            <div class="harbor two-one wheat">
-              <div class="harbor-piece tr"></div>
-            </div>
           </li>
           <li class="hex water">
             <div class="settlement target tl" @click="build(52)" id="s52"></div>
@@ -382,9 +361,6 @@
             <div class="settlement target tl" @click="build(53)" id="s53"></div>
             <div class="settlement target t" @click="build(50)" id="s50"></div>
             <div class="road target tl r53 r50" @click="buildRoad(53,50)"></div>
-            <div class="harbor three-one any">
-              <div class="harbor-piece tl"></div>
-            </div>
           </li>
         </ol>
       </div>
@@ -414,25 +390,19 @@
           <div v-if="!hasRolledDice">Turn: {{ turn }}</div>
           <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
         </div>
-        <!--        <div class="player-cards-container">-->
-        <!--          <div v-for="player in players" :key="player" class="player-card">-->
-        <!--            <div>Player: {{ player.playerId }}</div>-->
-        <!--            <div>Points: {{ player.pointAmount }}</div>-->
-        <!--            <div>Longest road: {{ player.longestRoad }}</div>-->
-        <!--            <div>Settlement amount: {{ player.settlementAmount }}</div>-->
-        <!--            <div>Knight cards used: {{ player.knightsUsed }}</div>-->
-        <!--          </div>-->
-
-        <!--          <div class="player-cards-container">-->
-        <!--            <div v-for="player in players" :key="player" class="player-card">-->
-        <!--              <div>Player: {{ player.playerId }}</div>-->
-        <!--              <div>Points: {{ player.pointAmount }}</div>-->
-        <!--              <div>Longest road: {{ player.longestRoad }}</div>-->
-        <!--              <div>Settlement amount: {{ player.settlementAmount }}</div>-->
-        <!--              <div>Knight cards used: {{ player.knightsUsed }}</div>-->
-        <!--            </div>-->
-        <!--          </div>-->
-        <!--        </div>-->
+        <div class="chat-container">
+          <div class="scrollable" ref="chatContainer">
+            <div v-if="chatMessages.length === 0" class="noMessageText">
+              Here you can talk to other players!
+            </div>
+            <div v-else class="chat-messages" v-for="msg in chatMessages" :key="msg.id">
+              <div :class="['message', { 'current-user-message': isCurrentUserMessage(msg.sender) }]">
+                {{ msg.sender }}: {{ msg.text }}
+              </div>
+            </div>
+          </div>
+          <input type="text" v-model="chatInput" @keyup.enter="sendChatMessage" placeholder="Type a message..." class="chat-input">
+        </div>
       </div>
 
     </div>
@@ -442,7 +412,7 @@
           <div class="inventory-resource-card"><img :src=this.resourceCardImg[resource] alt="resource card"></div>
         </div>
         <div class="game-buttons-container">
-          <button class="pos-button" @click="acquireDevelopmentCard">Buy Development Card</button>
+          <button class="pos-button" @click="acquireDevelopmentCard" :disabled="!isCurrentPlayerTurn">Buy Development Card</button>
           <button class="pos-button" v-if="canPlayKnightCard" @click="playDevelopmentCard('knight')">Play Knight
             Card
           </button>
@@ -474,6 +444,8 @@ export default {
   name: "gameComponent",
   data() {
     return {
+      chatMessages: [],
+      chatInput: '',
       showDiscardModal: false,
       selectedCards: [],
       cardsToDiscard: 0,
@@ -651,6 +623,24 @@ export default {
     },
   },
   methods: {
+    sendChatMessage() {
+      if (this.chatInput.trim() !== '') {
+        const message = { sender: this.userDetails.username, text: this.chatInput };
+        this.announcementsService.sendMessage(JSON.stringify({ action: 'chatMessage', content: message }));
+        this.chatInput = '';
+      }
+    },
+
+    isCurrentUserMessage(sender) {
+      return sender === this.userDetails.username;
+    },
+
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const chatContainer = this.$refs.chatContainer;
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      });
+    },
 
 
     updateGameState(action) {
@@ -671,6 +661,10 @@ export default {
         message.rightDiceOutcome = action.rightDiceOutcome;
       } else if (action.action === 'winner') {
         message.winner = action.winner;
+      } else if (action.action === 'longestRoad') {
+        message.longestRoadPlayer = action.longestRoadPlayer;
+        message.longestRoadLength = action.longestRoadLength;
+        message.playerPoints = action.playerPoints; // Include playerPoints in the message
       }
 
       this.announcementsService.sendMessage(JSON.stringify(message));
@@ -758,6 +752,12 @@ export default {
         // Display the winner modal
         this.updateBoard(parsedMessage.game);
         this.showWinnerModal = true;
+      } else if (parsedMessage.action === 'longestRoad') {
+        this.updateBoard(parsedMessage.game);
+        this.serializeGameState();
+      }else if (parsedMessage.action === 'chatMessage') {
+        this.chatMessages.push(parsedMessage.content);
+        this.scrollToBottom();
       }
 
       this.announcements.push(parsedMessage);
@@ -897,6 +897,12 @@ export default {
       }
 
       const currentPlayer = this.players[this.currentPlayerIndex];
+
+      // Check if there is already a settlement at the index
+      if (this.settlements[index] && this.settlements[index].player !== null) {
+        this.displayError("There is already a settlement at this position.");
+        return;
+      }
 
       // Check if it's the first or second turn
       const isFirstTurn = this.turn === 1;
@@ -1319,6 +1325,14 @@ export default {
         // Update the current longest road player
         this.longestRoadPlayer = newLongestRoadPlayer;
         this.longestRoadLength = longestRoadLength;
+
+        // Update the game state and broadcast the changes
+        this.updateGameState({
+          action: 'longestRoad',
+          longestRoadPlayer: this.longestRoadPlayer,
+          longestRoadLength: this.longestRoadLength,
+          playerPoints: this.playerPoints
+        });
       }
 
       // Log the player with the longest road
@@ -1908,14 +1922,16 @@ export default {
               numberElement.classList.add('red-number');
             }
 
-            // Call the method to steal a resource from adjacent settlements
-            this.stealResourceFromAdjacentSettlement();
+
 
             // Update game state to notify other players
             this.updateGameState({
               action: 'placeRobber',
               hexIndex: adjustedHexIndex
             });
+
+            // Call the method to steal a resource from adjacent settlements
+            this.stealResourceFromAdjacentSettlement();
 
             // Increment the count for the current player
             const currentPlayerIndex = this.currentPlayerIndex;
@@ -1955,6 +1971,7 @@ export default {
         }
       }
     },
+
     stealResourceFromAdjacentSettlement() {
       // Check if there is a robber placed on any tile
       if (this.robberHexIndex !== null) {
@@ -1979,20 +1996,16 @@ export default {
               // Randomly choose a resource to steal
               const randomResourceIndex = Math.floor(Math.random() * player.resources.length);
 
-
               // Remove the stolen resource from the player's inventory
               const stolenResource = player.resources.splice(randomResourceIndex, 1)[0];
 
-              // Add the stolen resource to the player who placed the robber
-              const robberPlayer = this.players.find(player => player.id === this.currentPlayerIndex);
-              if (robberPlayer) {
-                robberPlayer.resources.push(stolenResource);
+              // Get the current player object
+              const currentPlayer = this.players[this.currentPlayerIndex];
 
-                // Log the theft
-                console.log(`Stole ${stolenResource} from ${player.name}'s settlement.`);
-              } else {
-                console.log(`Error: Current player not found.`);
-              }
+              // Add the stolen resource to the current player's inventory
+              currentPlayer.resources.push(stolenResource);
+
+              console.log(`Stole ${stolenResource} from ${player.name}'s settlement.`);
             } else {
               console.log(`Player ${player.name} (ID: ${randomPlayerId}) has no resources to steal.`);
             }
@@ -2176,14 +2189,14 @@ export default {
           let number = parseInt(numberElement.textContent);
           // Check if the number matches the rolled number
           if (number === rolledNumber) {
-            // Find the index of the hex (from 1 to 19)
-            let hexIndex = parseInt(hex.id.substr(1));
-
-            // Check if the hex has the robber
-            if (hexIndex === this.robberHexIndex) {
+            // Check if the hex has the robber (red number)
+            if (numberElement.classList.contains('red-number')) {
               console.log(`Robber is on hex ${hex.id}. No resources assigned.`);
               return; // Skip assigning resources if there's a robber on this hex
             }
+
+            // Find the index of the hex (from 1 to 19)
+            let hexIndex = parseInt(hex.id.substr(1));
 
             // Get the adjacent settlement indexes for the given hex index
             let adjacentIndexes = this.adjacents[hexIndex - 1]; // Adjust for zero-based index
@@ -2268,6 +2281,51 @@ export default {
 
 <style scoped>
 
+
+.chat-container {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 10px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 10px;
+}
+
+.scrollable {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.chat-messages {
+  max-height: 240px;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  word-break: break-all;
+  padding: 5px;
+}
+
+.chat-input {
+  border: 1px solid #ddd;
+  padding: 8px;
+  width: calc(100% - 20px);
+  border-radius: 5px;
+}
+
+.noMessageText {
+  display: flex;
+  justify-content: center;
+  font-size: 20px;
+  margin-top: 9rem;
+}
+
+.current-user-message {
+  background-color: #d3d3d3;
+}
 
 
 .resource-card {
