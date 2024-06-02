@@ -23,7 +23,7 @@
       <div>
         <h3>Number of Players</h3>
         <span>{{ this.currentGame.numberOfPlayers }}</span>
-        <input type="range" min="2" max="4" v-model.number="currentGame.numberOfPlayers" class="transition center-column-slider">
+        <input type="range" min="1" max="4" v-model.number="currentGame.numberOfPlayers" class="transition center-column-slider">
       </div>
       <div>
         <h3>Turn Duration (In seconds)</h3>

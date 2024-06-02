@@ -388,12 +388,13 @@
           <div>Time remaining: {{ this.timeRemaining }}</div>
           <div>Points to win: {{this.game.pointsToWin}} </div>
           <div v-if="!hasRolledDice">Turn: {{ turn }}</div>
+          <div class="current-player" :style="{ color: loggedinPlayer }">You are Player: {{ loggedinPlayerColor }}</div>
           <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
         </div>
         <div class="chat-container">
           <div class="scrollable" ref="chatContainer">
             <div v-if="chatMessages.length === 0" class="noMessageText">
-              Here you can talk to other players!
+              You can chat here !
             </div>
             <div v-else class="chat-messages" v-for="msg in chatMessages" :key="msg.id">
               <div :class="['message', { 'current-user-message': isCurrentUserMessage(msg.sender) }]">
@@ -590,6 +591,13 @@ export default {
     },
     currentPlayerColor() {
       return this.currentPlayer;
+    },
+
+    loggedinPlayer() {
+      return this.playerColors[this.loggedinPlayerIndex];
+    },
+    loggedinPlayerColor() {
+      return this.loggedinPlayer;
     },
 
     currentPlayerResourcesInventory() {
