@@ -716,6 +716,11 @@ export default {
         this.mostRobbersPlaced = { ...gameState.mostRobbersPlaced };
         this.longestRoadPlayer = gameState.longestRoadPlayer;
         this.longestRoadLength = gameState.longestRoadLength;
+
+        // Update playerPoints array
+        if (gameState.playerPoints) {
+          this.playerPoints = [...gameState.playerPoints];
+        }
       } else {
         console.error('Malformed game state:', gameState);
       }
@@ -751,6 +756,7 @@ export default {
         this.updateBoard(parsedMessage.game);
       }else if (parsedMessage.action === 'winner') {
         // Display the winner modal
+        this.updateBoard(parsedMessage.game);
         this.showWinnerModal = true;
       }
 
