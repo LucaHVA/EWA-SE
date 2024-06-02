@@ -152,10 +152,12 @@ export default {
         this.$router.replace({ name: 'game', params: { id: this.gameId } });
       } else if (parsedMessage.action === 'updatePlayersList'){
         await this.updateCurrentPlayers();
-      } else if (parsedMessage.action === 'playerLeft'){
+      } else if (parsedMessage.action === 'playerKicked'){
         if (this.userDetails.id === parsedMessage.kickedId){
           this.$router.push("/lobbySelect");
+        await this.updateCurrentPlayers();
         }
+      } else if (parsedMessage.action === 'playerLeft'){
         await this.updateCurrentPlayers();
       }
     },
@@ -193,20 +195,12 @@ export default {
       return player.playerNumber===0;
     },
     async kickPlayer(index, playerNumber) {
-      console.log("kicking player")
       if (!this.players[index].host) {
         try {
-
           const kickedPlayerUserId = this.players[index].user.id;
-          // if (this.userDetails.id === kickedPlayerUserId){
-          //   this.$router.push("/lobbySelect");
-          // }
-
-          // console.log("player: ", kickedPlayer.user.id);
-          console.log("num: ", playerNumber);
           await this.gameService.deletePlayerFromGame(this.gameId, playerNumber);
 
-          this.announcementsService.sendMessage(JSON.stringify({action: 'playerLeft', kickedId: kickedPlayerUserId}));
+          this.announcementsService.sendMessage(JSON.stringify({action: 'playerKicked', kickedId: kickedPlayerUserId}));
         } catch (error) {
           console.error("Error deleting player from game:", error);
         }
