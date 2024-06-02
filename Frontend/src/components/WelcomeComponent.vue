@@ -5,17 +5,28 @@
       <div class="sub-title">Play for free</div>
       <p class="extra-info">Enjoy an online game of the classic board game Settlers of Catan!</p>
       <div class="welcome-page-button-container">
-        <router-link to="/lobbySelect">
-          <button class="multiplayer-button buttons-welcome-page transition">Play Game</button>
-        </router-link>
+          <button class="multiplayer-button buttons-welcome-page transition" @click="tokenCheck()">Play Game</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+
 export default {
   name: "WelcomeComponent",
+  inject:['usersService'],
+
+  methods:{
+tokenCheck(){
+  const token= this.usersService._currentToken
+  if (token===null){
+    this.$router.push({name:'login'})
+  }else {
+    this.$router.push({name:'lobbySelect'})
+  }
+}
+  }
 
 
 };
