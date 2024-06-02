@@ -32,11 +32,14 @@
             </div>
             <h1 v-if="!showAllPlayers">Player Details</h1>
             <h1 v-else>All Players</h1>
-            <div v-if="selectedPlayer && !showAllPlayers">
+            <div v-if="selectedPlayer && !showAllPlayers && !friendRequestSent">
               <p><strong>Name: </strong> {{ selectedPlayer.username }}</p>
               <p><strong>Points: </strong>{{ selectedPlayer.points }}</p>
               <p><strong>Rank: </strong> {{ selectedPlayer.rank }}</p>
-              <button class="orange-button transition" @click="closeModal">Send friend request</button>
+              <button class="orange-button transition" @click="sendFriendRequest(selectedPlayer.id)">Send friend request</button>
+            </div>
+            <div v-if="friendRequestSent && !showAllPlayers">
+              <p>You sent a friend request!</p>
             </div>
             <div v-if="showAllPlayers" class="modal-scrollable-content">
               <table class="modal-leaderboard-table">
@@ -79,6 +82,7 @@ export default {
       isModalOpen: false,
       selectedPlayer: null,
       showAllPlayers: false,
+      friendRequestSent: false, // new state property
     };
   },
 
@@ -97,6 +101,16 @@ export default {
   },
 
   methods: {
+    async sendFriendRequest(friendId) {
+      try {
+        const userInfo = await this.usersService.getCurrentUser;
+        await this.usersService.sendFriendRequest(userInfo.id, friendId);
+        this.friendRequestSent = true; // update state
+      } catch (error) {
+        console.error('Error sending friend request:', error);
+        alert("Something went wrong when trying to send a friend request!");
+      }
+    },
     showMorePlayers() {
       this.showAllPlayers = true;
       this.isModalOpen = true;
@@ -111,6 +125,7 @@ export default {
         this.isModalOpen = true;
         this.showAllPlayers = false;
       }
+      this.friendRequestSent = false; // reset state when showing player details
       document.body.style.overflow = 'hidden';
     },
     closeModal() {
@@ -118,6 +133,7 @@ export default {
       this.selectedPlayer = null;
       this.showAllPlayers = false;
       this.searchQuery = '';
+      this.friendRequestSent = false; // reset state when closing modal
       document.body.style.overflow = '';
     },
     async fetchAllUsers() {
