@@ -21,7 +21,6 @@ export class AnnouncementsAdaptor {
     }
 
     sendMessage(message) {
-        console.log("New announcement:" ,message);
         this.socket.send(message);
     }
 
