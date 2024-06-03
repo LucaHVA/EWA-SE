@@ -68,7 +68,7 @@
 
   <div class="modal" v-if="showTradingModal">
     <div class="modal-content">
-      <h2>Select the resource you want to trade</h2>
+      <h2>Select the resource you want to trade you can trade 3 resources for 1 resource of choice</h2>
       <div class="resource-selection">
         <div
             v-for="resourceType in simplifiedInventory"
@@ -927,7 +927,7 @@ export default {
 
         // Check if the player has required resources to build
         if (!(isFirstTurn || isSecondTurn) && (!hasWood || !hasBrick || !hasSheep || !hasWheat)) {
-          this.displayError("You don't have enough resources to build a settlement.");
+          this.displayError("You don't have enough resources to build a settlement you need to have 1 wood, 1 sheep, 1 brick and 1 wheat.");
           return;
         }
 
@@ -1436,7 +1436,7 @@ export default {
 
       // Check if the player has enough resources to upgrade
       if (!hasEnoughResources) {
-        this.displayError("You don't have enough resources to upgrade to a city.");
+        this.displayError("You don't have enough resources to upgrade to a city you need 2 wheat and 3 ore.");
         return;
       }
 
@@ -1711,7 +1711,7 @@ export default {
           const hasWood = currentPlayer.resources.includes('wood');
 
           if (!hasBrick || !hasWood) {
-            this.displayError("You don't have enough resources to build a road.");
+            this.displayError("You don't have enough resources to build a road you need 1 brick and 1 wood.");
             return;
           }
         }
@@ -2372,7 +2372,7 @@ export default {
   background-color: #f0f0f0;
   border: 1px solid #ccc;
   padding: 10px;
-  height: 400px;
+  height: 25vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -2419,7 +2419,7 @@ export default {
 }
 
 .resource-cards.selected {
-  border: 2px solid blue; /* Add your preferred styling for selected cards */
+  border: 4px solid blue; /* Add your preferred styling for selected cards */
 }
 
 .modal {
@@ -2507,6 +2507,7 @@ export default {
   width: 90vw;
   margin-left: 5vw;
   margin-right: 5vw;
+  height: 85vh;
 }
 
 /* Previous page button */
