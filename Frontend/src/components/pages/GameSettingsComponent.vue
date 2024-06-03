@@ -75,7 +75,6 @@
 <script>
 import popUpGameSettingsComponent from "@/components/pages/popUpGameSettingsComponent.vue";
 import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
-import CONFIG from '@/app-config.js';
 
 export default {
   name: "GameSettingsComponent",
@@ -103,7 +102,7 @@ export default {
     };
   },
   async created() {
-    this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement);
+    this.announcementsService = new AnnouncementsAdaptor(process.env.VUE_APP_API_URL + '/announcements', this.onReceiveAnnouncement);
 
     this.userDetails = await this.usersService._currentUser;
 

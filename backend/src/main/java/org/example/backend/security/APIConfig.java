@@ -65,11 +65,11 @@ public class APIConfig implements WebMvcConfigurer, WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(this.announcementDistributor, "/announcements")
-                .setAllowedOriginPatterns("http://localhost:*", getHostIPAddressPattern())
+                .setAllowedOriginPatterns("http://localhost:*", getHostIPAddressPattern(), "https://front-end-catan.onrender.com")
         //.withSockJS()
         ;
         registry.addHandler(this.notificationDistributor, "/notifications")
-                .setAllowedOriginPatterns("http://localhost:*", getHostIPAddressPattern())
+                .setAllowedOriginPatterns("http://localhost:*", getHostIPAddressPattern(), "https://front-end-catan.onrender.com")
         //.withSockJS()
         ;
     }

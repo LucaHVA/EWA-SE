@@ -1,6 +1,5 @@
 <template>
   <div class="front-blob-container">
-    <header-component></header-component>
     <nav-bar-component v-if="!isIgnoredRoute($route.path, ignoredNavBarPaths)"></nav-bar-component>
     <router-view></router-view>
   </div>
@@ -17,7 +16,6 @@ import { UsersAdaptor } from "@/services/UsersAdaptor";
 import { GameService } from "@/services/GameService";
 import { shallowReactive } from "vue";
 import { FetchInterceptor } from "@/services/fetch-interceptor";
-import CONFIG from '@/app-config.js';
 import { NotificationAdaptor } from "@/services/notification-adaptor";
 
 export default {
@@ -32,7 +30,7 @@ export default {
     };
   },
   provide() {
-    this.theNotificationService = new NotificationAdaptor(CONFIG.NOTIFICATIONS);
+    this.theNotificationService = new NotificationAdaptor(process.env.VUE_APP_API_URL + '/notifications');
     this.userService = shallowReactive(new UsersAdaptor(process.env.VUE_APP_API_URL + '/users'));
     this.theFetchInterceptor = new FetchInterceptor(this.userService, this.$router);
 

@@ -39,7 +39,7 @@
               <button class="orange-button transition" @click="sendFriendRequest(selectedPlayer.id)">Send friend request</button>
             </div>
             <div v-if="friendRequestSent && !showAllPlayers">
-              <p>You sent a friend request!</p>
+              <h3>You sent a friend request to {{ selectedPlayer.username }}!</h3>
             </div>
             <div v-if="showAllPlayers" class="modal-scrollable-content">
               <table class="modal-leaderboard-table">

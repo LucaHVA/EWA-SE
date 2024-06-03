@@ -38,8 +38,6 @@
 <script>
 import popUpLobbySelectComponent from "@/components/pages/popUpLobbySelectComponent.vue";
 import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
-import CONFIG from '@/app-config';
-
 
 export default {
   name: "LobbySelectComponent",
@@ -64,7 +62,7 @@ export default {
       this.getCurrentAmountOfPlayers(game.id);
     });
     // Initialize WebSocket service
-    this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement)
+    this.announcementsService = new AnnouncementsAdaptor(process.env.VUE_APP_API_URL + '/announcements', this.onReceiveAnnouncement)
   },
 
   beforeUnmount() {

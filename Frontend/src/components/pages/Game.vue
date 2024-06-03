@@ -439,7 +439,6 @@
 
 <script>
 import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
-import CONFIG from '@/app-config.js';
 
 export default {
   name: "gameComponent",
@@ -554,7 +553,7 @@ export default {
     this.userDetails = await this.usersService._currentUser;
     console.log("User details:", this.userDetails);
 
-    this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement);
+    this.announcementsService = new AnnouncementsAdaptor(process.env.VUE_APP_API_URL + '/announcements', this.onReceiveAnnouncement);
     await this.fetchGameDetails();
     await this.fetchPlayers();
 
