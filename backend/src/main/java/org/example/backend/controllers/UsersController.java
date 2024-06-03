@@ -144,6 +144,30 @@ public class UsersController {
         return ResponseEntity.ok(savedGameHistory);
     }
 
+    @PostMapping("/{userId}/saveGameHistories")
+    public ResponseEntity<List<GameHistory>> saveGameHistories(@PathVariable long userId, @RequestBody List<GameHistory> gameHistories) {
+        // Check if the user exists
+        User user = usersRepository.findById(userId);
+        if (user == null) {
+            throw new ResourceNotFoundException("User with ID " + userId + " not found.");
+        }
+
+        List<GameHistory> savedGameHistories = new ArrayList<>();
+
+        for (GameHistory gameHistory : gameHistories) {
+            // Set the user for the game history
+            gameHistory.setUser(user);
+            // Save the game history using GameHistoriesRepository
+            savedGameHistories.add(gameHistoriesRepository.save(gameHistory));
+        }
+
+        return ResponseEntity.ok(savedGameHistories);
+    }
+
+
+
+
+
     @GetMapping("/{id}/friends")
     public ResponseEntity<List<User>> getFriends(@PathVariable long id) {
         List<Friend> friends = friendsRepository.findByQuery("Get_accepted_friends", id);

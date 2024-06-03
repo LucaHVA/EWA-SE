@@ -11,7 +11,7 @@
         </li>
       </ul>
       <router-link to="/home">
-      <button class="pos-button" @click="goToHomePage">Home</button>
+        <button class="pos-button" @click="goToHomePage">Home</button>
       </router-link>
     </div>
   </div>
@@ -29,7 +29,8 @@
           </div>
         </div>
       </div>
-      <button class="pos-button" @click="confirmSelectedResources" :disabled="selectedResources.length < 2">Confirm</button>
+      <button class="pos-button" @click="confirmSelectedResources" :disabled="selectedResources.length < 2">Confirm
+      </button>
     </div>
   </div>
 
@@ -60,10 +61,10 @@
           <p>{{ selectedResources.includes(resource) ? '+' : 'Click to select' }}</p>
         </div>
       </div>
-      <button class="pos-button" @click="confirmSelectedResource" :disabled="selectedResources.length !== 1">Confirm</button>
+      <button class="pos-button" @click="confirmSelectedResource" :disabled="selectedResources.length !== 1">Confirm
+      </button>
     </div>
   </div>
-
 
 
   <div class="modal" v-if="showTradingModal">
@@ -368,7 +369,8 @@
 
 
         <div class="dice-container">
-          <button class="pos-button" id="roll-dice-button" @click="rollDice"  :disabled="!isCurrentPlayerTurn || hasRolledDice">Roll the dices!
+          <button class="pos-button" id="roll-dice-button" @click="rollDice"
+                  :disabled="!isCurrentPlayerTurn || hasRolledDice">Roll the dices!
             <img alt="roll dice" src="../../assets/images/game/dices/clear_rolling-dices.png">
           </button>
           <div class="dice-outcome-container">
@@ -384,9 +386,11 @@
               <p>Click one of the numbers to place the robber.</p>
             </div>
           </div>
-          <button class="pos-button" id="next-turn-button" @click="nextTurn" :disabled="!isCurrentPlayerTurn">Next turn</button>
+          <button class="pos-button" id="next-turn-button" @click="nextTurn" :disabled="!isCurrentPlayerTurn">Next
+            turn
+          </button>
           <div>Time remaining: {{ this.timeRemaining }}</div>
-          <div>Points to win: {{this.game.pointsToWin}} </div>
+          <div>Points to win: {{ this.game.pointsToWin }}</div>
           <div v-if="!hasRolledDice">Turn: {{ turn }}</div>
           <div class="current-player" :style="{ color: loggedinPlayer }">You are Player: {{ loggedinPlayerColor }}</div>
           <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
@@ -402,18 +406,21 @@
               </div>
             </div>
           </div>
-          <input type="text" v-model="chatInput" @keyup.enter="sendChatMessage" placeholder="Type a message..." class="chat-input">
+          <input type="text" v-model="chatInput" @keyup.enter="sendChatMessage" placeholder="Type a message..."
+                 class="chat-input">
         </div>
       </div>
 
     </div>
     <div class="player-inventory-container">
       <div class="player-inventory-resources">
-        <div v-for="resource in userPlayerResourcesInventory"  :key="resource.id">
+        <div v-for="resource in userPlayerResourcesInventory" :key="resource.id">
           <div class="inventory-resource-card"><img :src=this.resourceCardImg[resource] alt="resource card"></div>
         </div>
         <div class="game-buttons-container">
-          <button class="pos-button" @click="acquireDevelopmentCard" :disabled="!isCurrentPlayerTurn">Buy Development Card</button>
+          <button class="pos-button" @click="acquireDevelopmentCard" :disabled="!isCurrentPlayerTurn">Buy Development
+            Card
+          </button>
           <button class="pos-button" v-if="canPlayKnightCard" @click="playDevelopmentCard('knight')">Play Knight
             Card
           </button>
@@ -427,7 +434,9 @@
             Play Road_Building Card
           </button>
           <button class="pos-button" @click="openTradeModal" :disabled="!isCurrentPlayerTurn">Trade Resources</button>
-          <button class="pos-button" @click="upgradeSettlementToCity" :disabled="!isCurrentPlayerTurn">Upgrade Settlement to City</button>
+          <button class="pos-button" @click="upgradeSettlementToCity" :disabled="!isCurrentPlayerTurn">Upgrade
+            Settlement to City
+          </button>
 
         </div>
       </div>
@@ -439,6 +448,7 @@
 
 <script>
 import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
+import {GameHistory} from "@/models/gameHistory";
 
 export default {
   name: "gameComponent",
@@ -468,6 +478,7 @@ export default {
       currentPlayerIndex: 0,
       players: [],
       playerPoints: [0, 0, 0, 0],
+      playerPlacements: [],
       currentPlayerResources: [],
       robberHexIndex: null,
       hasRolledDice: false,
@@ -500,7 +511,7 @@ export default {
         [41, 45, 46, 49, 50, 53]
       ],
       resourcesInitialized: false,
-      initialResources: { brick: 0, wood: 0, wheat: 0, ore: 0, sheep: 0 },
+      initialResources: {brick: 0, wood: 0, wheat: 0, ore: 0, sheep: 0},
       settlements: [],
       playersSettlements: [
         [], // Player 0 settlements
@@ -534,7 +545,7 @@ export default {
         wood: require("../../assets/images/game/resources/wood_card_v1.png"),
         sheep: require("../../assets/images/game/resources/sheep_card_v1.png")
       },
-      developmentCards: ['Road_Building','year_of_plenty','monopoly','knight'],
+      developmentCards: ['Road_Building', 'year_of_plenty', 'monopoly', 'knight'],
       hasPlayedDevelopmentCard: false,
       announcements: [],
       gameState: null,
@@ -542,7 +553,7 @@ export default {
       loggedinPlayerIndex: null,
       botPlayerIndices: [],
       robberPlacements: [0, 0, 0, 0],
-      mostRobbersPlaced: { playerIndex: null, count: 0 },
+      mostRobbersPlaced: {playerIndex: null, count: 0},
       longestRoadPlayer: null,
       longestRoadLength: 0,
     };
@@ -630,10 +641,97 @@ export default {
     },
   },
   methods: {
+    calculatePlayerPlacement() {
+      // Debugging: Log the players array
+      console.log("Players array:", JSON.stringify(this.players, null, 2));
+
+      // Create an array of player objects with their points
+      const playersWithPoints = this.players.map((player, index) => {
+        console.log(`Player object at index ${index}:`, player);
+        return {
+          id: player.user.id,
+          username: player.user.username || player.user.name,  // Use username for human players and name for bots
+          points: this.playerPoints[index]
+        };
+      });
+
+      // Debugging: Log the players with points array
+      console.log("Players with Points:", JSON.stringify(playersWithPoints, null, 2));
+
+      // Sort players by their points in descending order
+      playersWithPoints.sort((a, b) => b.points - a.points);
+
+      // Create an array to store player placements
+      const placements = playersWithPoints.map((player, index) => ({
+        id: player.id,
+        username: player.username,
+        placement: (index + 1).toString()
+      }));
+
+      console.log("Player Placements:", JSON.stringify(placements, null, 2));
+
+      return placements;
+    },
+
+    async endGame(userId, placement, startTime, endTime) {
+      console.log("End game called with userId:", userId, "and placement:", placement);
+
+      try {
+        // Fetch the User object corresponding to userId from your data source
+        const user = await this.usersService.asyncFindById(userId);
+
+        if (!user) {
+          console.error('User not found for userId:', userId);
+          return;
+        }
+
+        // Create a new GameHistory object with the fetched User object
+        const gameHistory = new GameHistory(null, userId, placement, startTime, endTime);
+        console.log("This is the game history of you", gameHistory);
+
+        // Save the game history
+        const savedHistory = await this.usersService.saveGameHistories(userId, [gameHistory]);
+        console.log('Game history saved successfully:', savedHistory);
+      } catch (error) {
+        console.error('Failed to save game history:', error);
+      }
+    },
+
+
+    checkForWinner() {
+      const winningPoints = this.game.pointsToWin;
+      let winner = null;
+
+      // Check if any player has reached the winning points
+      this.players.forEach((player, playerIndex) => {
+        if (this.playerPoints[playerIndex] >= winningPoints) {
+          winner = player;
+        }
+      });
+
+      // If a winner is found, show the modal
+      if (winner) {
+        this.showWinnerModal = true;
+        this.updateGameState({action: 'winner', winner: winner, game: this.serializeGameState()});
+
+        // Calculate player placements
+        this.playerPlacements = this.calculatePlayerPlacement();
+
+        // End the game and save game history
+        const startTime = new Date().toLocaleTimeString('en-US', {hour12: false});
+        const endTime = new Date().toLocaleTimeString('en-US', {hour12: false});
+        const userId = winner.user.id; // Assuming winner is an object containing the winning player's details, including user id
+        const placement = this.calculatePlayerPlacement().findIndex((placement) => placement.id === userId) + 1; // Find the placement of the winner
+        console.log("Winner details - userId:", userId, "placement:", placement);
+        this.endGame(userId, placement, startTime, endTime);
+      }
+    },
+
+
     sendChatMessage() {
       if (this.chatInput.trim() !== '') {
-        const message = { sender: this.userDetails.username, text: this.chatInput };
-        this.announcementsService.sendMessage(JSON.stringify({ action: 'chatMessage', content: message }));
+        const message = {sender: this.userDetails.username, text: this.chatInput};
+        this.announcementsService.sendMessage(JSON.stringify({action: 'chatMessage', content: message}));
         this.chatInput = '';
       }
     },
@@ -704,17 +802,17 @@ export default {
         this.settlements = [...gameState.settlements];
         this.playersSettlements = gameState.playersSettlements.map(settlements => [...settlements]);
         this.currentPlayerIndex = gameState.currentPlayerIndex;
-        this.players = gameState.players.map(player => ({ ...player }));
+        this.players = gameState.players.map(player => ({...player}));
         this.robberHexIndex = gameState.robberHexIndex;
         this.hasRolledDice = gameState.hasRolledDice;
         this.timeRemaining = gameState.timeRemaining;
         this.turn = gameState.turn;
-        this.initialResources = { ...gameState.initialResources };
+        this.initialResources = {...gameState.initialResources};
         this.roads = [...gameState.roads];
         this.leftDiceOutcome = gameState.leftDiceOutcome;
         this.rightDiceOutcome = gameState.rightDiceOutcome;
         this.robberPlacements = [...gameState.robberPlacements];
-        this.mostRobbersPlaced = { ...gameState.mostRobbersPlaced };
+        this.mostRobbersPlaced = {...gameState.mostRobbersPlaced};
         this.longestRoadPlayer = gameState.longestRoadPlayer;
         this.longestRoadLength = gameState.longestRoadLength;
 
@@ -726,7 +824,6 @@ export default {
         console.error('Malformed game state:', gameState);
       }
     },
-
 
 
     onReceiveAnnouncement(message) {
@@ -753,16 +850,16 @@ export default {
       } else if (parsedMessage.action === 'placeRobber') {
         this.updateBoard(parsedMessage.game);
         this.updateRobberUI(parsedMessage.hexIndex);
-      }else if (parsedMessage.action === 'discardedcards') {
+      } else if (parsedMessage.action === 'discardedcards') {
         this.updateBoard(parsedMessage.game);
-      }else if (parsedMessage.action === 'winner') {
+      } else if (parsedMessage.action === 'winner') {
         // Display the winner modal
         this.updateBoard(parsedMessage.game);
         this.showWinnerModal = true;
       } else if (parsedMessage.action === 'longestRoad') {
         this.updateBoard(parsedMessage.game);
         this.serializeGameState();
-      }else if (parsedMessage.action === 'chatMessage') {
+      } else if (parsedMessage.action === 'chatMessage') {
         this.chatMessages.push(parsedMessage.content);
         this.scrollToBottom();
       }
@@ -823,7 +920,7 @@ export default {
       const leftDiceOutcome = roll();
 
       // Update game state for other players
-      this.updateGameState({ action: 'rollDice', leftDiceOutcome: leftDiceOutcome, rightDiceOutcome: rightDiceOutcome });
+      this.updateGameState({action: 'rollDice', leftDiceOutcome: leftDiceOutcome, rightDiceOutcome: rightDiceOutcome});
 
       // Update dice outcome UI
       this.updateDiceOutcomeUI(leftDiceOutcome, rightDiceOutcome);
@@ -955,7 +1052,7 @@ export default {
         }
 
         // Store the owner of the settlement
-        this.settlements[index] = { player: this.currentPlayerIndex };
+        this.settlements[index] = {player: this.currentPlayerIndex};
 
         // Update the playersSettlements array
         this.playersSettlements[this.currentPlayerIndex].push(index);
@@ -975,7 +1072,7 @@ export default {
         }
 
         // Update the game state and broadcast the build action
-        this.updateGameState({ action: 'build', index: index });
+        this.updateGameState({action: 'build', index: index});
       } else {
         this.displayError("You have already built on your turn.");
       }
@@ -1030,7 +1127,7 @@ export default {
       return {
         type: 'bot',  // Added type attribute
         playerColor: this.playerColors[index],
-        user: { id: `bot-${index}`, name: `Bot ${index + 1}` },
+        user: {id: `bot-${index}`, name: `Bot ${index + 1}`},
         resources: [],
         developmentCards: [],
       };
@@ -1044,7 +1141,7 @@ export default {
       // If no players fetched, add dummy data
       if (!Array.isArray(this.players) || this.players.length === 0) {
         console.warn("No players fetched, initializing with dummy data");
-        this.players = Array.from({ length: totalPlayers }, (_, i) => this.createBotPlayer(i));
+        this.players = Array.from({length: totalPlayers}, (_, i) => this.createBotPlayer(i));
       } else if (this.players.length < totalPlayers) {
         console.warn(`Only ${this.players.length} players fetched, initializing remaining with bot data`);
         for (let i = this.players.length; i < totalPlayers; i++) {
@@ -1160,9 +1257,6 @@ export default {
         });
       }
     },
-
-
-
 
 
     performSubsequentTurnLogic() {
@@ -1302,26 +1396,6 @@ export default {
       return -1; // Indicate that no buildable settlement index was found
     },
 
-
-
-    checkForWinner() {
-      const winningPoints = this.game.pointsToWin;
-      let winner = null;
-
-      // Check if any player has reached the winning points
-      this.players.forEach((player, playerIndex) => {
-        if (this.playerPoints[playerIndex] >= winningPoints) {
-          winner = player;
-        }
-      });
-
-      // If a winner is found, show the modal
-      if (winner) {
-        this.showWinnerModal = true;
-        this.updateGameState({ action: 'winner', winner: winner, game: this.serializeGameState() });
-      }
-    },
-
     checkConnectedRoads() {
       // Helper function to check if two roads are connected
       const areRoadsConnected = (road1, road2) => {
@@ -1421,8 +1495,6 @@ export default {
         console.log(`No player currently has the longest road.`);
       }
     },
-
-
 
 
     upgradeSettlementToCity() {
@@ -1548,7 +1620,7 @@ export default {
       for (let i = 0; i < size; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        row.push({ resource, number });
+        row.push({resource, number});
       }
       return row;
     },
@@ -1719,7 +1791,7 @@ export default {
         // Build the road only if it's adjacent to the player's settlement or road
         if (this.isAdjacentToSettlement(fromIndex, toIndex) || this.isAdjacentToOwnRoad(fromIndex, toIndex)) {
           // Add the road to the list of roads
-          this.roads.push({ from: fromIndex, to: toIndex, owner: this.currentPlayerIndex });
+          this.roads.push({from: fromIndex, to: toIndex, owner: this.currentPlayerIndex});
 
           // Add a CSS class to the road position
           const roadElement = document.querySelector(`.road.r${fromIndex}.r${toIndex}`);
@@ -1748,7 +1820,7 @@ export default {
           }
 
           // Update the game state and broadcast the build action
-          this.updateGameState({ action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex });
+          this.updateGameState({action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex});
         } else {
           // Display a warning message if the road is not adjacent to the player's settlement or road
           this.displayError("Road must be adjacent to your own settlement or road.");
@@ -1764,7 +1836,7 @@ export default {
       if (roadElement) {
         roadElement.classList.add(`build-${this.currentPlayerIndex}`);
       }
-      this.updateGameState({ action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex });
+      this.updateGameState({action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex});
     },
 
     isAdjacentToOwnRoad(fromIndex, toIndex) {
@@ -1882,8 +1954,6 @@ export default {
         this.displayError("You don't have the specified development card to play.");
       }
     },
-
-
 
 
     playKnightCardLogic() {
@@ -2021,7 +2091,6 @@ export default {
             }
 
 
-
             // Update game state to notify other players
             this.updateGameState({
               action: 'placeRobber',
@@ -2065,7 +2134,7 @@ export default {
 
           // Award the current player 2 points
           this.playerPoints[playerIndex] += 2;
-          this.mostRobbersPlaced = { playerIndex, count: playerRobberCount };
+          this.mostRobbersPlaced = {playerIndex, count: playerRobberCount};
         }
       }
     },
@@ -2167,7 +2236,6 @@ export default {
     },
 
 
-
     startCountdown() {
       // Clear any existing timer
       clearInterval(this.timerId);
@@ -2242,7 +2310,6 @@ export default {
       });
 
     },
-
 
 
     toggleCardSelection(index) {
@@ -2453,14 +2520,17 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.resource-cards{
+
+.resource-cards {
   display: inline-flex;
   margin: 5px;
 }
-.resource-cardmodal{
+
+.resource-cardmodal {
   margin: 5px;
 }
-.resource-selection{
+
+.resource-selection {
   display: inline-flex;
   margin: 5px;
 }
@@ -2625,7 +2695,6 @@ export default {
   transform: rotate(90deg); /* Rotate 90 degrees clockwise */
   background-image: url("~@/assets/images/City (3).png");
 }
-
 
 
 .box {
@@ -2952,6 +3021,7 @@ ol.odd {
   opacity: .4;
   border: 2px dotted;
 }
+
 /* .hex #robber::after {
   content: "R";
 } */
@@ -3069,7 +3139,6 @@ ol.odd {
 }
 
 
-
 .hex .settlement.target {
 }
 
@@ -3156,7 +3225,7 @@ ol.odd {
   margin: 5px;
 }
 
-.dice-outcome-container h2{
+.dice-outcome-container h2 {
   font-weight: 400;
   margin: 0;
 }
@@ -3164,7 +3233,7 @@ ol.odd {
 /* Player resources */
 .player-inventory-container {
   background-color: #5c86ae;
-  border: solid #2c3e50 ;
+  border: solid #2c3e50;
   padding: 10px;
   min-height: 160px;
 }

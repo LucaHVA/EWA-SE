@@ -197,6 +197,30 @@ export class UsersAdaptor {
         }
     }
 
+    async saveGameHistories(userId, gameHistories) {
+        try {
+            const url = `${this.resourcesUrl}/${userId}/saveGameHistories`;
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': this.currentToken
+                },
+                body: JSON.stringify(gameHistories)
+            };
+
+            const response = await this.fetchJson(url, options);
+            if (!response) {
+                throw new Error('Failed to save game histories');
+            }
+
+            return response.map(GameHistory.copyConstructor);
+        } catch (error) {
+            console.error('Error during save game histories:', error);
+            return null;
+        }
+    }
+
     async calculatePlayerPoints(userId) {
         const matchHistory = await this.fetchMatchHistory(userId);
         let playerPoints = 0;
