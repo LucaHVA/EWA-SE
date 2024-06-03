@@ -33,7 +33,7 @@
       <div>
         <h3>Points to win</h3>
         <span>{{ this.currentGame.pointsToWin }}</span>
-        <input type="range" min="5" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
+        <input type="range" min="3" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
       </div>
 
       <div class="start-game-div">
