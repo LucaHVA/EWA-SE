@@ -11,7 +11,7 @@
         </li>
       </ul>
       <router-link to="/home">
-      <button @click="goToHomePage">Home</button>
+      <button class="pos-button" @click="goToHomePage">Home</button>
       </router-link>
     </div>
   </div>
@@ -23,13 +23,13 @@
         <div v-for="resource in resourceCardTypes" :key="resource">
           <img class="resource-cardmodal" :src="resourceCardImg[resource]" :alt="resource + ' card'">
           <div>
-            <button @click="incrementResource(resource)">+</button>
+            <button class="pos-button" @click="incrementResource(resource)">+</button>
             <span>{{ getSelectedCount(resource) }}</span>
-            <button @click="decrementResource(resource)">-</button>
+            <button class="pos-button" @click="decrementResource(resource)">-</button>
           </div>
         </div>
       </div>
-      <button @click="confirmSelectedResources" :disabled="selectedResources.length < 2">Confirm</button>
+      <button class="pos-button" @click="confirmSelectedResources" :disabled="selectedResources.length < 2">Confirm</button>
     </div>
   </div>
 
@@ -47,7 +47,7 @@
           <img :src="resourceCardImg[card]" :alt="card">
         </div>
       </div>
-      <button @click="discardSelectedCards">Discard</button>
+      <button class="pos-button" @click="discardSelectedCards">Discard</button>
     </div>
   </div>
 
@@ -60,7 +60,7 @@
           <p>{{ selectedResources.includes(resource) ? '+' : 'Click to select' }}</p>
         </div>
       </div>
-      <button @click="confirmSelectedResource" :disabled="selectedResources.length !== 1">Confirm</button>
+      <button class="pos-button" @click="confirmSelectedResource" :disabled="selectedResources.length !== 1">Confirm</button>
     </div>
   </div>
 
@@ -942,9 +942,8 @@ export default {
         }
 
         // Check if there are at least 2 roads between settlements
-        const roadsBetweenSettlements = this.getRoadsBetweenSettlements(index);
-        if (roadsBetweenSettlements < 2) {
-          this.displayError("There should be at least 2 roads between settlements.");
+        if (adjacentSettlements.some(settlement => settlement.player === this.currentPlayerIndex)) {
+          this.displayError("There should be at least 2 roads between your own settlements.");
           return;
         }
 
@@ -1076,73 +1075,121 @@ export default {
     botLogic() {
       // Check if the current player index is not human (i.e., index is not 0)
       if (this.isBot(this.currentPlayerIndex)) {
-
         this.rollDice();
-
 
         // Introduce a delay of 1000 milliseconds (1 second) before executing bot actions
         setTimeout(() => {
-          // Execute different logic based on the turn number
-          if (this.turn=== 1 || this.turn === 2) {
-            // Logic for the first two turns
-            const settlementIndex = this.findRandomBuildableSettlementIndex();
-            if (settlementIndex !== -1) {
-              // Build settlement at the found index
-              this.build(settlementIndex);
-              // Construct the selector string using the settlement index
-              const selector = `.road.r${settlementIndex}`;
-              // Use querySelectorAll to find road elements with the specified class
-              const roadElements = document.querySelectorAll(selector);
-              // Check if any road elements were found
-              console.log("Road Elements Found:", roadElements);
-              if (roadElements.length > 0) {
-                // Extract the fromIndex from the class name of the first road element found
-                const fromIndex = settlementIndex;
+          let errorOccurred;
+          do {
+            errorOccurred = false;
+            try {
+              // Execute different logic based on the turn number
+              if (this.turn === 1 || this.turn === 2) {
+                // Logic for the first two turns
+                const settlementIndex = this.findRandomBuildableSettlementIndex();
+                if (settlementIndex !== -1) {
+                  // Build settlement at the found index
+                  this.build(settlementIndex);
+                  // Construct the selector string using the settlement index
+                  const selector = `.road.r${settlementIndex}`;
+                  // Use querySelectorAll to find road elements with the specified class
+                  const roadElements = document.querySelectorAll(selector);
+                  // Check if any road elements were found
+                  console.log("Road Elements Found:", roadElements);
+                  if (roadElements.length > 0) {
+                    // Extract the fromIndex from the class name of the first road element found
+                    const fromIndex = settlementIndex;
 
-                // Extract the toIndex from the class name of the first road element found
-                let toIndex;
-                roadElements.forEach(roadElement => {
-                  const settlements = roadElement.className.match(/r\d+/g);
-                  if (settlements) {
-                    settlements.forEach(settlement => {
-                      const indexStr = settlement.substring(1);
-                      const index = parseInt(indexStr);
-                      if (index !== fromIndex) {
-                        toIndex = index;
+                    // Extract the toIndex from the class name of the first road element found
+                    let toIndex;
+                    roadElements.forEach(roadElement => {
+                      const settlements = roadElement.className.match(/r\d+/g);
+                      if (settlements) {
+                        settlements.forEach(settlement => {
+                          const indexStr = settlement.substring(1);
+                          const index = parseInt(indexStr);
+                          if (index !== fromIndex) {
+                            toIndex = index;
+                          }
+                        });
                       }
                     });
-                  }
-                });
 
-                // Call the buildRoad method with the found road elements
-                console.log("Building Road from", fromIndex, "to", toIndex);
-                if (toIndex !== undefined) {
-                  this.buildRoad(fromIndex, toIndex);
+                    // Call the buildRoad method with the found road elements
+                    console.log("Building Road from", fromIndex, "to", toIndex);
+                    if (toIndex !== undefined) {
+                      this.buildRoad(fromIndex, toIndex);
+                    } else {
+                      console.warn("No valid toIndex found for selector:", selector);
+                    }
+                  } else {
+                    console.warn("No road elements found for selector:", selector);
+                  }
                 } else {
-                  console.warn("No valid toIndex found for selector:", selector);
+                  // If no empty settlement index is found, perform some other action or skip turn
+                  console.log("No empty settlement index found. Bot skipping turn.");
                 }
               } else {
-                console.warn("No road elements found for selector:", selector);
+                // Logic for subsequent turns
+                this.performSubsequentTurnLogic();
               }
-            } else {
-              // If no empty settlement index is found, perform some other action or skip turn
-              console.log("No empty settlement index found. Bot skipping turn.");
+            } catch (error) {
+              errorOccurred = true;
+              console.error("Bot action failed, retrying...", error);
             }
-          } else {
-            // Logic for subsequent turns
-            this.performSubsequentTurnLogic();
-          }
+          } while (errorOccurred);
+
           // After performing bot actions, proceed to the next turn
           this.nextTurn();
         }, 1000); // 1000 milliseconds delay
       }
     },
 
+    displayError(message) {
+      console.error(message);
+      const isBot = this.botPlayerIndices.includes(this.currentPlayerIndex);
+      if (isBot) {
+        throw new Error(message);
+      } else {
+        document.getElementById('game-error-message').classList.remove('hidden');
+        let errorMessage = document.querySelector('.error-message');
+        errorMessage.textContent = message;
+
+        // Close error message
+        document.getElementById('confirm-error-message').addEventListener('click', function () {
+          document.getElementById('game-error-message').classList.add('hidden');
+        });
+      }
+    },
+
+
 
 
 
     performSubsequentTurnLogic() {
       const currentPlayer = this.players[this.currentPlayerIndex];
+
+      // Helper function to trade 4 resources of the same type for a random resource
+      const tradeResources = () => {
+        const resourceTypes = ['wood', 'brick', 'sheep', 'wheat', 'ore'];
+        for (let resourceType of resourceTypes) {
+          const resourceCount = currentPlayer.resources.filter(resource => resource === resourceType).length;
+          if (resourceCount >= 4) {
+            // Remove 4 of the same resource
+            for (let i = 0; i < 2; i++) {
+              currentPlayer.resources.splice(currentPlayer.resources.indexOf(resourceType), 1);
+            }
+            // Add a random resource
+            const newResource = resourceTypes[Math.floor(Math.random() * resourceTypes.length)];
+            currentPlayer.resources.push(newResource);
+            console.log(`Traded 2 ${resourceType} for 1 ${newResource}`);
+            break; // Only trade once per turn
+          }
+        }
+      };
+
+      // Perform trade if possible
+      tradeResources();
 
       // Check if the current player has the necessary resources to build a settlement
       const hasWood = currentPlayer.resources.includes('wood');
@@ -1201,13 +1248,38 @@ export default {
     },
 
     findRandomBuildableSettlementIndex() {
-      // Create a list of empty settlement indices (0 to 53)
+      const prioritizedIndices = [12, 8, 13, 9, 14, 17, 18, 19, 22, 23, 24, 25, 28, 29, 30, 31, 34, 35, 36, 39, 40, 41];
+
+      // Helper function to shuffle an array
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      // Shuffle the prioritized indices
+      shuffle(prioritizedIndices);
+
+      // Check shuffled prioritized indices first
+      for (const index of prioritizedIndices) {
+        if ((this.settlements[index] === null || this.settlements[index] === undefined) &&
+            this.getRoadsBetweenSettlements(index) >= 2) {
+          const adjacentSettlements = this.getAdjacentSettlements(index);
+          if (adjacentSettlements.every(settlement => settlement === null || settlement.player === this.currentPlayerIndex)) {
+            return index;
+          }
+        }
+      }
+
+      // Create a list of remaining empty settlement indices (0 to 53) excluding prioritized indices
       const emptySettlementIndices = [];
       for (let i = 0; i < 54; i++) {
-        if (this.settlements[i] === null || this.settlements[i] === undefined) {
+        if ((this.settlements[i] === null || this.settlements[i] === undefined) && !prioritizedIndices.includes(i)) {
           emptySettlementIndices.push(i);
         }
       }
+
       // Attempt to find a buildable settlement index using a do...while loop
       let settlementIndex = -1;
       if (emptySettlementIndices.length > 0) {
@@ -1218,7 +1290,6 @@ export default {
 
           if (this.getRoadsBetweenSettlements(settlementIndex) >= 2) {
             const adjacentSettlements = this.getAdjacentSettlements(settlementIndex);
-
             if (adjacentSettlements.every(settlement => settlement === null || settlement.player === this.currentPlayerIndex)) {
               return settlementIndex;
             }
@@ -1227,6 +1298,7 @@ export default {
           emptySettlementIndices.splice(randomIndex, 1);
         } while (emptySettlementIndices.length > 0);
       }
+
       console.log("No Buildable Settlement Index Found.");
       return -1; // Indicate that no buildable settlement index was found
     },
@@ -1539,6 +1611,25 @@ export default {
               break; // Exit loop once settlement is found for the player
             }
           }
+        });
+      });
+
+      // Now check for settlements that are one road away from adjacent settlements
+      connectedSettlements.forEach(adjacent => {
+        const furtherRoads = document.querySelectorAll(`.road[class*="r${adjacent.id}"]`);
+        furtherRoads.forEach(roadElement => {
+          const settlements = roadElement.className.match(/r\d+/g);
+          const connected = settlements.filter(settlement => settlement !== `r${adjacent.id}`);
+          const connectedWithoutPrefix = connected.map(settlement => settlement.substring(1));
+          connectedWithoutPrefix.forEach(settlementId => {
+            for (let i = 0; i < 4; i++) {
+              const settlementElement = document.querySelector(`#s${settlementId}.has-settlement-${i}`);
+              if (settlementElement) {
+                connectedSettlements.push({id: settlementId, player: i});
+                break;
+              }
+            }
+          });
         });
       });
 
@@ -2270,18 +2361,6 @@ export default {
         console.error(`Player at index ${playerIndex} not found.`);
       }
     },
-
-    displayError(message) {
-      // Display error message
-      document.getElementById('game-error-message').classList.remove('hidden');
-      let errorMessage = document.querySelector('.error-message');
-      errorMessage.textContent = message;
-
-      // Close error message
-      document.getElementById('confirm-error-message').addEventListener('click', function () {
-        document.getElementById('game-error-message').classList.add('hidden');
-      });
-    }
   }
 };
 </script>
