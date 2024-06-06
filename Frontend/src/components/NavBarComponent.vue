@@ -8,6 +8,7 @@
         <li class="nav-item">
           <router-link to="/home" class="nav-link" active-class="active">Home</router-link>
         </li>
+        <a  class="nav-item" style="color: black; text-decoration: none;" href="https://www.catan.com/sites/default/files/2021-06/catan_base_rules_2020_200707.pdf" target="_blank">Tutorial</a>
         <li class="nav-item" v-if="isLoggedIn">
           <router-link to="/leaderboard" class="nav-link" active-class="active">Leaderboard</router-link>
         </li>

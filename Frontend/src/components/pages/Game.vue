@@ -11,7 +11,7 @@
         </li>
       </ul>
       <router-link to="/home">
-      <button @click="goToHomePage">Home</button>
+        <button class="pos-button" @click="goToHomePage">Home</button>
       </router-link>
     </div>
   </div>
@@ -23,13 +23,14 @@
         <div v-for="resource in resourceCardTypes" :key="resource">
           <img class="resource-cardmodal" :src="resourceCardImg[resource]" :alt="resource + ' card'">
           <div>
-            <button @click="incrementResource(resource)">+</button>
+            <button class="pos-button" @click="incrementResource(resource)">+</button>
             <span>{{ getSelectedCount(resource) }}</span>
-            <button @click="decrementResource(resource)">-</button>
+            <button class="pos-button" @click="decrementResource(resource)">-</button>
           </div>
         </div>
       </div>
-      <button @click="confirmSelectedResources" :disabled="selectedResources.length < 2">Confirm</button>
+      <button class="pos-button" @click="confirmSelectedResources" :disabled="selectedResources.length < 2">Confirm
+      </button>
     </div>
   </div>
 
@@ -47,7 +48,7 @@
           <img :src="resourceCardImg[card]" :alt="card">
         </div>
       </div>
-      <button @click="discardSelectedCards">Discard</button>
+      <button class="pos-button" @click="discardSelectedCards">Discard</button>
     </div>
   </div>
 
@@ -60,15 +61,15 @@
           <p>{{ selectedResources.includes(resource) ? '+' : 'Click to select' }}</p>
         </div>
       </div>
-      <button @click="confirmSelectedResource" :disabled="selectedResources.length !== 1">Confirm</button>
+      <button class="pos-button" @click="confirmSelectedResource" :disabled="selectedResources.length !== 1">Confirm
+      </button>
     </div>
   </div>
 
 
-
   <div class="modal" v-if="showTradingModal">
     <div class="modal-content">
-      <h2>Select the resource you want to trade</h2>
+      <h2>Select the resource you want to trade you can trade 3 resources for 1 resource of choice</h2>
       <div class="resource-selection">
         <div
             v-for="resourceType in simplifiedInventory"
@@ -368,7 +369,8 @@
 
 
         <div class="dice-container">
-          <button class="pos-button" id="roll-dice-button" @click="rollDice"  :disabled="!isCurrentPlayerTurn || hasRolledDice">Roll the dices!
+          <button class="pos-button" id="roll-dice-button" @click="rollDice"
+                  :disabled="!isCurrentPlayerTurn || hasRolledDice">Roll the dices!
             <img alt="roll dice" src="../../assets/images/game/dices/clear_rolling-dices.png">
           </button>
           <div class="dice-outcome-container">
@@ -384,9 +386,11 @@
               <p>Click one of the numbers to place the robber.</p>
             </div>
           </div>
-          <button class="pos-button" id="next-turn-button" @click="nextTurn" :disabled="!isCurrentPlayerTurn">Next turn</button>
+          <button class="pos-button" id="next-turn-button" @click="nextTurn" :disabled="!isCurrentPlayerTurn">Next
+            turn
+          </button>
           <div>Time remaining: {{ this.timeRemaining }}</div>
-          <div>Points to win: {{this.game.pointsToWin}} </div>
+          <div>Points to win: {{ this.game.pointsToWin }}</div>
           <div v-if="!hasRolledDice">Turn: {{ turn }}</div>
           <div class="current-player" :style="{ color: loggedinPlayer }">You are Player: {{ loggedinPlayerColor }}</div>
           <div class="current-player" :style="{ color: currentPlayerColor }">Current Player: {{ currentPlayer }}</div>
@@ -402,18 +406,21 @@
               </div>
             </div>
           </div>
-          <input type="text" v-model="chatInput" @keyup.enter="sendChatMessage" placeholder="Type a message..." class="chat-input">
+          <input type="text" v-model="chatInput" @keyup.enter="sendChatMessage" placeholder="Type a message..."
+                 class="chat-input">
         </div>
       </div>
 
     </div>
     <div class="player-inventory-container">
       <div class="player-inventory-resources">
-        <div v-for="resource in userPlayerResourcesInventory"  :key="resource.id">
+        <div v-for="resource in userPlayerResourcesInventory" :key="resource.id">
           <div class="inventory-resource-card"><img :src=this.resourceCardImg[resource] alt="resource card"></div>
         </div>
         <div class="game-buttons-container">
-          <button class="pos-button" @click="acquireDevelopmentCard" :disabled="!isCurrentPlayerTurn">Buy Development Card</button>
+          <button class="pos-button" @click="acquireDevelopmentCard" :disabled="!isCurrentPlayerTurn">Buy Development
+            Card
+          </button>
           <button class="pos-button" v-if="canPlayKnightCard" @click="playDevelopmentCard('knight')">Play Knight
             Card
           </button>
@@ -427,7 +434,9 @@
             Play Road_Building Card
           </button>
           <button class="pos-button" @click="openTradeModal" :disabled="!isCurrentPlayerTurn">Trade Resources</button>
-          <button class="pos-button" @click="upgradeSettlementToCity" :disabled="!isCurrentPlayerTurn">Upgrade Settlement to City</button>
+          <button class="pos-button" @click="upgradeSettlementToCity" :disabled="!isCurrentPlayerTurn">Upgrade
+            Settlement to City
+          </button>
 
         </div>
       </div>
@@ -439,7 +448,7 @@
 
 <script>
 import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
-import CONFIG from '@/app-config.js';
+import {GameHistory} from "@/models/gameHistory";
 
 export default {
   name: "gameComponent",
@@ -469,6 +478,7 @@ export default {
       currentPlayerIndex: 0,
       players: [],
       playerPoints: [0, 0, 0, 0],
+      playerPlacements: [],
       currentPlayerResources: [],
       robberHexIndex: null,
       hasRolledDice: false,
@@ -501,7 +511,7 @@ export default {
         [41, 45, 46, 49, 50, 53]
       ],
       resourcesInitialized: false,
-      initialResources: { brick: 0, wood: 0, wheat: 0, ore: 0, sheep: 0 },
+      initialResources: {brick: 0, wood: 0, wheat: 0, ore: 0, sheep: 0},
       settlements: [],
       playersSettlements: [
         [], // Player 0 settlements
@@ -535,7 +545,7 @@ export default {
         wood: require("../../assets/images/game/resources/wood_card_v1.png"),
         sheep: require("../../assets/images/game/resources/sheep_card_v1.png")
       },
-      developmentCards: ['Road_Building','year_of_plenty','monopoly','knight'],
+      developmentCards: ['Road_Building', 'year_of_plenty', 'monopoly', 'knight'],
       hasPlayedDevelopmentCard: false,
       announcements: [],
       gameState: null,
@@ -543,7 +553,7 @@ export default {
       loggedinPlayerIndex: null,
       botPlayerIndices: [],
       robberPlacements: [0, 0, 0, 0],
-      mostRobbersPlaced: { playerIndex: null, count: 0 },
+      mostRobbersPlaced: {playerIndex: null, count: 0},
       longestRoadPlayer: null,
       longestRoadLength: 0,
     };
@@ -554,7 +564,7 @@ export default {
     this.userDetails = await this.usersService._currentUser;
     console.log("User details:", this.userDetails);
 
-    this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement);
+    this.announcementsService = new AnnouncementsAdaptor(process.env.VUE_APP_API_URL + '/announcements', this.onReceiveAnnouncement);
     await this.fetchGameDetails();
     await this.fetchPlayers();
 
@@ -631,10 +641,97 @@ export default {
     },
   },
   methods: {
+    calculatePlayerPlacement() {
+      // Debugging: Log the players array
+      console.log("Players array:", JSON.stringify(this.players, null, 2));
+
+      // Create an array of player objects with their points
+      const playersWithPoints = this.players.map((player, index) => {
+        console.log(`Player object at index ${index}:`, player);
+        return {
+          id: player.user.id,
+          username: player.user.username || player.user.name,  // Use username for human players and name for bots
+          points: this.playerPoints[index]
+        };
+      });
+
+      // Debugging: Log the players with points array
+      console.log("Players with Points:", JSON.stringify(playersWithPoints, null, 2));
+
+      // Sort players by their points in descending order
+      playersWithPoints.sort((a, b) => b.points - a.points);
+
+      // Create an array to store player placements
+      const placements = playersWithPoints.map((player, index) => ({
+        id: player.id,
+        username: player.username,
+        placement: (index + 1).toString()
+      }));
+
+      console.log("Player Placements:", JSON.stringify(placements, null, 2));
+
+      return placements;
+    },
+
+    async endGame(userId, placement, startTime, endTime) {
+      console.log("End game called with userId:", userId, "and placement:", placement);
+
+      try {
+        // Fetch the User object corresponding to userId from your data source
+        const user = await this.usersService.asyncFindById(userId);
+
+        if (!user) {
+          console.error('User not found for userId:', userId);
+          return;
+        }
+
+        // Create a new GameHistory object with the fetched User object
+        const gameHistory = new GameHistory(null, userId, placement, startTime, endTime);
+        console.log("This is the game history of you", gameHistory);
+
+        // Save the game history
+        const savedHistory = await this.usersService.saveGameHistories(userId, [gameHistory]);
+        console.log('Game history saved successfully:', savedHistory);
+      } catch (error) {
+        console.error('Failed to save game history:', error);
+      }
+    },
+
+
+    checkForWinner() {
+      const winningPoints = this.game.pointsToWin;
+      let winner = null;
+
+      // Check if any player has reached the winning points
+      this.players.forEach((player, playerIndex) => {
+        if (this.playerPoints[playerIndex] >= winningPoints) {
+          winner = player;
+        }
+      });
+
+      // If a winner is found, show the modal
+      if (winner) {
+        this.showWinnerModal = true;
+        this.updateGameState({action: 'winner', winner: winner, game: this.serializeGameState()});
+
+        // Calculate player placements
+        this.playerPlacements = this.calculatePlayerPlacement();
+
+        // End the game and save game history
+        const startTime = new Date().toLocaleTimeString('en-US', {hour12: false});
+        const endTime = new Date().toLocaleTimeString('en-US', {hour12: false});
+        const userId = winner.user.id; // Assuming winner is an object containing the winning player's details, including user id
+        const placement = this.calculatePlayerPlacement().findIndex((placement) => placement.id === userId) + 1; // Find the placement of the winner
+        console.log("Winner details - userId:", userId, "placement:", placement);
+        this.endGame(userId, placement, startTime, endTime);
+      }
+    },
+
+
     sendChatMessage() {
       if (this.chatInput.trim() !== '') {
-        const message = { sender: this.userDetails.username, text: this.chatInput };
-        this.announcementsService.sendMessage(JSON.stringify({ action: 'chatMessage', content: message }));
+        const message = {sender: this.userDetails.username, text: this.chatInput};
+        this.announcementsService.sendMessage(JSON.stringify({action: 'chatMessage', content: message}));
         this.chatInput = '';
       }
     },
@@ -705,17 +802,17 @@ export default {
         this.settlements = [...gameState.settlements];
         this.playersSettlements = gameState.playersSettlements.map(settlements => [...settlements]);
         this.currentPlayerIndex = gameState.currentPlayerIndex;
-        this.players = gameState.players.map(player => ({ ...player }));
+        this.players = gameState.players.map(player => ({...player}));
         this.robberHexIndex = gameState.robberHexIndex;
         this.hasRolledDice = gameState.hasRolledDice;
         this.timeRemaining = gameState.timeRemaining;
         this.turn = gameState.turn;
-        this.initialResources = { ...gameState.initialResources };
+        this.initialResources = {...gameState.initialResources};
         this.roads = [...gameState.roads];
         this.leftDiceOutcome = gameState.leftDiceOutcome;
         this.rightDiceOutcome = gameState.rightDiceOutcome;
         this.robberPlacements = [...gameState.robberPlacements];
-        this.mostRobbersPlaced = { ...gameState.mostRobbersPlaced };
+        this.mostRobbersPlaced = {...gameState.mostRobbersPlaced};
         this.longestRoadPlayer = gameState.longestRoadPlayer;
         this.longestRoadLength = gameState.longestRoadLength;
 
@@ -727,7 +824,6 @@ export default {
         console.error('Malformed game state:', gameState);
       }
     },
-
 
 
     onReceiveAnnouncement(message) {
@@ -754,16 +850,16 @@ export default {
       } else if (parsedMessage.action === 'placeRobber') {
         this.updateBoard(parsedMessage.game);
         this.updateRobberUI(parsedMessage.hexIndex);
-      }else if (parsedMessage.action === 'discardedcards') {
+      } else if (parsedMessage.action === 'discardedcards') {
         this.updateBoard(parsedMessage.game);
-      }else if (parsedMessage.action === 'winner') {
+      } else if (parsedMessage.action === 'winner') {
         // Display the winner modal
         this.updateBoard(parsedMessage.game);
         this.showWinnerModal = true;
       } else if (parsedMessage.action === 'longestRoad') {
         this.updateBoard(parsedMessage.game);
         this.serializeGameState();
-      }else if (parsedMessage.action === 'chatMessage') {
+      } else if (parsedMessage.action === 'chatMessage') {
         this.chatMessages.push(parsedMessage.content);
         this.scrollToBottom();
       }
@@ -824,7 +920,7 @@ export default {
       const leftDiceOutcome = roll();
 
       // Update game state for other players
-      this.updateGameState({ action: 'rollDice', leftDiceOutcome: leftDiceOutcome, rightDiceOutcome: rightDiceOutcome });
+      this.updateGameState({action: 'rollDice', leftDiceOutcome: leftDiceOutcome, rightDiceOutcome: rightDiceOutcome});
 
       // Update dice outcome UI
       this.updateDiceOutcomeUI(leftDiceOutcome, rightDiceOutcome);
@@ -928,7 +1024,7 @@ export default {
 
         // Check if the player has required resources to build
         if (!(isFirstTurn || isSecondTurn) && (!hasWood || !hasBrick || !hasSheep || !hasWheat)) {
-          this.displayError("You don't have enough resources to build a settlement.");
+          this.displayError("You don't have enough resources to build a settlement you need to have 1 wood, 1 sheep, 1 brick and 1 wheat.");
           return;
         }
 
@@ -942,9 +1038,8 @@ export default {
         }
 
         // Check if there are at least 2 roads between settlements
-        const roadsBetweenSettlements = this.getRoadsBetweenSettlements(index);
-        if (roadsBetweenSettlements < 2) {
-          this.displayError("There should be at least 2 roads between settlements.");
+        if (adjacentSettlements.some(settlement => settlement.player === this.currentPlayerIndex)) {
+          this.displayError("There should be at least 2 roads between your own settlements.");
           return;
         }
 
@@ -957,7 +1052,7 @@ export default {
         }
 
         // Store the owner of the settlement
-        this.settlements[index] = { player: this.currentPlayerIndex };
+        this.settlements[index] = {player: this.currentPlayerIndex};
 
         // Update the playersSettlements array
         this.playersSettlements[this.currentPlayerIndex].push(index);
@@ -977,7 +1072,7 @@ export default {
         }
 
         // Update the game state and broadcast the build action
-        this.updateGameState({ action: 'build', index: index });
+        this.updateGameState({action: 'build', index: index});
       } else {
         this.displayError("You have already built on your turn.");
       }
@@ -1032,7 +1127,7 @@ export default {
       return {
         type: 'bot',  // Added type attribute
         playerColor: this.playerColors[index],
-        user: { id: `bot-${index}`, name: `Bot ${index + 1}` },
+        user: {id: `bot-${index}`, name: `Bot ${index + 1}`},
         resources: [],
         developmentCards: [],
       };
@@ -1046,7 +1141,7 @@ export default {
       // If no players fetched, add dummy data
       if (!Array.isArray(this.players) || this.players.length === 0) {
         console.warn("No players fetched, initializing with dummy data");
-        this.players = Array.from({ length: totalPlayers }, (_, i) => this.createBotPlayer(i));
+        this.players = Array.from({length: totalPlayers}, (_, i) => this.createBotPlayer(i));
       } else if (this.players.length < totalPlayers) {
         console.warn(`Only ${this.players.length} players fetched, initializing remaining with bot data`);
         for (let i = this.players.length; i < totalPlayers; i++) {
@@ -1076,73 +1171,118 @@ export default {
     botLogic() {
       // Check if the current player index is not human (i.e., index is not 0)
       if (this.isBot(this.currentPlayerIndex)) {
-
         this.rollDice();
-
 
         // Introduce a delay of 1000 milliseconds (1 second) before executing bot actions
         setTimeout(() => {
-          // Execute different logic based on the turn number
-          if (this.turn=== 1 || this.turn === 2) {
-            // Logic for the first two turns
-            const settlementIndex = this.findRandomBuildableSettlementIndex();
-            if (settlementIndex !== -1) {
-              // Build settlement at the found index
-              this.build(settlementIndex);
-              // Construct the selector string using the settlement index
-              const selector = `.road.r${settlementIndex}`;
-              // Use querySelectorAll to find road elements with the specified class
-              const roadElements = document.querySelectorAll(selector);
-              // Check if any road elements were found
-              console.log("Road Elements Found:", roadElements);
-              if (roadElements.length > 0) {
-                // Extract the fromIndex from the class name of the first road element found
-                const fromIndex = settlementIndex;
+          let errorOccurred;
+          do {
+            errorOccurred = false;
+            try {
+              // Execute different logic based on the turn number
+              if (this.turn === 1 || this.turn === 2) {
+                // Logic for the first two turns
+                const settlementIndex = this.findRandomBuildableSettlementIndex();
+                if (settlementIndex !== -1) {
+                  // Build settlement at the found index
+                  this.build(settlementIndex);
+                  // Construct the selector string using the settlement index
+                  const selector = `.road.r${settlementIndex}`;
+                  // Use querySelectorAll to find road elements with the specified class
+                  const roadElements = document.querySelectorAll(selector);
+                  // Check if any road elements were found
+                  console.log("Road Elements Found:", roadElements);
+                  if (roadElements.length > 0) {
+                    // Extract the fromIndex from the class name of the first road element found
+                    const fromIndex = settlementIndex;
 
-                // Extract the toIndex from the class name of the first road element found
-                let toIndex;
-                roadElements.forEach(roadElement => {
-                  const settlements = roadElement.className.match(/r\d+/g);
-                  if (settlements) {
-                    settlements.forEach(settlement => {
-                      const indexStr = settlement.substring(1);
-                      const index = parseInt(indexStr);
-                      if (index !== fromIndex) {
-                        toIndex = index;
+                    // Extract the toIndex from the class name of the first road element found
+                    let toIndex;
+                    roadElements.forEach(roadElement => {
+                      const settlements = roadElement.className.match(/r\d+/g);
+                      if (settlements) {
+                        settlements.forEach(settlement => {
+                          const indexStr = settlement.substring(1);
+                          const index = parseInt(indexStr);
+                          if (index !== fromIndex) {
+                            toIndex = index;
+                          }
+                        });
                       }
                     });
-                  }
-                });
 
-                // Call the buildRoad method with the found road elements
-                console.log("Building Road from", fromIndex, "to", toIndex);
-                if (toIndex !== undefined) {
-                  this.buildRoad(fromIndex, toIndex);
+                    // Call the buildRoad method with the found road elements
+                    console.log("Building Road from", fromIndex, "to", toIndex);
+                    if (toIndex !== undefined) {
+                      this.buildRoad(fromIndex, toIndex);
+                    } else {
+                      console.warn("No valid toIndex found for selector:", selector);
+                    }
+                  } else {
+                    console.warn("No road elements found for selector:", selector);
+                  }
                 } else {
-                  console.warn("No valid toIndex found for selector:", selector);
+                  // If no empty settlement index is found, perform some other action or skip turn
+                  console.log("No empty settlement index found. Bot skipping turn.");
                 }
               } else {
-                console.warn("No road elements found for selector:", selector);
+                // Logic for subsequent turns
+                this.performSubsequentTurnLogic();
               }
-            } else {
-              // If no empty settlement index is found, perform some other action or skip turn
-              console.log("No empty settlement index found. Bot skipping turn.");
+            } catch (error) {
+              errorOccurred = true;
+              console.error("Bot action failed, retrying...", error);
             }
-          } else {
-            // Logic for subsequent turns
-            this.performSubsequentTurnLogic();
-          }
+          } while (errorOccurred);
+
           // After performing bot actions, proceed to the next turn
           this.nextTurn();
         }, 1000); // 1000 milliseconds delay
       }
     },
 
+    displayError(message) {
+      console.error(message);
+      const isBot = this.botPlayerIndices.includes(this.currentPlayerIndex);
+      if (isBot) {
+        throw new Error(message);
+      } else {
+        document.getElementById('game-error-message').classList.remove('hidden');
+        let errorMessage = document.querySelector('.error-message');
+        errorMessage.textContent = message;
 
+        // Close error message
+        document.getElementById('confirm-error-message').addEventListener('click', function () {
+          document.getElementById('game-error-message').classList.add('hidden');
+        });
+      }
+    },
 
 
     performSubsequentTurnLogic() {
       const currentPlayer = this.players[this.currentPlayerIndex];
+
+      // Helper function to trade 4 resources of the same type for a random resource
+      const tradeResources = () => {
+        const resourceTypes = ['wood', 'brick', 'sheep', 'wheat', 'ore'];
+        for (let resourceType of resourceTypes) {
+          const resourceCount = currentPlayer.resources.filter(resource => resource === resourceType).length;
+          if (resourceCount >= 4) {
+            // Remove 4 of the same resource
+            for (let i = 0; i < 2; i++) {
+              currentPlayer.resources.splice(currentPlayer.resources.indexOf(resourceType), 1);
+            }
+            // Add a random resource
+            const newResource = resourceTypes[Math.floor(Math.random() * resourceTypes.length)];
+            currentPlayer.resources.push(newResource);
+            console.log(`Traded 2 ${resourceType} for 1 ${newResource}`);
+            break; // Only trade once per turn
+          }
+        }
+      };
+
+      // Perform trade if possible
+      tradeResources();
 
       // Check if the current player has the necessary resources to build a settlement
       const hasWood = currentPlayer.resources.includes('wood');
@@ -1201,13 +1341,38 @@ export default {
     },
 
     findRandomBuildableSettlementIndex() {
-      // Create a list of empty settlement indices (0 to 53)
+      const prioritizedIndices = [12, 8, 13, 9, 14, 17, 18, 19, 22, 23, 24, 25, 28, 29, 30, 31, 34, 35, 36, 39, 40, 41];
+
+      // Helper function to shuffle an array
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      // Shuffle the prioritized indices
+      shuffle(prioritizedIndices);
+
+      // Check shuffled prioritized indices first
+      for (const index of prioritizedIndices) {
+        if ((this.settlements[index] === null || this.settlements[index] === undefined) &&
+            this.getRoadsBetweenSettlements(index) >= 2) {
+          const adjacentSettlements = this.getAdjacentSettlements(index);
+          if (adjacentSettlements.every(settlement => settlement === null || settlement.player === this.currentPlayerIndex)) {
+            return index;
+          }
+        }
+      }
+
+      // Create a list of remaining empty settlement indices (0 to 53) excluding prioritized indices
       const emptySettlementIndices = [];
       for (let i = 0; i < 54; i++) {
-        if (this.settlements[i] === null || this.settlements[i] === undefined) {
+        if ((this.settlements[i] === null || this.settlements[i] === undefined) && !prioritizedIndices.includes(i)) {
           emptySettlementIndices.push(i);
         }
       }
+
       // Attempt to find a buildable settlement index using a do...while loop
       let settlementIndex = -1;
       if (emptySettlementIndices.length > 0) {
@@ -1218,7 +1383,6 @@ export default {
 
           if (this.getRoadsBetweenSettlements(settlementIndex) >= 2) {
             const adjacentSettlements = this.getAdjacentSettlements(settlementIndex);
-
             if (adjacentSettlements.every(settlement => settlement === null || settlement.player === this.currentPlayerIndex)) {
               return settlementIndex;
             }
@@ -1227,28 +1391,9 @@ export default {
           emptySettlementIndices.splice(randomIndex, 1);
         } while (emptySettlementIndices.length > 0);
       }
+
       console.log("No Buildable Settlement Index Found.");
       return -1; // Indicate that no buildable settlement index was found
-    },
-
-
-
-    checkForWinner() {
-      const winningPoints = this.game.pointsToWin;
-      let winner = null;
-
-      // Check if any player has reached the winning points
-      this.players.forEach((player, playerIndex) => {
-        if (this.playerPoints[playerIndex] >= winningPoints) {
-          winner = player;
-        }
-      });
-
-      // If a winner is found, show the modal
-      if (winner) {
-        this.showWinnerModal = true;
-        this.updateGameState({ action: 'winner', winner: winner, game: this.serializeGameState() });
-      }
     },
 
     checkConnectedRoads() {
@@ -1352,8 +1497,6 @@ export default {
     },
 
 
-
-
     upgradeSettlementToCity() {
       // Set a flag to indicate that the player is in the process of upgrading a settlement to a city
       this.isUpgradingToCity = true;
@@ -1365,7 +1508,7 @@ export default {
 
       // Check if the player has enough resources to upgrade
       if (!hasEnoughResources) {
-        this.displayError("You don't have enough resources to upgrade to a city.");
+        this.displayError("You don't have enough resources to upgrade to a city you need 2 wheat and 3 ore.");
         return;
       }
 
@@ -1477,7 +1620,7 @@ export default {
       for (let i = 0; i < size; i++) {
         const resource = this.getRandomResource();
         const number = this.assignRandomNumber();
-        row.push({ resource, number });
+        row.push({resource, number});
       }
       return row;
     },
@@ -1539,6 +1682,25 @@ export default {
               break; // Exit loop once settlement is found for the player
             }
           }
+        });
+      });
+
+      // Now check for settlements that are one road away from adjacent settlements
+      connectedSettlements.forEach(adjacent => {
+        const furtherRoads = document.querySelectorAll(`.road[class*="r${adjacent.id}"]`);
+        furtherRoads.forEach(roadElement => {
+          const settlements = roadElement.className.match(/r\d+/g);
+          const connected = settlements.filter(settlement => settlement !== `r${adjacent.id}`);
+          const connectedWithoutPrefix = connected.map(settlement => settlement.substring(1));
+          connectedWithoutPrefix.forEach(settlementId => {
+            for (let i = 0; i < 4; i++) {
+              const settlementElement = document.querySelector(`#s${settlementId}.has-settlement-${i}`);
+              if (settlementElement) {
+                connectedSettlements.push({id: settlementId, player: i});
+                break;
+              }
+            }
+          });
         });
       });
 
@@ -1621,7 +1783,7 @@ export default {
           const hasWood = currentPlayer.resources.includes('wood');
 
           if (!hasBrick || !hasWood) {
-            this.displayError("You don't have enough resources to build a road.");
+            this.displayError("You don't have enough resources to build a road you need 1 brick and 1 wood.");
             return;
           }
         }
@@ -1629,7 +1791,7 @@ export default {
         // Build the road only if it's adjacent to the player's settlement or road
         if (this.isAdjacentToSettlement(fromIndex, toIndex) || this.isAdjacentToOwnRoad(fromIndex, toIndex)) {
           // Add the road to the list of roads
-          this.roads.push({ from: fromIndex, to: toIndex, owner: this.currentPlayerIndex });
+          this.roads.push({from: fromIndex, to: toIndex, owner: this.currentPlayerIndex});
 
           // Add a CSS class to the road position
           const roadElement = document.querySelector(`.road.r${fromIndex}.r${toIndex}`);
@@ -1658,7 +1820,7 @@ export default {
           }
 
           // Update the game state and broadcast the build action
-          this.updateGameState({ action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex });
+          this.updateGameState({action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex});
         } else {
           // Display a warning message if the road is not adjacent to the player's settlement or road
           this.displayError("Road must be adjacent to your own settlement or road.");
@@ -1674,7 +1836,7 @@ export default {
       if (roadElement) {
         roadElement.classList.add(`build-${this.currentPlayerIndex}`);
       }
-      this.updateGameState({ action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex });
+      this.updateGameState({action: 'buildroad', fromIndex: fromIndex, toIndex: toIndex});
     },
 
     isAdjacentToOwnRoad(fromIndex, toIndex) {
@@ -1792,8 +1954,6 @@ export default {
         this.displayError("You don't have the specified development card to play.");
       }
     },
-
-
 
 
     playKnightCardLogic() {
@@ -1931,7 +2091,6 @@ export default {
             }
 
 
-
             // Update game state to notify other players
             this.updateGameState({
               action: 'placeRobber',
@@ -1975,7 +2134,7 @@ export default {
 
           // Award the current player 2 points
           this.playerPoints[playerIndex] += 2;
-          this.mostRobbersPlaced = { playerIndex, count: playerRobberCount };
+          this.mostRobbersPlaced = {playerIndex, count: playerRobberCount};
         }
       }
     },
@@ -2077,7 +2236,6 @@ export default {
     },
 
 
-
     startCountdown() {
       // Clear any existing timer
       clearInterval(this.timerId);
@@ -2152,7 +2310,6 @@ export default {
       });
 
     },
-
 
 
     toggleCardSelection(index) {
@@ -2270,18 +2427,6 @@ export default {
         console.error(`Player at index ${playerIndex} not found.`);
       }
     },
-
-    displayError(message) {
-      // Display error message
-      document.getElementById('game-error-message').classList.remove('hidden');
-      let errorMessage = document.querySelector('.error-message');
-      errorMessage.textContent = message;
-
-      // Close error message
-      document.getElementById('confirm-error-message').addEventListener('click', function () {
-        document.getElementById('game-error-message').classList.add('hidden');
-      });
-    }
   }
 };
 </script>
@@ -2294,7 +2439,7 @@ export default {
   background-color: #f0f0f0;
   border: 1px solid #ccc;
   padding: 10px;
-  height: 400px;
+  height: 25vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -2341,7 +2486,7 @@ export default {
 }
 
 .resource-cards.selected {
-  border: 2px solid blue; /* Add your preferred styling for selected cards */
+  border: 4px solid blue; /* Add your preferred styling for selected cards */
 }
 
 .modal {
@@ -2375,14 +2520,17 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.resource-cards{
+
+.resource-cards {
   display: inline-flex;
   margin: 5px;
 }
-.resource-cardmodal{
+
+.resource-cardmodal {
   margin: 5px;
 }
-.resource-selection{
+
+.resource-selection {
   display: inline-flex;
   margin: 5px;
 }
@@ -2429,6 +2577,7 @@ export default {
   width: 90vw;
   margin-left: 5vw;
   margin-right: 5vw;
+  height: 85vh;
 }
 
 /* Previous page button */
@@ -2546,7 +2695,6 @@ export default {
   transform: rotate(90deg); /* Rotate 90 degrees clockwise */
   background-image: url("~@/assets/images/City (3).png");
 }
-
 
 
 .box {
@@ -2873,6 +3021,7 @@ ol.odd {
   opacity: .4;
   border: 2px dotted;
 }
+
 /* .hex #robber::after {
   content: "R";
 } */
@@ -2990,7 +3139,6 @@ ol.odd {
 }
 
 
-
 .hex .settlement.target {
 }
 
@@ -3077,7 +3225,7 @@ ol.odd {
   margin: 5px;
 }
 
-.dice-outcome-container h2{
+.dice-outcome-container h2 {
   font-weight: 400;
   margin: 0;
 }
@@ -3085,7 +3233,7 @@ ol.odd {
 /* Player resources */
 .player-inventory-container {
   background-color: #5c86ae;
-  border: solid #2c3e50 ;
+  border: solid #2c3e50;
   padding: 10px;
   min-height: 160px;
 }

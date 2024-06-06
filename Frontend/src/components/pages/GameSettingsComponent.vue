@@ -33,7 +33,7 @@
       <div>
         <h3>Points to win</h3>
         <span>{{ this.currentGame.pointsToWin }}</span>
-        <input type="range" min="5" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
+        <input type="range" min="3" max="10" v-model.number="currentGame.pointsToWin" class="transition center-column-slider">
       </div>
 
       <div class="start-game-div">
@@ -76,7 +76,6 @@
 <script>
 import popUpGameSettingsComponent from "@/components/pages/popUpGameSettingsComponent.vue";
 import {AnnouncementsAdaptor} from "@/services/announcements-adaptor";
-import CONFIG from '@/app-config.js';
 
 export default {
   name: "GameSettingsComponent",
@@ -104,7 +103,7 @@ export default {
     };
   },
   async created() {
-    this.announcementsService = new AnnouncementsAdaptor(CONFIG.ANNOUNCEMENTS, this.onReceiveAnnouncement);
+    this.announcementsService = new AnnouncementsAdaptor(process.env.VUE_APP_API_URL + '/announcements', this.onReceiveAnnouncement);
 
     this.userDetails = await this.usersService._currentUser;
 
