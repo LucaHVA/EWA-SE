@@ -472,7 +472,6 @@ export default {
       canPlayMonopolyCard: false,
       canPlayVictory_PointCard: false,
       game: null,
-      gameId: this.$route.params.id,
       previousPage: "/lobbySelect",
       playerColors: ["red", "blue", "green", "orange"],
       currentPlayerIndex: 0,
@@ -556,10 +555,13 @@ export default {
       mostRobbersPlaced: {playerIndex: null, count: 0},
       longestRoadPlayer: null,
       longestRoadLength: 0,
+      gameId: null,
     };
   },
   inject: ['gameService', 'usersService'],
   async created() {
+
+    this.gameId = this.$route.params.id;
     // Ensure currentUser is defined before proceeding
     this.userDetails = await this.usersService._currentUser;
     console.log("User details:", this.userDetails);
@@ -867,6 +869,98 @@ export default {
       this.announcements.push(parsedMessage);
     },
 
+
+    build(index) {
+      // Check if it's the logged-in player's turn
+      if (this.currentPlayerIndex !== this.loggedinPlayerIndex && !this.botPlayerIndices.includes(this.currentPlayerIndex)) {
+        this.displayError("It's not your turn.");
+        return;
+      }
+
+      // Check if the current player is defined
+      if (this.currentPlayerIndex === null || this.players[this.currentPlayerIndex] === undefined) {
+        console.error("Current player is undefined.");
+        return;
+      }
+
+      const currentPlayer = this.players[this.currentPlayerIndex];
+
+      // Check if there is already a settlement at the index
+      if (this.settlements[index] && this.settlements[index].player !== null) {
+        this.displayError("There is already a settlement at this position.");
+        return;
+      }
+
+      // Check if it's the first or second turn
+      const isFirstTurn = this.turn === 1;
+      const isSecondTurn = this.turn === 2;
+
+      // Check if the current player has already built on their turn
+      if ((!isFirstTurn && !isSecondTurn) ||
+          (isFirstTurn && !currentPlayer.hasBuiltFirstTurn) ||
+          (isSecondTurn && !currentPlayer.hasBuiltSecondTurn)) {
+
+        const hasWood = currentPlayer.resources.includes('wood');
+        const hasBrick = currentPlayer.resources.includes('brick');
+        const hasSheep = currentPlayer.resources.includes('sheep');
+        const hasWheat = currentPlayer.resources.includes('wheat');
+
+        // Check if the player has required resources to build
+        if (!(isFirstTurn || isSecondTurn) && (!hasWood || !hasBrick || !hasSheep || !hasWheat)) {
+          this.displayError("You don't have enough resources to build a settlement you need to have 1 wood, 1 sheep, 1 brick and 1 wheat.");
+          return;
+        }
+
+        // Check if there are settlements adjacent to the road
+        const adjacentSettlements = this.getAdjacentSettlements(index);
+
+        // Check if any adjacent settlement is occupied
+        if (adjacentSettlements.some(settlement => settlement.player !== null && settlement.player !== this.currentPlayerIndex)) {
+          this.displayError("You cannot build a settlement adjacent to another player's settlement.");
+          return;
+        }
+
+        // Check if there are at least 2 roads between settlements
+        if (adjacentSettlements.some(settlement => settlement.player === this.currentPlayerIndex)) {
+          this.displayError("There should be at least 2 roads between your own settlements.");
+          return;
+        }
+
+        // Deduct the resources from the player's inventory on non-first turn
+        if (!(isFirstTurn || isSecondTurn)) {
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('sheep'), 1);
+          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wheat'), 1);
+        }
+
+        // Store the owner of the settlement
+        this.settlements[index] = {player: this.currentPlayerIndex};
+
+        // Update the playersSettlements array
+        this.playersSettlements[this.currentPlayerIndex].push(index);
+
+        // Add a CSS class to the settlement position
+        const settlementElement = document.getElementById('s' + index);
+        if (settlementElement) {
+          settlementElement.classList.add(`has-settlement-${this.currentPlayerIndex}`);
+        }
+
+        this.playerPoints[this.currentPlayerIndex] += 1;
+
+        if (isFirstTurn) {
+          currentPlayer.hasBuiltFirstTurn = true;
+        } else if (isSecondTurn) {
+          currentPlayer.hasBuiltSecondTurn = true;
+        }
+
+        // Update the game state and broadcast the build action
+        this.updateGameState({action: 'build', index: index});
+      } else {
+        this.displayError("You have already built on your turn.");
+      }
+    },
+
     updateRobberUI(hexIndex) {
       console.log(`Updating robber UI: hexIndex=${hexIndex}`);
       if (this.robberHexIndex !== null) {
@@ -987,96 +1081,6 @@ export default {
       this.hasRolledDice = true;
     },
 
-    build(index) {
-      // Check if it's the logged-in player's turn
-      if (this.currentPlayerIndex !== this.loggedinPlayerIndex && !this.botPlayerIndices.includes(this.currentPlayerIndex)) {
-        this.displayError("It's not your turn.");
-        return;
-      }
-
-      // Check if the current player is defined
-      if (this.currentPlayerIndex === null || this.players[this.currentPlayerIndex] === undefined) {
-        console.error("Current player is undefined.");
-        return;
-      }
-
-      const currentPlayer = this.players[this.currentPlayerIndex];
-
-      // Check if there is already a settlement at the index
-      if (this.settlements[index] && this.settlements[index].player !== null) {
-        this.displayError("There is already a settlement at this position.");
-        return;
-      }
-
-      // Check if it's the first or second turn
-      const isFirstTurn = this.turn === 1;
-      const isSecondTurn = this.turn === 2;
-
-      // Check if the current player has already built on their turn
-      if ((!isFirstTurn && !isSecondTurn) ||
-          (isFirstTurn && !currentPlayer.hasBuiltFirstTurn) ||
-          (isSecondTurn && !currentPlayer.hasBuiltSecondTurn)) {
-
-        const hasWood = currentPlayer.resources.includes('wood');
-        const hasBrick = currentPlayer.resources.includes('brick');
-        const hasSheep = currentPlayer.resources.includes('sheep');
-        const hasWheat = currentPlayer.resources.includes('wheat');
-
-        // Check if the player has required resources to build
-        if (!(isFirstTurn || isSecondTurn) && (!hasWood || !hasBrick || !hasSheep || !hasWheat)) {
-          this.displayError("You don't have enough resources to build a settlement you need to have 1 wood, 1 sheep, 1 brick and 1 wheat.");
-          return;
-        }
-
-        // Check if there are settlements adjacent to the road
-        const adjacentSettlements = this.getAdjacentSettlements(index);
-
-        // Check if any adjacent settlement is occupied
-        if (adjacentSettlements.some(settlement => settlement.player !== null && settlement.player !== this.currentPlayerIndex)) {
-          this.displayError("You cannot build a settlement adjacent to another player's settlement.");
-          return;
-        }
-
-        // Check if there are at least 2 roads between settlements
-        if (adjacentSettlements.some(settlement => settlement.player === this.currentPlayerIndex)) {
-          this.displayError("There should be at least 2 roads between your own settlements.");
-          return;
-        }
-
-        // Deduct the resources from the player's inventory on non-first turn
-        if (!(isFirstTurn || isSecondTurn)) {
-          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wood'), 1);
-          currentPlayer.resources.splice(currentPlayer.resources.indexOf('brick'), 1);
-          currentPlayer.resources.splice(currentPlayer.resources.indexOf('sheep'), 1);
-          currentPlayer.resources.splice(currentPlayer.resources.indexOf('wheat'), 1);
-        }
-
-        // Store the owner of the settlement
-        this.settlements[index] = {player: this.currentPlayerIndex};
-
-        // Update the playersSettlements array
-        this.playersSettlements[this.currentPlayerIndex].push(index);
-
-        // Add a CSS class to the settlement position
-        const settlementElement = document.getElementById('s' + index);
-        if (settlementElement) {
-          settlementElement.classList.add(`has-settlement-${this.currentPlayerIndex}`);
-        }
-
-        this.playerPoints[this.currentPlayerIndex] += 1;
-
-        if (isFirstTurn) {
-          currentPlayer.hasBuiltFirstTurn = true;
-        } else if (isSecondTurn) {
-          currentPlayer.hasBuiltSecondTurn = true;
-        }
-
-        // Update the game state and broadcast the build action
-        this.updateGameState({action: 'build', index: index});
-      } else {
-        this.displayError("You have already built on your turn.");
-      }
-    },
 
 
     async fetchGameDetails() {
