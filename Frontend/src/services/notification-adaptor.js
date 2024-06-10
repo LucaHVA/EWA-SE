@@ -1,5 +1,4 @@
-// see https://www.devglan.com/spring-boot/spring-websocket-integration-example-without-stomp
-//import SockJS from "sockjs-client";
+
 export class NotificationAdaptor {
     socketUrl;          // socket-url
     socket = null;      // connection socket (upgraded with async programming compatibility)
