@@ -771,7 +771,7 @@ export default {
       } else if (action.action === 'longestRoad') {
         message.longestRoadPlayer = action.longestRoadPlayer;
         message.longestRoadLength = action.longestRoadLength;
-        message.playerPoints = action.playerPoints; // Include playerPoints in the message
+        message.playerPoints = action.playerPoints;
       }
 
       this.announcementsService.sendMessage(JSON.stringify(message));
