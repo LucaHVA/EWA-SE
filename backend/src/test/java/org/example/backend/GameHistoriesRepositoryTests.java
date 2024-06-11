@@ -1,5 +1,5 @@
 package org.example.backend;
-
+//heeloo
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.example.backend.models.GameHistory;
