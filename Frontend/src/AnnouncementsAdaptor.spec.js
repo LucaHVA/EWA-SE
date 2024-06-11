@@ -20,7 +20,7 @@ describe('AnnouncementsAdaptor', () => {
         mockHandler = jest.fn();
 
         // Create instance of AnnouncementsAdaptor
-        adaptor = new AnnouncementsAdaptor('http://localhost:3000', mockHandler);
+        adaptor = new AnnouncementsAdaptor('http://localhost:8085', mockHandler);
     });
 
     afterEach(() => {
@@ -29,7 +29,7 @@ describe('AnnouncementsAdaptor', () => {
 
     it('should create a WebSocket connection with the correct URL', () => {
         // Arrange
-        const expectedUrl = 'ws://localhost:3000';
+        const expectedUrl = 'ws://localhost:8085';
 
         // Assert
         expect(global.WebSocket).toHaveBeenCalledWith(expectedUrl);
@@ -104,7 +104,7 @@ describe('AnnouncementsAdaptor', () => {
 
         // Assert
         expect(mockWebSocket.close).toHaveBeenCalled();
-        expect(consoleSpy).toHaveBeenCalledWith('Closed announcements adaptor on ws://localhost:3000');
+        expect(consoleSpy).toHaveBeenCalledWith('Closed announcements adaptor on ws://localhost:8085');
         consoleSpy.mockRestore();
     });
 });

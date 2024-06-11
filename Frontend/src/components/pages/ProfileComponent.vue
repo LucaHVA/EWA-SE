@@ -46,7 +46,10 @@
       <!-- Match History Section -->
       <div class="match-history-container">
         <h1 class="match-history-title">Recent Games</h1>
+        <!-- List to display recent games -->
         <ul>
+          <!-- Iterating through recent games and displaying them -->
+          <!--:key is an unique indentifier-->
           <li v-for="(game, index) in matchHistory.slice(0, 4)" :key="index" class="pill transition"
               @click="showGameDetails(game)">
             {{ removeSeconds(game.startTime) }} - {{ formatPlacement(game.placement) }}
@@ -107,15 +110,15 @@ export default {
       password: '',
       alert: false,
       recentGames: [],
-      matchHistory: [],
+      matchHistory: [], // Array to store the user's match history
       isModalOpen: false,
-      selectedGameHistory: null
+      selectedGameHistory: null //details of the selected game history for modal display
     };
   },
 
   created() {
     this.fetchUserInfo();
-    this.fetchMatchHistory();
+    this.fetchMatchHistory(); // Fetching the user's match history when the component is created
   },
 
   methods: {
@@ -182,6 +185,8 @@ export default {
     },
     async fetchMatchHistory() {
       try {
+        // Fetches the user's match history from the backend
+        // Retrieve the user ID from session storage after parsing the stored JSON data
         const userId = JSON.parse(sessionStorage.getItem('undefined_ACC')).id;
         this.matchHistory = await this.usersService.fetchMatchHistory(userId);
         console.log("hello noobs " + this.matchHistory)

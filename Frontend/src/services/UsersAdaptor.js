@@ -182,14 +182,16 @@ export class UsersAdaptor {
 
     async fetchMatchHistory(userId) {
         try {
+            //URL for fetching the match history using the user ID
             const url = `${this.resourcesUrl}/${userId}/games`;
             const options = {
                 method: "GET",
-                headers: {
-                    Authorization: this.currentToken,
-                },
             };
+            // Send the fetch request and await the response
             const response = await this.fetchJson(url, options);
+            // If a response is received, map the JSON data to GameHistory objects using the copyConstructor static method
+            //true or false
+            //to each element of the array
             return response ? response.map(GameHistory.copyConstructor) : [];
         } catch (error) {
             console.error("Error during fetch match history:", error);
@@ -204,7 +206,6 @@ export class UsersAdaptor {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': this.currentToken
                 },
                 body: JSON.stringify(gameHistories)
             };
