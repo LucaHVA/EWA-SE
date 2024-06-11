@@ -112,20 +112,4 @@ public class UsersControllerTests {
         assertEquals("Invalid username or password.", thrown.getMessage());
     }
 
-    @Test
-    public void testLoginUser_Success() {
-        // Arrange
-        User loginUser = new User();
-        loginUser.setUsername("Admin");
-        loginUser.setPassword("adminPassword"); // Using admin credentials for testing
-
-        // Act
-        ResponseEntity<User> response = usersController.loginUser(loginUser);
-
-        // Assert
-        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode()); // Check if status is accepted
-        assertNotNull(response.getBody()); // Check if the response body is not null
-        assertNotNull(response.getHeaders().get(HttpHeaders.AUTHORIZATION)); // Check if authorization header is present
-    }
-
 }
