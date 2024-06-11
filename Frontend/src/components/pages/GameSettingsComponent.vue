@@ -37,7 +37,7 @@
       </div>
 
       <div class="start-game-div">
-        <button class="start-game-button transition" @click="showModal = true">Start Game</button>
+        <button  class="start-game-button transition" @click="showModal = true">Start Game</button>
       </div>
     </div>
     <div class="right-column-gamesettings-page">
@@ -67,7 +67,8 @@
                                 :gameSettings="currentGame"
                                 :numberOfPlayers="currentGame.numberOfPlayers"
                                 :turnDuration="currentGame.turnDuration"
-                                :pointsToWin="currentGame.pointsToWin">
+                                :pointsToWin="currentGame.pointsToWin"
+                                :isHost="isCurrentUserHost">>
     </popUpGameSettingsComponent>
   </div>
 </template>

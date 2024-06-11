@@ -18,6 +18,9 @@
               {{ Math.abs(isCorrectPlayerCount) }} {{ Math.abs(isCorrectPlayerCount) === 1 ? 'player' : 'players' }}
               {{ isCorrectPlayerCount > 0 ? 'needed to fill' : 'too many in' }} the lobby.
             </p>
+            <p v-if="!isHost" class="error-message">
+              Only the host can start the game.
+            </p>
           </div>
           <div class="modal-footer">
             <slot name="footer">
@@ -44,7 +47,8 @@ export default {
     pointsToWin: Number,
     botCount: Number,
     totalPlayers: Number,
-    gameSettings:Object
+    gameSettings:Object,
+    isHost: Boolean
   },
   inject:['gameService'],
   methods: {
@@ -52,6 +56,10 @@ export default {
       // Check if the player count is valid
       if (this.isCorrectPlayerCount !== 0) {
         console.error('Incorrect number of players.')
+        return;
+      }
+      if (!this.isHost) {
+        console.error('Only the host can start the game.');
         return;
       }
 

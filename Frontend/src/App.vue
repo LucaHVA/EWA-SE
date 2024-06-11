@@ -18,6 +18,7 @@ import { shallowReactive } from "vue";
 import { FetchInterceptor } from "@/services/fetch-interceptor";
 import { NotificationAdaptor } from "@/services/notification-adaptor";
 
+
 export default {
   name: "AppComponent",
   components: {
@@ -33,6 +34,7 @@ export default {
     this.theNotificationService = new NotificationAdaptor(process.env.VUE_APP_API_URL + '/notifications');
     this.userService = shallowReactive(new UsersAdaptor(process.env.VUE_APP_API_URL + '/users'));
     this.theFetchInterceptor = new FetchInterceptor(this.userService, this.$router);
+
 
     return {
       usersService: this.userService,
