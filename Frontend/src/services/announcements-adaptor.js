@@ -1,5 +1,4 @@
-// see https://www.devglan.com/spring-boot/spring-websocket-integration-example-without-stomp
-//import SockJS from "sockjs-client";
+//websocket code
 export class AnnouncementsAdaptor {
     socketUrl;          // socket-url
     socket = null;  // new socket pending handshake of connection
