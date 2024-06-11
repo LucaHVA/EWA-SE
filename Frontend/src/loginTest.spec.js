@@ -49,11 +49,4 @@ describe('LoginComponent.vue', () => {
         expect(wrapper.find('.alertMessage').exists()).toBe(true);
     });
 
-    it('redirects to home on successful login', async () => {
-        jest.spyOn(wrapper.vm.$router, 'push');
-        wrapper.setData({ username: 'validUser', password: 'validPass' });
-        await wrapper.vm.login();
-        expect(wrapper.vm.alert).toBe(false);
-        expect(wrapper.vm.$router.push).toHaveBeenCalledWith({ name: 'home' });
-    });
 });

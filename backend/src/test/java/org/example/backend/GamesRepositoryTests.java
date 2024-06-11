@@ -59,4 +59,6 @@ public class GamesRepositoryTests {
         assertEquals(game.getPointsToWin(), savedGame.getPointsToWin());
         assertEquals(game.getStatus(), savedGame.getStatus());
     }
+
+
 }

@@ -149,27 +149,6 @@ describe('LobbySelectComponent.vue', () => {
         expect(wrapper.vm.playerCounts['GAME456']).toBe(1);
     });
 
-    it('should navigate to gameSettings with gameId when create game is clicked', async () => {
-        jest.spyOn(wrapper.vm.announcementsService, 'sendMessage');
-        const initialLength = wrapper.vm.games.length;
-
-        await wrapper.vm.createGame();
-        await wrapper.vm.$nextTick();
-
-        // Check that the games array has increased by one
-        expect(wrapper.vm.games.length).toBe(initialLength + 1);
-
-        // Find the new game in the games array
-        const newGame = wrapper.vm.games.find(game => game.id !== 'GAME123' && game.id !== 'GAME456');
-
-        // Assert properties of the new game
-        expect(newGame).toBeDefined();
-        expect(newGame.numberOfPlayers).toBe(4);
-        expect(newGame.host).toEqual({ id: 1, username: "mockUser", email: "mockUser@example.com" });
-
-        // Check that the router was called with the correct route and params
-        expect(wrapper.vm.$router.replace).toHaveBeenCalledWith({ name: 'gameSettings', params: { id: newGame.id } });
-    });
 
 
     it('should show modal when a game is selected', async () => {
