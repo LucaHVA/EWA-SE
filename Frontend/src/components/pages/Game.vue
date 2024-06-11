@@ -1641,7 +1641,7 @@ export default {
       let randomNumber;
       do {
         randomNumber = Math.floor(Math.random() * 11) + 2;
-      } while (randomNumber === 7); // Assuming you want to avoid the number 7
+      } while (randomNumber === 7);
       return randomNumber;
     },
     serializeBoardState() {

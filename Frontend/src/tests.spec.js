@@ -35,7 +35,7 @@ const mockGameService = {
 // Mock WebSocket
 global.WebSocket = jest.fn(() => {
     const events = {};
-    let readyState = 0; // Initial CONNECTING state
+    let readyState = 0;
     return {
         send: jest.fn(),
         close: jest.fn(),
@@ -73,7 +73,6 @@ global.WebSocket = jest.fn(() => {
     };
 });
 
-process.env.VUE_APP_API_URL = 'http://localhost:3000';
 
 describe('Game.vue', () => {
     let wrapper;
@@ -110,16 +109,22 @@ describe('Game.vue', () => {
         socketInstance.simulateOpen();
     });
 
+    // Test to initialize players correctly
     it('should initialize players correctly', async () => {
+        // Mock the fetchGameDetails and fetchPlayers methods to not perform actual API calls
         jest.spyOn(wrapper.vm, 'fetchGameDetails').mockImplementation(async () => {});
         jest.spyOn(wrapper.vm, 'fetchPlayers').mockImplementation(async () => {});
 
+        // Call the created lifecycle hook to initialize the component
         await wrapper.vm.$options.created.call(wrapper.vm);
 
+        // Call the initializePlayers method to set up players
         await wrapper.vm.initializePlayers();
 
+        // Assert that the players array has 4 players
         expect(wrapper.vm.players.length).toBe(4);
 
+        // Assert that each player has the required properties and correct colors
         wrapper.vm.players.forEach((player, index) => {
             expect(player).toHaveProperty('type');
             expect(player).toHaveProperty('playerColor');
@@ -128,92 +133,110 @@ describe('Game.vue', () => {
             expect(player.playerColor).toBe(wrapper.vm.playerColors[index]);
         });
 
+        // Assert that there are bot players in the players array
         expect(wrapper.vm.players.filter(p => p.type === 'bot').length).toBeGreaterThan(0);
 
+        // Assert that loggedinPlayerIndex is defined
         expect(wrapper.vm.loggedinPlayerIndex).toBeDefined();
     });
 
+// Test to check dice roll functionality
     it('should roll dice correctly and update the UI', () => {
-        // Mock Math.random to return fixed values
+        // Mock Math.random to return fixed values for predictable outcomes
         jest.spyOn(Math, 'random').mockReturnValueOnce(0.1).mockReturnValueOnce(0.5);
 
+        // Spy on the methods that update the game state and UI
         const updateGameStateSpy = jest.spyOn(wrapper.vm, 'updateGameState').mockImplementation(() => {});
         const updateDiceOutcomeUISpy = jest.spyOn(wrapper.vm, 'updateDiceOutcomeUI').mockImplementation(() => {});
 
+        // Call the rollDice method
         wrapper.vm.rollDice();
 
-        // Validate the values produced by Math.random mock
+        // Validate the expected dice outcomes based on mocked Math.random values
         const expectedLeftDiceOutcome = 1 + Math.floor(0.5 * 6); // 4
         const expectedRightDiceOutcome = 1 + Math.floor(0.1 * 6); // 1
 
+        // Assert that the game state was updated with the correct dice outcomes
         expect(updateGameStateSpy).toHaveBeenCalledWith({
             action: 'rollDice',
             leftDiceOutcome: expectedLeftDiceOutcome,
             rightDiceOutcome: expectedRightDiceOutcome
         });
 
+        // Assert that the UI was updated with the correct dice outcomes
         expect(updateDiceOutcomeUISpy).toHaveBeenCalledWith(expectedLeftDiceOutcome, expectedRightDiceOutcome);
 
+        // Restore the original Math.random method
         Math.random.mockRestore();
     });
 
+// Test to advance to the next turn correctly
     it('should advance to the next turn correctly', () => {
         // Mock valid player objects
-        const mockPlayers = [
-            { id: 1, type: 'human', resources: [], hasBuiltFirstTurn: false, hasBuiltSecondTurn: false },
+        const mockPlayers = [        { id: 1, type: 'human', resources: [], hasBuiltFirstTurn: false, hasBuiltSecondTurn: false },
             { id: 2, type: 'bot', resources: [], hasBuiltFirstTurn: false, hasBuiltSecondTurn: false },
-            // Add more mock players if needed
         ];
 
         // Set up the game state with mock players
         wrapper.vm.players = mockPlayers;
-        wrapper.vm.loggedinPlayerIndex = 0; // Assuming the logged-in player is the first player
-        wrapper.vm.currentPlayerIndex = 0; // Assuming it's the first player's turn
-        wrapper.vm.turn = 1; // Assuming it's the first turn
+        wrapper.vm.loggedinPlayerIndex = 0;
+        wrapper.vm.currentPlayerIndex = 0;
+        wrapper.vm.turn = 1;
 
-        // Spy on dependent methods
+        // Spy on dependent methods to check if they are called correctly
         const displayErrorSpy = jest.spyOn(wrapper.vm, 'displayError').mockImplementation(() => {});
         const checkForWinnerSpy = jest.spyOn(wrapper.vm, 'checkForWinner').mockImplementation(() => {});
         const botLogicSpy = jest.spyOn(wrapper.vm, 'botLogic').mockImplementation(() => {});
         const startCountdownSpy = jest.spyOn(wrapper.vm, 'startCountdown').mockImplementation(() => {});
         const updateGameStateSpy = jest.spyOn(wrapper.vm, 'updateGameState').mockImplementation(() => {});
 
+        // Call the rollDice method to simulate a dice roll
         wrapper.vm.rollDice();
-        // Call the nextTurn method
+
+        // Call the nextTurn method to advance to the next turn
         wrapper.vm.nextTurn();
 
-        // Expectations
-        expect(displayErrorSpy).not.toHaveBeenCalled(); // No error should be displayed
-        expect(checkForWinnerSpy).toHaveBeenCalled(); // Expect checkForWinner to be called
-        expect(botLogicSpy).toHaveBeenCalled(); // Expect botLogic to be called
-        expect(startCountdownSpy).toHaveBeenCalled(); // Expect startCountdown to be called
-        expect(updateGameStateSpy).toHaveBeenCalledWith({ action: 'nextTurn' }); // Expect updateGameState to be called with the correct parameters
+        // Assert that no error was displayed
+        expect(displayErrorSpy).not.toHaveBeenCalled();
+
+        // Assert that the checkForWinner method was called
+        expect(checkForWinnerSpy).toHaveBeenCalled();
+
+        // Assert that the botLogic method was called
+        expect(botLogicSpy).toHaveBeenCalled();
+
+        // Assert that the startCountdown method was called
+        expect(startCountdownSpy).toHaveBeenCalled();
+
+        // Assert that the game state was updated with the correct action
+        expect(updateGameStateSpy).toHaveBeenCalledWith({ action: 'nextTurn' });
     });
 
+// Test to check build functionality when it's the player's turn
     it('should build correctly when it is the player\'s turn', () => {
-        // Mock dependencies
-        const currentPlayerIndex = 0; // Assuming the current player is the first player
-        const loggedinPlayerIndex = 0; // Assuming the logged-in player is also the first player
-        const mockPlayers = [
-            { id: 1, type: 'human', resources: ['wood', 'brick', 'sheep', 'wheat'], hasBuiltFirstTurn: false, hasBuiltSecondTurn: false },
-            // Mock other players if needed
+        // Mock dependencies for the test
+        const currentPlayerIndex = 0;
+        const loggedinPlayerIndex = 0;
+        const mockPlayers = [        { id: 1, type: 'human', resources: ['wood', 'brick', 'sheep', 'wheat'], hasBuiltFirstTurn: false, hasBuiltSecondTurn: false },
         ];
 
-        // Set up the game state
+        // Set up the game state with the mock players
         wrapper.vm.currentPlayerIndex = currentPlayerIndex;
         wrapper.vm.loggedinPlayerIndex = loggedinPlayerIndex;
         wrapper.vm.players = mockPlayers;
 
-        // Spy on dependent methods
+        // Spy on dependent methods to check if they are called correctly
         const displayErrorSpy = jest.spyOn(wrapper.vm, 'displayError').mockImplementation(() => {});
         const updateGameStateSpy = jest.spyOn(wrapper.vm, 'updateGameState').mockImplementation(() => {});
 
-        // Call the build method
-        wrapper.vm.build(0); // Assuming building at index 0
+        // Call the build method with the player index
+        wrapper.vm.build(0);
 
-        // Expectations
-        expect(displayErrorSpy).not.toHaveBeenCalled(); // No error should be displayed
-        expect(updateGameStateSpy).toHaveBeenCalledWith({ action: 'build', index: 0 }); // Expect updateGameState to be called with the correct parameters
+        // Assert that no error was displayed
+        expect(displayErrorSpy).not.toHaveBeenCalled();
+
+        // Assert that the game state was updated with the correct action and index
+        expect(updateGameStateSpy).toHaveBeenCalledWith({ action: 'build', index: 0 });
     });
 
 });
