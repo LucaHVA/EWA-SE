@@ -45,7 +45,7 @@ class Player {
     static copyConstructor(player){
         if (player==null) return null;
 
-        const copy = new player(
+        const copy = new Player(
             player.playerNumber,
             player.gameId,
             player.user,

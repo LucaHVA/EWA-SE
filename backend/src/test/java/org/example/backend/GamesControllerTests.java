@@ -1,11 +1,14 @@
 package org.example.backend;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.example.backend.exceptions.ResourceNotFoundException;
 import org.example.backend.models.Game;
 import org.example.backend.models.Player;
 import org.example.backend.models.PlayerKey;
@@ -123,5 +126,21 @@ public class GamesControllerTests {
                 .andExpect(jsonPath("$.playerId.playerNumber").value(playerNumber));
     }
 
+    /**
+     * @Author Stephanie
+     * @throws Exception
+     */
+    @Test
+    public void getGameById_WhenGameDoesNotExist_ShouldThrowException() throws Exception {
+        // Arrange
+        String nonExistentGameId = "non-existent-id";
+        when(gamesRepository.findById(nonExistentGameId)).thenReturn(null);
+
+        // Act & Assert
+        mockMvc.perform(get("/game/{id}", nonExistentGameId))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andExpect(result -> assertEquals("Game with ID: " + nonExistentGameId + " not found.", result.getResolvedException().getMessage()));
+    }
 
 }
