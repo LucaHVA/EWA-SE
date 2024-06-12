@@ -1,9 +1,9 @@
 <template>
   <div class="container">
     <h2>Friends List</h2>
-    <div class="table-container">
+    <div class="table-container scrollable">
       <div v-if="friends.length === 0">
-        Sadly you're a loser and don't have friends :(
+        Sadly you don't have friends yet :(
       </div>
       <table v-else>
         <tr v-for="friend in friends" :key="friend.id" class="user-item">
@@ -13,31 +13,20 @@
       </table>
     </div>
 
-    <div>
-      -----------------------------------------------------------------
-    </div>
-
-    <div class="table-container scrollable">
-      <table>
-        <tr v-for="user in receivedFriendRequests" :key="user.id" class="user-item">
-          <td>{{ user.username }}</td>
-          <button class="accept-button" @click="acceptFriendRequest(user.id)">Accept friend request</button>
-          <button @click="declineFriendRequest(user.id)">Decline friend request</button>
-        </tr>
-      </table>
-    </div>
-
     <div class="sticky-button-container">
-      <button class="search-users-button transition" type="button" @click="this.isModalOpen = true">
+      <button class="search-users-button transition" type="button" @click="openModal(true, false)">
         Search for players
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 icon-small">
           <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
         </svg>
       </button>
+      <button class="search-users-button transition" type="button" @click="openModal(true, true)">
+        Received friend requests
+      </button>
     </div>
 
     <transition name="modal">
-      <div v-if="isModalOpen" class="modal-mask" @click="this.isModalOpen = false">
+      <div v-if="isModalOpen" class="modal-mask" @click="openModal(false, false)">
         <div class="modal-wrapper">
           <div class="modal-container" @click.stop>
             <h2>Search for Players</h2>
@@ -45,7 +34,7 @@
               <input type="text" placeholder="Search for players..." v-model="searchQuery">
             </div>
             <h2>Search Results</h2>
-            <div class="table-container scrollable">
+            <div v-if="!receivedList" class="table-container scrollable">
               <table>
                 <tr v-for="user in filteredUsers" :key="user.id" class="user-item">
                   <td>{{ user.username }}</td>
@@ -53,8 +42,20 @@
                 </tr>
               </table>
             </div>
+            <div v-else class="table-container scrollable">
+              <div v-if="receivedFriendRequests.length === 0" >
+                You have no friend requests.
+              </div>
+              <table v-else>
+                <tr v-for="user in receivedFriendRequests" :key="user.id" class="user-item">
+                  <td>{{ user.username }}</td>
+                  <button class="accept-button" @click="acceptFriendRequest(user.id)">Accept friend request</button>
+                  <button @click="declineFriendRequest(user.id)">Decline friend request</button>
+                </tr>
+              </table>
+            </div>
             <div class="close-button-box">
-              <button class="close-button transition" @click="this.isModalOpen = false">Close</button>
+              <button class="close-button transition" @click="openModal(false, false)">Close</button>
             </div>
           </div>
         </div>
@@ -67,7 +68,7 @@
 <script>
 export default {
   name: "FriendsListComponent",
-  inject:['usersService'],
+  inject: ['usersService'],
   data() {
     return {
       friends: [],
@@ -77,6 +78,7 @@ export default {
       searchQuery: "",
       isModalOpen: false,
       currentUser: null,
+      receivedList: false,
     };
   },
   async created() {
@@ -104,6 +106,10 @@ export default {
     }
   },
   methods: {
+    openModal(modal, requests) {
+      this.isModalOpen = modal;
+      this.receivedList = requests;
+    },
     async fetchFriends() {
       const userInfo = await this.usersService.getCurrentUser;
       this.friends = await this.usersService.getFriends(userInfo.id);
